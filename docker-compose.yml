@@ -253,6 +253,9 @@ services:
     restart: unless-stopped
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     profiles: [dev]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:5173"]

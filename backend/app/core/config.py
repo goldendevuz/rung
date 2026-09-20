@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     STARS_ENABLED: bool = True
     PAYNET_ENABLED: bool = True
     SHOW_PAYMENT_DETAILS: bool = False
+    SHOW_LIVE_STATS: bool = False
     ENABLED_LISTING_KINDS: str = 'channel'
 
     B_UNIT_UZS: int = 1000

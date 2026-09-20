@@ -22,6 +22,14 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info('Rung backend starting (ENV=%s)', settings.ENV)
+    if settings.SEED_DEMO:
+        logger.info('SEED_DEMO=true — running demo seed')
+        try:
+            from app.db.seed import run_seed
+            await run_seed()
+            logger.info('Demo seed complete')
+        except Exception:
+            logger.exception('Seed failed — continuing startup anyway')
     yield
     logger.info('Rung backend shutting down')
 
