@@ -102,6 +102,7 @@ class PublicStatsOut(BaseModel):
     total_entries: int
     online_now: int | None = None   # None when SHOW_LIVE_STATS=false
     visits_today: int | None = None  # None when SHOW_LIVE_STATS=false
+    total_paid_units: int = 0
 
 
 # ── Pagination helper ─────────────────────────────────────────────────────────

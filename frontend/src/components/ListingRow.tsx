@@ -1,5 +1,5 @@
 import React from 'react';
-import { initials, nf, subs } from '../utils/formatters';
+import { initials, nf, subs, formatB } from '../utils/formatters';
 import { Link } from 'react-router-dom';
 
 const ICON_V = (
@@ -56,7 +56,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
         </p>
         <p className="rdesc">{ch.d}</p>
         <p className="rmeta">
-          <span className="sq" style={{ '--c': cat.c } as any} />
+          {cat.i ? <span style={{ marginRight: '4px' }}>{cat.i}</span> : <span className="sq" style={{ '--c': cat.c } as any} />}
           <b>{cat.n}</b>
           <span className="sep">·</span>
           {ch.t} {/* Time added */}
@@ -89,7 +89,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
               if (onClaim) onClaim();
             }}
           >
-            Bu o'rinni <span className="num">{item.price + 1} B</span> ga oling
+            Bu o'rinni <span className="num">{formatB(item.priceUnits + 1000)} B</span> ga oling
           </button>
         </>
       ) : (

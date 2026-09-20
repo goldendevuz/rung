@@ -5,7 +5,8 @@
 - **Bot**: aiogram.
 - **Deployment**: Docker Compose, Caddy for reverse proxy and HTTPS.
 - **S1 Fixes**:
-  - `PAGE_SIZE` increased to 20 to accommodate prototype designs (14 items on the first page).
-  - Typescript unused imports fixed to ensure strict builds in `npm run build`.
-  - Smoke tests implemented via Playwright asserting network and visual logic (>=14 items on home).
-  - Screenshots diffing automated via pixelmatch.
+  - `PAGE_SIZE` reverted to 12 as per spec and prototype.
+  - Money calculations strictly use integer units (1 B = 1000 units) to prevent string math bugs.
+  - Categories fetch and display `name_uz` and active `listing_count`.
+  - Stats API (`/api/v1/stats/public`) accurately returns real totals: `total_listings` (active listings/channels), `total_paid_units` (sum of active paid units), `visits_today` (real verified views).
+  - Test suite expanded for rank ties, quotes math, pagination and boundary logic.

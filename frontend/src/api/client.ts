@@ -30,3 +30,9 @@ export async function fetchPublicStats() {
   if (!res.ok) throw new Error('Failed to fetch stats');
   return res.json();
 }
+
+export async function fetchQuote(boardId: number, targetRank: number) {
+  const res = await fetch(`${API_BASE}/boards/${boardId}/quote?target_rank=${targetRank}`);
+  if (!res.ok) throw new Error('Failed to fetch quote');
+  return res.json();
+}

@@ -10,4 +10,4 @@
 
 ## Done
 - S0: Skeleton and Docker configuration
-- S1: API routes for boards, listings, and frontend implementation. TS errors fixed. Tests passing. Smoke tests passing.
+- S1: Backend logic, category names/counts, money math fixes, pagination, stats, visual diffs and tests. Finalized UI details.

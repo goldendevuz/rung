@@ -36,6 +36,14 @@ async def get_public_stats(db: Annotated[AsyncSession, Depends(get_db)]) -> Publ
         )
     ).scalar_one() or 0
 
+    total_paid_units = (
+        await db.execute(
+            select(func.sum(BoardEntry.paid_units)).where(
+                BoardEntry.status == "active", BoardEntry.deleted_at.is_(None)
+            )
+        )
+    ).scalar_one() or 0
+
     show_live = getattr(settings, "SHOW_LIVE_STATS", False)
 
     return PublicStatsOut(
@@ -43,4 +51,5 @@ async def get_public_stats(db: Annotated[AsyncSession, Depends(get_db)]) -> Publ
         total_entries=total_entries,
         online_now=None if not show_live else 0,
         visits_today=None if not show_live else 0,
+        total_paid_units=int(total_paid_units),
     )

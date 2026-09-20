@@ -73,9 +73,26 @@ async def test_all_api_endpoints():
         entries = data['entries']
         assert len(entries) > 0
         for i in range(len(entries) - 1):
-            assert float(entries[i]['paid_b']) >= float(entries[i+1]['paid_b'])
+            # Rank derivation with ties: paid_units DESC, then entered_at ASC
+            paid1 = entries[i]['paid_units']
+            paid2 = entries[i+1]['paid_units']
+            assert paid1 >= paid2
+            if paid1 == paid2:
+                # ties broken by entered_at ASC
+                t1 = datetime.fromisoformat(entries[i]['entered_at'].replace('Z', '+00:00'))
+                t2 = datetime.fromisoformat(entries[i+1]['entered_at'].replace('Z', '+00:00'))
+                assert t1 <= t2
         assert data['page'] == 1
         assert data['total'] > 0
+        
+        # 2.b pagination (page 2)
+        if data['total_pages'] > 1:
+            p2_resp = await ac.get('/api/v1/boards/all_time/current?page=2')
+            assert p2_resp.status_code == 200
+            p2_data = p2_resp.json()
+            assert p2_data['page'] == 2
+            assert len(p2_data['entries']) > 0
+            assert p2_data['entries'][0]['rank'] == 13 # since PAGE_SIZE is 12
 
         # 3. test_category_filter
         resp = await ac.get('/api/v1/boards/all_time/current?category=texnologiya')
@@ -101,4 +118,7 @@ async def test_all_api_endpoints():
             quote_data = quote_resp.json()
             holder_paid = quote_data['holder_paid_units']
             assert quote_data['min_cost_units'] == holder_paid + 1000
+            # Explicitly check seeded data value
+            if data['period_type'] == 'all_time':
+                assert quote_data['min_cost_units'] == 26000
 

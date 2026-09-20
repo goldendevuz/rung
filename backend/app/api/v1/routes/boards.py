@@ -27,7 +27,7 @@ from app.schemas.public import (
 
 router = APIRouter(prefix="/boards", tags=["boards"])
 
-PAGE_SIZE = 20
+PAGE_SIZE = 12
 
 
 def _listing_to_compact(listing: Listing, clickthroughs: int = 0) -> ListingCompact:

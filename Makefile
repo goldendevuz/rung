@@ -2,7 +2,7 @@
 
 COMPOSE  = docker compose
 PW_VER   = 1.46.0
-SHOTS_DIR = docs/screenshots/s0
+SHOTS_DIR = docs/screenshots/s1
 
 up:
 	$(COMPOSE) --profile dev up -d --build

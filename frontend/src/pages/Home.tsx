@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchTabs, fetchBoard, fetchCategories } from '../api/client';
-import { ListingRow } from '../components/ListingRow';
+import { fetchTabs, fetchBoard, fetchCategories, fetchQuote, fetchPublicStats } from '../api/client';
+import { formatB } from '../utils/formatters';
+import { ListingRow, MiniListing } from '../components/ListingRow';
 
 const PERIOD_NAMES: Record<string, string> = {
   all_time: "Barcha vaqt",
@@ -38,11 +39,10 @@ export function Home() {
   });
 
   const categoryMap = React.useMemo(() => {
-    const map: Record<string, any> = {};
-    categories.forEach((c: any) => {
-      map[c.slug] = c;
-    });
-    return map;
+    return categories.reduce((acc: any, c: any) => {
+      acc[c.slug] = { n: c.name_uz, c: c.color, i: c.icon };
+      return acc;
+    }, {});
   }, [categories]);
 
   const { data: boardPage, isLoading } = useQuery({
@@ -51,22 +51,40 @@ export function Home() {
     retry: false, // 404 means no active board
   });
 
+  const { data: heroQuote } = useQuery({
+    queryKey: ['quote', boardPage?.board_id, 1],
+    queryFn: () => fetchQuote(boardPage!.board_id, 1),
+    enabled: !!boardPage?.board_id,
+  });
+
+  const { data: sideDailyBoard } = useQuery({
+    queryKey: ['board', 'daily', 1, undefined, undefined],
+    queryFn: () => fetchBoard('daily', 1),
+    retry: false,
+  });
+
   const entries = boardPage?.entries || [];
-  const topPrice = entries.length > 0 ? entries[0].paid_b : 0;
-  const nextPrice = topPrice + 1;
+  
+  // Base price in units
+  const basePriceUnits = heroQuote ? heroQuote.min_cost_units : 1000;
 
   // Use state for hero price so user can increment it
-  const [heroPrice, setHeroPrice] = useState<number | null>(null);
+  const [heroPriceUnits, setHeroPriceUnits] = useState<number | null>(null);
   
-  // Update hero price when board changes, if user hasn't explicitly set it
+  // Update hero price when quote changes, if user hasn't explicitly set it
   React.useEffect(() => {
-    if (boardPage) {
-      setHeroPrice(nextPrice);
+    if (heroQuote) {
+      setHeroPriceUnits(heroQuote.min_cost_units);
     }
-  }, [boardPage, nextPrice]);
+  }, [heroQuote]);
 
-  const displayPrice = Math.max(heroPrice || nextPrice, nextPrice);
+  const displayPriceUnits = Math.max(heroPriceUnits ?? basePriceUnits, basePriceUnits);
   const note = PERIOD_NOTES[period] || '';
+
+  const { data: stats } = useQuery({
+    queryKey: ['stats'],
+    queryFn: fetchPublicStats,
+  });
 
   return (
     <section id="page-home">
@@ -104,7 +122,7 @@ export function Home() {
                 aria-pressed={cat === c.slug ? "true" : "false"}
                 onClick={() => { setCat(cat === c.slug ? 'all' : c.slug); setPage(1); }}
               >
-                <span className="sq" style={{ '--c': c.color } as any} />{c.name}
+                <span className="sq" style={{ '--c': c.color } as any} />{c.name_uz} <span className="num">{c.listing_count}</span>
               </button>
             ))}
           </div>
@@ -113,16 +131,16 @@ export function Home() {
           <h1 className="claim">
             <span>{period === 'daily' ? "Bugungi 1-o'rinni" : "1-o'rinni"}</span>
             <button className="step" aria-label="Narxni kamaytirish" 
-              disabled={displayPrice <= nextPrice}
-              onClick={() => setHeroPrice(displayPrice - 1)}
+              disabled={displayPriceUnits <= basePriceUnits}
+              onClick={() => setHeroPriceUnits(displayPriceUnits - 1000)}
             >−</button>
-            <span className="price-big"><span className="num">{displayPrice}</span> B</span>
+            <span className="price-big"><span className="num">{formatB(displayPriceUnits)}</span> B</span>
             <button className="step" aria-label="Narxni oshirish"
-              onClick={() => setHeroPrice(displayPrice + 1)}
+              onClick={() => setHeroPriceUnits(displayPriceUnits + 1000)}
             >+</button>
             <span>ga oling</span>
           </h1>
-          <p className="uzs">≈ <span className="num">{new Intl.NumberFormat('ru-RU').format(displayPrice * 1000).replace(',', ' ')}</span> so'm · to'lov Telegram Stars yoki Paynet orqali</p>
+          <p className="uzs">≈ <span className="num">{new Intl.NumberFormat('ru-RU').format(displayPriceUnits).replace(',', ' ')}</span> so'm · to'lov Telegram Stars yoki Paynet orqali</p>
           
           <div className="claimbar">
             <label className="field">
@@ -132,7 +150,7 @@ export function Home() {
             <select className="field" id="heroCat" aria-label="Kategoriya">
               <option value="">Kategoriyani tanlang</option>
               {categories.map((c: any) => (
-                <option key={c.slug} value={c.slug}>{c.name}</option>
+                <option key={c.slug} value={c.slug}>{c.name_uz}</option>
               ))}
             </select>
             <button className="btn-primary" id="heroClaim">O'rinni olish</button>
@@ -158,6 +176,7 @@ export function Home() {
                 const mappedItem = {
                   rank: entry.rank,
                   price: entry.paid_b,
+                  priceUnits: entry.paid_units,
                   ch: {
                     n: entry.listing.name,
                     h: entry.listing.handle,
@@ -211,7 +230,17 @@ export function Home() {
             <div className="card">
               <div className="card-h" id="sideTitle">Bugungi reyting <a href="/kunlik">Hammasi →</a></div>
               <div id="sideList">
-                {/* Side list mapping here */}
+                {sideDailyBoard?.entries?.slice(0, 5).map((entry: any) => {
+                  const mappedItem = {
+                    rank: entry.rank,
+                    price: entry.paid_b,
+                    ch: {
+                      n: entry.listing.name,
+                      g: [entry.listing.gradient_start, entry.listing.gradient_end],
+                    }
+                  };
+                  return <MiniListing key={entry.listing.slug} item={mappedItem} />;
+                })}
               </div>
             </div>
             <div className="card wallet">
@@ -231,9 +260,9 @@ export function Home() {
         <section className="stats">
           <h2>Rung statistikasi:</h2>
           <div className="stat-grid">
-            <div className="stat"><div className="v num">0</div><div className="k">tashrif (tekshirilgan, botlarsiz)</div></div>
-            <div className="stat accent"><div className="v num">0 B</div><div className="k">o'rinlar uchun to'langan</div></div>
-            <div className="stat"><div className="v num">0</div><div className="k">ro'yxatdagi kanal</div></div>
+            <div className="stat"><div className="v num">{stats?.visits_today ?? 0}</div><div className="k">tashrif (tekshirilgan, botlarsiz)</div></div>
+            <div className="stat accent"><div className="v num">{stats ? formatB(stats.total_paid_units) : '0'} B</div><div className="k">o'rinlar uchun to'langan</div></div>
+            <div className="stat"><div className="v num">{stats?.total_listings ?? 0}</div><div className="k">ro'yxatdagi kanal</div></div>
           </div>
         </section>
       </div>
