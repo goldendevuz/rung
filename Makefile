@@ -1,6 +1,8 @@
-.PHONY: up down logs test lint seed migrate build shell-backend shell-bot
+.PHONY: up down logs test lint seed migrate build shell-backend shell-bot shots
 
-COMPOSE = docker compose
+COMPOSE  = docker compose
+PW_VER   = 1.46.0
+SHOTS_DIR = docs/screenshots/s0
 
 up:
 	$(COMPOSE) --profile dev up -d --build
@@ -31,3 +33,15 @@ shell-backend:
 
 shell-bot:
 	$(COMPOSE) exec bot bash
+
+shots:
+	@mkdir -p $(SHOTS_DIR)
+	docker run --rm --network host \
+		-v $(PWD)/deploy/shots/shots.js:/tmp/shots.js:ro \
+		-v $(PWD)/$(SHOTS_DIR):/shots \
+		mcr.microsoft.com/playwright:v$(PW_VER)-jammy \
+		bash -c "mkdir /tmp/pw && cd /tmp/pw && \
+		  npm init -y -q 2>/dev/null && \
+		  npm install @playwright/test@$(PW_VER) --no-package-lock -q && \
+		  cp /tmp/shots.js . && node shots.js"
+	@echo "Saved: $(SHOTS_DIR)/desktop-1440x900.png, $(SHOTS_DIR)/mobile-390x844.png"

@@ -1,8 +1,0 @@
-HTTP/1.1 200 OK
-Cache-Control: no-cache
-Content-Type: text/html
-Date: Sun, 20 Sep 2026 12:49:17 GMT
-Etag: W/"2b2-bQYYvpfVGKnSsY3VPSP05wtcjUc"
-Vary: Origin
-Via: 1.1 Caddy
-

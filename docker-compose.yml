@@ -20,10 +20,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - target: 5432
-        published: "5432"
-        protocol: tcp
-        mode: host
+      - "127.0.0.1:5432:5432"
     profiles: [dev]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rung} -d ${POSTGRES_DB:-rung}"]
@@ -55,10 +52,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - target: 6379
-        published: "6379"
-        protocol: tcp
-        mode: host
+      - "127.0.0.1:6379:6379"
     profiles: [dev]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -285,7 +279,7 @@ services:
         condition: service_healthy
     profiles: [dev]
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:2019/config/"]
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
       interval: 15s
       timeout: 5s
       retries: 5

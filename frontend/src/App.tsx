@@ -4,7 +4,7 @@ function HomePage() {
   return (
     <div style={{ padding: '2rem', fontFamily: 'Manrope, sans-serif' }}>
       <h1>Rung</h1>
-      <p>Bir pog&apos;ona yuqoriga. \U0001FA9C</p>
+      <p>Bir pog&apos;ona yuqoriga. 🪜</p>
     </div>
   )
 }

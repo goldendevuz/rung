@@ -53,3 +53,10 @@ This file is deliberately short. Details live in `docs/spec/*.md`.
 ## 5. Definition of done and REPORT
 
 A phase is done when tests and lint pass, the stack starts with one command, everything is pushed, and docs (`STATE.md`, `DECISIONS.md`, `RUNBOOK.md`) are updated. End every phase with a REPORT: what was built; how to run it; local URLs; a step-by-step manual test script; env vars the owner must fill in; known gaps; decisions taken; and the exact question(s), if any, needed before the next phase.
+
+## Frontend packaging note
+
+Inside Docker (`frontend/Dockerfile.dev`), dependencies are installed with
+**npm install** (not pnpm) to avoid pnpm 9+ `ERR_PNPM_IGNORED_BUILDS` for
+esbuild. Dev scripts (`npm run dev`, `npm run build`) work identically.
+The committed lockfile is `frontend/package-lock.json`.

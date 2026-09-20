@@ -17,3 +17,15 @@
 - Docker: multi-stage images, non-root users, healthchecks, named volumes, `restart: unless-stopped`, migrations run as a one-shot service before the backend starts.
 - Seed script (idempotent) creates categories, settings and DEMO data only when `SEED_DEMO=true`.
 
+
+
+## Frontend build tooling note
+
+**Package manager in Docker:** 
+pm install is used inside rontend/Dockerfile.dev
+(and will be used in the prod Dockerfile) instead of pnpm install. This is because
+pnpm 9+ introduced ERR_PNPM_IGNORED_BUILDS which blocks esbuild postinstall in
+non-interactive environments. See DECISIONS.md D007.
+
+The committed lockfile is rontend/package-lock.json.
+Developer-facing commands (outside Docker) may use pnpm or npm interchangeably.

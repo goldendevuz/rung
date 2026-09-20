@@ -23,3 +23,21 @@ Allows adding tunnel hostnames without code changes.
 
 ### D006: ENABLED_LISTING_KINDS=channel (v1 only)
 Other kinds reserved but not creatable in v1 per spec S0 section 6.
+
+## 2026-09-20 — S0 fixes
+
+### D007: Frontend uses npm install instead of pnpm for Docker builds
+pnpm 9+ introduced ERR_PNPM_IGNORED_BUILDS which blocks esbuild's postinstall
+script in non-interactive environments (Docker). The fix is documented in
+frontend/Dockerfile.dev: npm installs packages, pnpm (installed globally) runs
+the dev/build scripts (it finds node_modules normally). pnpm is still the
+developer-facing tool; npm is only used inside Docker image builds.
+
+### D008: Caddy healthcheck uses `caddy validate` not admin API
+The caddy admin API (localhost:2019) is not enabled in the dev Caddyfile by
+default. `caddy validate --config /etc/caddy/Caddyfile` is a zero-dependency
+check that verifies the config is loadable and the server is in a working state.
+
+### D009: Postgres and Redis dev ports bound to 127.0.0.1 only
+Publishing on 0.0.0.0 exposes dev DB/cache to the local network. Changed to
+127.0.0.1:5432:5432 and 127.0.0.1:6379:6379 per security requirement.
