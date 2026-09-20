@@ -1,15 +1,8 @@
-# Rung monorepo — Docker Compose
-# Profiles: dev, prod, tunnel
-# Usage: docker compose --profile dev up -d --build
-
 name: rung
-
-x-common-env: &common-env
+x-common-env:
   TZ: ${TZ:-Asia/Tashkent}
   LOG_LEVEL: ${LOG_LEVEL:-INFO}
-
 services:
-  # ── Infrastructure ──────────────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -18,17 +11,19 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:-rung}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+    - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5432:5432"
-    profiles: [dev]
+    - 127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432
+    profiles:
+    - dev
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rung} -d ${POSTGRES_DB:-rung}"]
+      test:
+      - CMD-SHELL
+      - pg_isready -U ${POSTGRES_USER:-rung} -d ${POSTGRES_DB:-rung}
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
-
   postgres_prod:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -37,78 +32,93 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:-rung}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    profiles: [prod]
+    - postgres_data:/var/lib/postgresql/data
+    profiles:
+    - prod
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rung} -d ${POSTGRES_DB:-rung}"]
+      test:
+      - CMD-SHELL
+      - pg_isready -U ${POSTGRES_USER:-rung} -d ${POSTGRES_DB:-rung}
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
-
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     volumes:
-      - redis_data:/data
+    - redis_data:/data
     ports:
-      - "127.0.0.1:6379:6379"
-    profiles: [dev]
+    - 127.0.0.1:${REDIS_HOST_PORT:-6379}:6379
+    profiles:
+    - dev
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+      - CMD
+      - redis-cli
+      - ping
       interval: 10s
       timeout: 3s
       retries: 5
-
   redis_prod:
     image: redis:7-alpine
     restart: unless-stopped
     volumes:
-      - redis_data:/data
-    profiles: [prod]
+    - redis_data:/data
+    profiles:
+    - prod
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+      - CMD
+      - redis-cli
+      - ping
       interval: 10s
       timeout: 3s
       retries: 5
-
-  # ── Migrate (one-shot) ──────────────────────────────────────────────────────
   migrate:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: ["alembic", "upgrade", "head"]
+    command:
+    - alembic
+    - upgrade
+    - head
     environment:
-      <<: *common-env
+      TZ: ${TZ:-Asia/Tashkent}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
     depends_on:
       postgres:
         condition: service_healthy
-    profiles: [dev]
-    restart: "no"
-
+    profiles:
+    - dev
+    restart: 'no'
   migrate_prod:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: ["alembic", "upgrade", "head"]
+    command:
+    - alembic
+    - upgrade
+    - head
     environment:
-      <<: *common-env
+      TZ: ${TZ:-Asia/Tashkent}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
     depends_on:
       postgres_prod:
         condition: service_healthy
-    profiles: [prod]
-    restart: "no"
-
-  # ── Backend (FastAPI) ───────────────────────────────────────────────────────
+    profiles:
+    - prod
+    restart: 'no'
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      <<: *common-env
+      TZ: ${TZ:-Asia/Tashkent}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
@@ -138,24 +148,29 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./backend:/app
-    profiles: [dev]
-
+    - ./backend:/app
+    ports:
+    - 127.0.0.1:${BACKEND_HOST_PORT:-8000}:8000
+    profiles:
+    - dev
     healthcheck:
-      test: ["CMD", "python", "-c",
-        "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 15s
-
   backend_prod:
     build:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      <<: *common-env
+      TZ: ${TZ:-Asia/Tashkent}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       REDIS_URL: ${REDIS_URL:-redis://redis_prod:6379/0}
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
@@ -184,29 +199,35 @@ services:
         condition: service_completed_successfully
       redis_prod:
         condition: service_healthy
-    profiles: [prod]
+    profiles:
+    - prod
     healthcheck:
-      test: ["CMD", "python", "-c",
-        "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 15s
-
-  # ── Worker (arq) ────────────────────────────────────────────────────────────
   worker:
-    build:
+    build: &id001
       context: ./backend
       dockerfile: Dockerfile
-    command: ["python", "-m", "app.workers.main"]
+    command: &id002
+    - python
+    - -m
+    - app.workers.main
     restart: unless-stopped
-    environment:
-      <<: *common-env
+    environment: &id003
+      TZ: ${TZ:-Asia/Tashkent}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      REDIS_URL: ${REDIS_URL:-redis://redis_prod:6379/0}
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
-      ENV: ${ENV:-dev}
+      ENV: ${ENV:-prod}
       BOT_TOKEN: ${BOT_TOKEN:-}
       ADMIN_TG_IDS: ${ADMIN_TG_IDS:-}
       B_UNIT_UZS: ${B_UNIT_UZS:-1000}
@@ -218,37 +239,45 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-    profiles: [dev]
-    healthcheck:
-      test: ["CMD", "test", "-f", "/tmp/worker_heartbeat"]
+    profiles:
+    - dev
+    healthcheck: &id004
+      test:
+      - CMD
+      - test
+      - -f
+      - /tmp/worker_heartbeat
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 20s
-
-  # ── Bot (aiogram 3) ─────────────────────────────────────────────────────────
   bot:
-    build:
+    build: &id005
       context: ./bot
       dockerfile: Dockerfile
     restart: unless-stopped
-    environment:
-      <<: *common-env
+    environment: &id006
+      TZ: ${TZ:-Asia/Tashkent}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       BOT_TOKEN: ${BOT_TOKEN:-}
       BOT_USERNAME: ${BOT_USERNAME:-rung_uz_bot}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
       WEBAPP_URL: ${WEBAPP_URL:-http://localhost}
       ADMIN_TG_IDS: ${ADMIN_TG_IDS:-}
-      BACKEND_URL: http://backend:8000
-    profiles: [dev]
-    healthcheck:
-      test: ["CMD", "test", "-f", "/tmp/bot_heartbeat"]
+      BACKEND_URL: http://backend_prod:8000
+      ENV: ${ENV:-prod}
+    profiles:
+    - dev
+    healthcheck: &id007
+      test:
+      - CMD
+      - test
+      - -f
+      - /tmp/bot_heartbeat
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 15s
-
-  # ── Frontend (Vite dev server) ──────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
@@ -257,73 +286,106 @@ services:
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    profiles: [dev]
+    - ./frontend:/app
+    - /app/node_modules
+    ports:
+    - 127.0.0.1:${FRONTEND_HOST_PORT:-5173}:5173
+    profiles:
+    - dev
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:5173"]
+      test:
+      - CMD
+      - wget
+      - -qO-
+      - http://localhost:5173
       interval: 20s
       timeout: 5s
       retries: 10
       start_period: 90s
-
-  # ── Caddy (reverse proxy) ───────────────────────────────────────────────────
   caddy_dev:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+    - 127.0.0.1:${HTTP_PORT:-80}:80
+    - 127.0.0.1:${HTTPS_PORT:-443}:443
     volumes:
-      - ./deploy/caddy/dev/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+    - ./deploy/caddy/dev/Caddyfile:/etc/caddy/Caddyfile:ro
+    - caddy_data:/data
+    - caddy_config:/config
     depends_on:
       backend:
         condition: service_healthy
       frontend:
         condition: service_healthy
-    profiles: [dev]
+    profiles:
+    - dev
     healthcheck:
-      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      test:
+      - CMD
+      - caddy
+      - validate
+      - --config
+      - /etc/caddy/Caddyfile
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 10s
-
-  caddy_prod:
+  caddy:
     image: caddy:2-alpine
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
     volumes:
-      - ./deploy/caddy/prod/Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./frontend/dist:/srv/www:ro
-      - caddy_data:/data
-      - caddy_config:/config
+    - ./deploy/caddy/prod/Caddyfile:/etc/caddy/Caddyfile:ro
+    - ./frontend/dist:/srv/www:ro
+    - caddy_data:/data
+    - caddy_config:/config
     depends_on:
       backend_prod:
         condition: service_healthy
-    profiles: [prod]
+    profiles:
+    - prod
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:2019/config/"]
+      test:
+      - CMD
+      - wget
+      - -qO-
+      - http://localhost:2019/config/
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 10s
-
-  # ── Cloudflared tunnel (optional) ──────────────────────────────────────────
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run
     restart: unless-stopped
     environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
-    profiles: [tunnel]
-
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+    - caddy
+    profiles:
+    - tunnel
+    - prod
+  worker_prod:
+    build: *id001
+    command: *id002
+    restart: unless-stopped
+    environment: *id003
+    depends_on:
+      migrate_prod:
+        condition: service_completed_successfully
+      redis_prod:
+        condition: service_healthy
+    profiles:
+    - prod
+    healthcheck: *id004
+  bot_prod:
+    build: *id005
+    restart: unless-stopped
+    environment: *id006
+    profiles:
+    - prod
+    healthcheck: *id007
 volumes:
-  postgres_data:
-  redis_data:
-  caddy_data:
-  caddy_config:
+  postgres_data: null
+  redis_data: null
+  caddy_data: null
+  caddy_config: null
