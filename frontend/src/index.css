@@ -1,0 +1,41 @@
+/* Rung design tokens — dark default */
+:root {
+  --bg: #0D1015;
+  --surface: #141920;
+  --surface-2: #1A212B;
+  --border: #252E3A;
+  --text: #E9EEF5;
+  --muted: #8B97A8;
+  --primary: #B8F03C;
+  --primary-fg: #0D1015;
+  --accent: #7C6CFF;
+  --success: #3DDC97;
+  --warn: #FFB84D;
+  --danger: #FF5D6C;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #F5F7FA;
+    --surface: #FFFFFF;
+    --surface-2: #EEF1F6;
+    --border: #D4DAE4;
+    --text: #111620;
+    --muted: #5A6474;
+    --primary: #7AB020;
+    --primary-fg: #FFFFFF;
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

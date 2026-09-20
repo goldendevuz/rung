@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+.env
+*.env.local
+*.env.*.local
+
+# Node / Frontend
+node_modules/
+.pnpm-store/
+frontend/dist/
+frontend/.next/
+frontend/build/
+*.tsbuildinfo
+
+# Docker / Infra
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+.cache/
+
+# Test / Coverage
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.lcov
+playwright-report/
+test-results/
+
+# Zone identifiers (Windows/WSL)
+*:Zone.Identifier
+
+# Private design reference (third-party screenshots)
+docs/design/outbid-reference/
+!docs/design/outbid-reference/.gitkeep
+
+# Secrets / local
+.env
+backend/.env
+bot/.env
+frontend/.env.local
+deploy/secrets/
+
+# Alembic generated SQLite (local dev)
+*.db
+*.sqlite3
+
+# Misc
+*.bak
+*.tmp
+.DS_Store

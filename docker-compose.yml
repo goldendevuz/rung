@@ -1,0 +1,329 @@
+# Rung monorepo — Docker Compose
+# Profiles: dev, prod, tunnel
+# Usage: docker compose --profile dev up -d --build
+
+name: rung
+
+x-common-env: &common-env
+  TZ: ${TZ:-Asia/Tashkent}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+services:
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rung}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-rung}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - target: 5432
+        published: "5432"
+        protocol: tcp
+        mode: host
+    profiles: [dev]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rung} -d ${POSTGRES_DB:-rung}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  postgres_prod:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rung}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-rung}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    profiles: [prod]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rung} -d ${POSTGRES_DB:-rung}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - target: 6379
+        published: "6379"
+        protocol: tcp
+        mode: host
+    profiles: [dev]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  redis_prod:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    profiles: [prod]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── Migrate (one-shot) ──────────────────────────────────────────────────────
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      <<: *common-env
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: [dev]
+    restart: "no"
+
+  migrate_prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      <<: *common-env
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+    depends_on:
+      postgres_prod:
+        condition: service_healthy
+    profiles: [prod]
+    restart: "no"
+
+  # ── Backend (FastAPI) ───────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
+      ENV: ${ENV:-dev}
+      DEV_AUTH: ${DEV_AUTH:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      BOT_TOKEN: ${BOT_TOKEN:-}
+      BOT_USERNAME: ${BOT_USERNAME:-rung_uz_bot}
+      ADMIN_TG_IDS: ${ADMIN_TG_IDS:-}
+      WEBAPP_URL: ${WEBAPP_URL:-http://localhost}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      SHOW_PAYMENT_DETAILS: ${SHOW_PAYMENT_DETAILS:-false}
+      STARS_ENABLED: ${STARS_ENABLED:-true}
+      PAYNET_ENABLED: ${PAYNET_ENABLED:-true}
+      SEED_DEMO: ${SEED_DEMO:-false}
+      B_UNIT_UZS: ${B_UNIT_UZS:-1000}
+      STARS_UNITS_PER_STAR: ${STARS_UNITS_PER_STAR:-200}
+      FLOOR_B: ${FLOOR_B:-1}
+      MIN_STEP_B: ${MIN_STEP_B:-1}
+      ENABLED_LISTING_KINDS: ${ENABLED_LISTING_KINDS:-channel}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    profiles: [dev]
+    healthcheck:
+      test: ["CMD", "python", "-c",
+        "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  backend_prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL:-redis://redis_prod:6379/0}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
+      ENV: ${ENV:-prod}
+      DEV_AUTH: ${DEV_AUTH:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      BOT_TOKEN: ${BOT_TOKEN:-}
+      BOT_USERNAME: ${BOT_USERNAME:-rung_uz_bot}
+      ADMIN_TG_IDS: ${ADMIN_TG_IDS:-}
+      WEBAPP_URL: ${WEBAPP_URL:-http://localhost}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      SHOW_PAYMENT_DETAILS: ${SHOW_PAYMENT_DETAILS:-false}
+      STARS_ENABLED: ${STARS_ENABLED:-true}
+      PAYNET_ENABLED: ${PAYNET_ENABLED:-true}
+      SEED_DEMO: ${SEED_DEMO:-false}
+      B_UNIT_UZS: ${B_UNIT_UZS:-1000}
+      STARS_UNITS_PER_STAR: ${STARS_UNITS_PER_STAR:-200}
+      FLOOR_B: ${FLOOR_B:-1}
+      MIN_STEP_B: ${MIN_STEP_B:-1}
+      ENABLED_LISTING_KINDS: ${ENABLED_LISTING_KINDS:-channel}
+    depends_on:
+      migrate_prod:
+        condition: service_completed_successfully
+      redis_prod:
+        condition: service_healthy
+    profiles: [prod]
+    healthcheck:
+      test: ["CMD", "python", "-c",
+        "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── Worker (arq) ────────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["python", "-m", "app.workers.main"]
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
+      ENV: ${ENV:-dev}
+      BOT_TOKEN: ${BOT_TOKEN:-}
+      ADMIN_TG_IDS: ${ADMIN_TG_IDS:-}
+      B_UNIT_UZS: ${B_UNIT_UZS:-1000}
+      STARS_UNITS_PER_STAR: ${STARS_UNITS_PER_STAR:-200}
+      FLOOR_B: ${FLOOR_B:-1}
+      MIN_STEP_B: ${MIN_STEP_B:-1}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    profiles: [dev]
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/worker_heartbeat"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # ── Bot (aiogram 3) ─────────────────────────────────────────────────────────
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      BOT_TOKEN: ${BOT_TOKEN:-}
+      BOT_USERNAME: ${BOT_USERNAME:-rung_uz_bot}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
+      WEBAPP_URL: ${WEBAPP_URL:-http://localhost}
+      ADMIN_TG_IDS: ${ADMIN_TG_IDS:-}
+      BACKEND_URL: http://backend:8000
+    profiles: [dev]
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/bot_heartbeat"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ── Frontend (Vite dev server) ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
+    profiles: [dev]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5173"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── Caddy (reverse proxy) ───────────────────────────────────────────────────
+  caddy_dev:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/caddy/dev/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    profiles: [dev]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2019/config/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  caddy_prod:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/caddy/prod/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frontend/dist:/srv/www:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend_prod:
+        condition: service_healthy
+    profiles: [prod]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2019/config/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Cloudflared tunnel (optional) ──────────────────────────────────────────
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    restart: unless-stopped
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    profiles: [tunnel]
+
+volumes:
+  postgres_data:
+  redis_data:
+  caddy_data:
+  caddy_config:

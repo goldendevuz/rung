@@ -1,0 +1,13 @@
+# Rung — Caddy prod config
+# /api/* -> backend, everything else -> static build with SPA fallback
+
+{$PUBLIC_BASE_URL:localhost} {
+    encode gzip
+
+    @api path /api/* /healthz /readyz /go/*
+    reverse_proxy @api backend_prod:8000
+
+    root * /srv/www
+    try_files {path} /index.html
+    file_server
+}

@@ -1,0 +1,1141 @@
+<title>Rung reyting taxtasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* ============ TOKENS — qorong'i (asosiy identifikatsiya) ============ */
+:root{
+  color-scheme: dark;
+  --bg:#0D0F11; --bg-2:#101316; --surface:#16191D; --surface-2:#1C2026;
+  --line:#262B31; --line-soft:#1E2329;
+  --ink:#EEF2F0; --ink-2:#A3ADAD; --ink-3:#6D7679;
+  --lime:#B8F03C; --lime-ink:#0D0F11; --lime-text:#C9F76D; --lime-soft:rgba(184,240,60,.14);
+  --violet:#7C6CFF; --violet-text:#A79BFF; --violet-soft:rgba(124,108,255,.18);
+  --danger:#FF7A6B;
+  --tint:184,240,60; --tint-strength:.13;
+  --ring:rgba(184,240,60,.55);
+  --shadow:0 14px 34px -22px rgba(0,0,0,.95);
+  --r-sm:8px; --r:12px; --r-lg:18px; --r-pill:999px;
+  --sans:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --rail:74px;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --bg:#F1F3EE; --bg-2:#E9ECE4; --surface:#FFFFFF; --surface-2:#F7F9F3;
+    --line:#DCE1D6; --line-soft:#E8ECE3;
+    --ink:#11161A; --ink-2:#55605F; --ink-3:#848D8D;
+    --lime:#B8F03C; --lime-ink:#14200A; --lime-text:#4D6B08; --lime-soft:rgba(184,240,60,.34);
+    --violet:#7C6CFF; --violet-text:#5544D6; --violet-soft:rgba(124,108,255,.14);
+    --danger:#C2402F;
+    --tint-strength:.36;
+    --ring:rgba(90,120,10,.5);
+    --shadow:0 14px 30px -24px rgba(20,30,10,.55);
+  }
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --bg:#F1F3EE; --bg-2:#E9ECE4; --surface:#FFFFFF; --surface-2:#F7F9F3;
+  --line:#DCE1D6; --line-soft:#E8ECE3;
+  --ink:#11161A; --ink-2:#55605F; --ink-3:#848D8D;
+  --lime:#B8F03C; --lime-ink:#14200A; --lime-text:#4D6B08; --lime-soft:rgba(184,240,60,.34);
+  --violet:#7C6CFF; --violet-text:#5544D6; --violet-soft:rgba(124,108,255,.14);
+  --danger:#C2402F;
+  --tint-strength:.36;
+  --ring:rgba(90,120,10,.5);
+  --shadow:0 14px 30px -24px rgba(20,30,10,.55);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ring); outline-offset:2px; border-radius:6px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ============ RUNG RAIL (chap vertikal pog'ona) ============ */
+.app{display:flex;min-height:100%}
+.rail{
+  position:fixed; inset:0 auto 0 0; width:var(--rail); z-index:40;
+  display:none; flex-direction:column; align-items:center; gap:4px;
+  padding:calc(18px + env(safe-area-inset-top,0px)) 0 calc(14px + env(safe-area-inset-bottom,0px));
+  background:var(--bg-2); border-right:1px solid var(--line-soft);
+}
+.rail-mark{display:flex;flex-direction:column;gap:3px;align-items:flex-start;width:26px;margin-bottom:18px}
+.rail-mark i{display:block;height:4px;border-radius:2px;background:var(--lime)}
+.rail-mark i:nth-child(1){width:12px;opacity:.45}
+.rail-mark i:nth-child(2){width:19px;opacity:.72}
+.rail-mark i:nth-child(3){width:26px}
+.rail-nav{display:flex;flex-direction:column;gap:2px;width:100%;align-items:center;position:relative}
+.rail-nav::before{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:1px;background:var(--line);transform:translateX(-22px)}
+.rung{
+  position:relative; width:52px; height:46px; display:grid; place-items:center;
+  border:0; background:transparent; cursor:pointer; color:var(--ink-3);
+  font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  border-radius:var(--r-sm);
+}
+.rung::before{content:"";position:absolute;left:4px;top:50%;width:10px;height:2px;border-radius:2px;background:var(--line);transition:background .16s,width .16s}
+.rung:hover{color:var(--ink-2)}
+.rung[aria-current="page"]{color:var(--lime-text)}
+.rung[aria-current="page"]::before{background:var(--lime);width:16px}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;align-items:center}
+.rail-b{font-family:var(--mono);font-size:11px;color:var(--ink-3);writing-mode:vertical-rl;letter-spacing:.12em}
+
+/* ============ LAYOUT ============ */
+.viewport{flex:1;min-width:0;display:flex;flex-direction:column}
+.wrap{width:100%;max-width:1180px;margin:0 auto;padding-inline:16px}
+main{flex:1;padding-block:0 56px}
+
+/* ============ TOPBAR ============ */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+.topbar-in{display:flex;align-items:center;gap:14px;padding-block:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.02em;font-size:19px}
+.brand-mark{display:flex;flex-direction:column;gap:2.5px;width:20px}
+.brand-mark i{height:3px;border-radius:2px;background:var(--lime)}
+.brand-mark i:nth-child(1){width:9px;opacity:.45}
+.brand-mark i:nth-child(2){width:14px;opacity:.72}
+.brand-mark i:nth-child(3){width:20px}
+.live{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-pill);font-size:12.5px;color:var(--ink-2);background:var(--surface)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 3px var(--lime-soft)}
+.live b{color:var(--ink);font-weight:700}
+.topnav{margin-left:auto;display:flex;align-items:center;gap:4px}
+.topnav a{padding:7px 11px;border-radius:var(--r-sm);font-size:14px;font-weight:600;color:var(--ink-2)}
+.topnav a:hover{color:var(--ink);background:var(--surface)}
+.icon-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);cursor:pointer;color:var(--ink-2)}
+.icon-btn:hover{color:var(--ink);border-color:var(--ink-3)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.btn-login{padding:8px 14px;border-radius:var(--r-pill);border:1px solid var(--lime);color:var(--lime-text);background:transparent;font-weight:700;font-size:13.5px;cursor:pointer}
+.btn-login:hover{background:var(--lime-soft)}
+
+/* kategoriya filtri */
+.catbar{display:flex;gap:6px;overflow-x:auto;padding:10px 0 12px;scrollbar-width:none}
+.catbar::-webkit-scrollbar{display:none}
+.cpill{
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;cursor:pointer;
+  padding:7px 13px;border-radius:var(--r-pill);border:1px solid var(--line);
+  background:var(--surface);color:var(--ink-2);font-size:13.5px;font-weight:600;
+}
+.cpill:hover{color:var(--ink)}
+.cpill .sq{width:9px;height:9px;border-radius:3px;background:var(--c,var(--ink-3))}
+.cpill[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--lime-ink)}
+.cpill[aria-pressed="true"] .sq{background:currentColor;opacity:.55}
+
+/* ============ HERO ============ */
+.hero{text-align:center;padding-block:26px 8px}
+.periods{display:inline-flex;gap:2px;padding:4px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-pill);flex-wrap:wrap;justify-content:center}
+.ptab{border:0;background:transparent;padding:8px 15px;border-radius:var(--r-pill);cursor:pointer;font-size:13.5px;font-weight:700;color:var(--ink-2)}
+.ptab:hover{color:var(--ink)}
+.ptab[aria-selected="true"]{background:var(--lime);color:var(--lime-ink)}
+.ptab .dot{width:6px;height:6px;display:inline-block;margin-right:6px;vertical-align:1px;box-shadow:none;background:currentColor;opacity:.7}
+.period-note{margin:10px 0 0;font-size:12.5px;color:var(--ink-3)}
+.period-note .num{color:var(--ink-2)}
+h1.claim{
+  margin:18px 0 6px;font-size:clamp(27px,5.2vw,46px);font-weight:800;letter-spacing:-.035em;
+  text-wrap:balance;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+}
+.price-big{font-family:var(--mono);font-weight:700;color:var(--lime-text);letter-spacing:-.02em}
+.step{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.step:hover:not(:disabled){border-color:var(--lime);color:var(--lime-text)}
+.step:disabled{opacity:.35;cursor:not-allowed}
+.uzs{margin:0 0 20px;font-size:13px;color:var(--ink-3)}
+.claimbar{display:flex;gap:10px;max-width:880px;margin:0 auto;flex-wrap:wrap}
+.field{flex:1 1 300px;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:0 18px;min-height:52px}
+.field svg{width:17px;height:17px;flex:none;fill:none;stroke:var(--ink-3);stroke-width:1.7}
+.field input{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:15.5px;font-weight:500}
+.field input::placeholder{color:var(--ink-3)}
+select.field{flex:0 1 220px;appearance:none;cursor:pointer;font-weight:600;font-size:14.5px;color:var(--ink-2);
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 23px,calc(100% - 15px) 23px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:40px}
+.btn-primary{
+  flex:0 0 auto;min-height:52px;padding:0 26px;border:0;border-radius:var(--r-pill);
+  background:var(--lime);color:var(--lime-ink);font-weight:800;font-size:15px;cursor:pointer;letter-spacing:-.01em;
+}
+.btn-primary:hover{filter:brightness(1.07)}
+.btn-ghost{min-height:44px;padding:0 20px;border-radius:var(--r-pill);border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:700;cursor:pointer}
+.btn-ghost:hover{border-color:var(--ink-3)}
+
+/* ============ BOARD ============ */
+.board{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;padding-top:30px;align-items:start}
+@media (min-width:1000px){.board{grid-template-columns:minmax(0,1fr) 296px}}
+
+.row{
+  position:relative;display:grid;grid-template-columns:44px 56px minmax(0,1fr) auto;gap:14px;align-items:center;
+  padding:14px 16px;border-radius:var(--r-lg);
+  background:rgba(var(--tint),calc(var(--a,0) * var(--tint-strength)));
+}
+.row + .row{margin-top:2px}
+.row.plain{border-radius:0;border-top:1px solid var(--line-soft);margin-top:0;padding-block:15px}
+.row:hover{background:rgba(var(--tint),calc((var(--a,0) * var(--tint-strength)) + .05))}
+.rank{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink-3);text-align:right}
+.row[data-top="1"] .rank{color:var(--lime-text);font-size:17px}
+.ava{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:19px;letter-spacing:-.02em;color:#0D0F11;overflow:hidden}
+.row.plain .ava{width:48px;height:48px;border-radius:12px;font-size:17px}
+.row.plain{grid-template-columns:44px 48px minmax(0,1fr) auto}
+.rtitle{font-size:16.5px;font-weight:700;letter-spacing:-.015em;margin:0 0 2px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.vbadge{width:14px;height:14px;flex:none}
+.vbadge svg{width:14px;height:14px;fill:var(--violet);}
+.rdesc{margin:0;color:var(--ink-2);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rmeta{margin:5px 0 0;font-size:12.5px;color:var(--ink-3);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rmeta .sq{width:8px;height:8px;border-radius:2px;background:var(--c,var(--ink-3));display:inline-block}
+.rmeta b{color:var(--ink-2);font-weight:600}
+.rmeta .sep{opacity:.5}
+.adlabel{color:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-pill);padding:1px 8px;font-size:11.5px;font-weight:600}
+.adlabel.free{border-color:var(--violet-text);color:var(--violet-text)}
+.adlabel.unclaimed{border-style:dashed}
+.rprice{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--lime-text);text-align:right;white-space:nowrap}
+.row.plain .rprice{font-size:17px}
+.claim-pill{
+  position:absolute;right:16px;top:50%;transform:translateY(-50%) translateX(6px);
+  opacity:0;pointer-events:none;transition:opacity .14s,transform .14s;
+  background:var(--lime);color:var(--lime-ink);border:0;border-radius:var(--r-pill);
+  padding:9px 16px;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap;box-shadow:var(--shadow);
+}
+.row:hover .claim-pill,.row:focus-within .claim-pill{opacity:1;pointer-events:auto;transform:translateY(-50%) translateX(0)}
+.row:hover .rprice,.row:focus-within .rprice{opacity:0}
+@media (hover:none){.claim-pill{position:static;opacity:1;pointer-events:auto;transform:none;display:none}}
+
+.divider{display:flex;align-items:center;gap:16px;margin:26px 0 18px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.divider span{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--lime-text);border:1px solid var(--lime-soft);background:var(--lime-soft);padding:5px 14px;border-radius:var(--r-pill)}
+
+/* so'nggi harakat */
+.activity{margin:26px 0}
+.activity h2{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink-2);margin:0 0 10px}
+.acts{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.acts::-webkit-scrollbar{display:none}
+.act{flex:0 0 auto;display:flex;gap:9px;align-items:center;background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:9px 13px;min-width:190px}
+.act .ava{width:30px;height:30px;border-radius:9px;font-size:12px}
+.act-n{font-size:13px;font-weight:700;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.act-m{font-size:11.5px;color:var(--ink-3);margin:1px 0 0;font-family:var(--mono)}
+
+/* sidebar */
+.side{position:sticky;top:96px;display:flex;flex-direction:column;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:16px}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;font-size:14px;font-weight:700}
+.card-h a{font-size:12.5px;color:var(--lime-text);font-weight:600}
+.mini{display:flex;align-items:center;gap:10px;padding:7px 0}
+.mini + .mini{border-top:1px solid var(--line-soft)}
+.mini .rank{font-size:12px;width:22px}
+.mini .ava{width:28px;height:28px;border-radius:8px;font-size:12px}
+.mini-n{flex:1;min-width:0;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-p{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--lime-text)}
+.wallet .bal{font-family:var(--mono);font-size:28px;font-weight:700;letter-spacing:-.02em;margin:2px 0 0}
+.wallet p{margin:4px 0 12px;font-size:12.5px;color:var(--ink-3)}
+
+/* bo'sh holat */
+.empty{border:1px dashed var(--line);border-radius:var(--r-lg);padding:42px 24px;text-align:center;background:var(--surface-2)}
+.empty .rungs{display:flex;flex-direction:column;gap:5px;align-items:center;margin-bottom:16px}
+.empty .rungs i{height:4px;border-radius:2px;background:var(--line)}
+.empty .rungs i:nth-child(1){width:26px}
+.empty .rungs i:nth-child(2){width:40px}
+.empty .rungs i:nth-child(3){width:54px;background:var(--lime)}
+.empty h3{margin:0 0 6px;font-size:18px;font-weight:700;letter-spacing:-.02em}
+.empty p{margin:0 auto 18px;max-width:420px;color:var(--ink-2);font-size:14px}
+
+/* pagination + stats */
+.pager{display:flex;gap:6px;justify-content:center;align-items:center;margin:28px 0 8px}
+.pg{min-width:36px;height:36px;padding:0 10px;border-radius:50%;border:1px solid transparent;background:transparent;color:var(--ink-2);font-weight:700;font-family:var(--mono);font-size:13.5px;cursor:pointer}
+.pg:hover:not(:disabled){color:var(--ink);border-color:var(--line)}
+.pg[aria-current="true"]{background:var(--lime);color:var(--lime-ink)}
+.pg:disabled{opacity:.3;cursor:not-allowed}
+.pg-info{text-align:center;font-size:13px;color:var(--ink-3);font-family:var(--mono)}
+.stats{margin:52px 0 0;text-align:center}
+.stats h2{font-size:clamp(17px,2.4vw,21px);font-weight:600;letter-spacing:-.02em;color:var(--ink-2);margin:0 0 20px}
+.stats h2 b{color:var(--ink);font-weight:800}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:26px 16px}
+.stat .v{font-family:var(--mono);font-size:clamp(24px,3.4vw,32px);font-weight:700;letter-spacing:-.03em}
+.stat .k{margin-top:4px;font-size:13px;color:var(--ink-3)}
+.stat.accent .v{color:var(--lime-text)}
+
+footer{border-top:1px solid var(--line-soft);padding-block:26px calc(30px + env(safe-area-inset-bottom,0px));text-align:center;color:var(--ink-3);font-size:13.5px}
+footer .flinks{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+footer .flinks a{color:var(--lime-text);padding:2px 6px}
+footer .slogan{font-family:var(--mono);font-size:12px;letter-spacing:.06em;margin-top:14px;color:var(--ink-3)}
+
+/* ============ ICHKI SAHIFALAR ============ */
+.page-head{padding-block:34px 8px;max-width:720px}
+.page-head h1{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.035em;margin:0 0 8px;text-wrap:balance}
+.page-head p{margin:0;color:var(--ink-2);font-size:15.5px}
+.daycards{display:grid;gap:14px;padding-top:22px}
+.day{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:18px}
+.day.live{border-color:var(--lime);background:linear-gradient(180deg,rgba(var(--tint),.07),transparent 60%),var(--surface)}
+.day-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.day-h h3{margin:0;font-size:17px;font-weight:700;letter-spacing:-.02em}
+.tag{display:inline-flex;align-items:center;gap:6px;border-radius:var(--r-pill);padding:3px 10px;font-size:12px;font-weight:700;border:1px solid var(--line);color:var(--ink-2)}
+.tag.on{border-color:var(--lime);color:var(--lime-text);background:var(--lime-soft)}
+.tag .num{font-size:11.5px}
+.day-rows .mini{padding:8px 0}
+.day-acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;padding-top:22px}
+.catcard{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:16px}
+.catcard h3{margin:0 0 4px;font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.catcard .sq{width:11px;height:11px;border-radius:3px;background:var(--c)}
+.catcard .cnt{font-size:12.5px;color:var(--ink-3);font-family:var(--mono);margin:0 0 10px}
+.hot{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding-top:22px}
+.hotcard{border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;background:var(--surface)}
+.hotcard.first{border-color:var(--lime);background:linear-gradient(180deg,rgba(var(--tint),.09),transparent 70%),var(--surface)}
+.hotcard .lab{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;color:var(--ink-3)}
+.hotcard.first .lab{color:var(--lime-text)}
+.hotcard h3{margin:8px 0 2px;font-size:19px;font-weight:800;letter-spacing:-.02em}
+.prose{max-width:680px;padding-block:20px 10px}
+.prose h2{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:30px 0 8px}
+.prose p,.prose li{color:var(--ink-2);font-size:15px;margin:0 0 9px}
+.prose li{margin-bottom:7px}
+.prose ul{padding-left:20px;margin:0 0 14px}
+.prose strong{color:var(--ink);font-weight:700}
+.prose code{font-family:var(--mono);font-size:13px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:6px;padding:1px 6px;color:var(--lime-text)}
+
+/* login */
+.login{max-width:400px;margin:0 auto;padding-block:44px 30px;text-align:center}
+.login .brand{justify-content:center;font-size:26px;margin-bottom:8px}
+.login h1{font-size:25px;font-weight:800;letter-spacing:-.03em;margin:14px 0 6px}
+.login p.sub{color:var(--ink-2);font-size:14.5px;margin:0 0 26px}
+.authbtn{width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px}
+.authbtn:hover{border-color:var(--ink-3)}
+.authbtn.tg{background:var(--violet);border-color:var(--violet);color:#fff}
+.authbtn.tg:hover{filter:brightness(1.07)}
+.authbtn svg{width:19px;height:19px}
+.or{display:flex;align-items:center;gap:12px;color:var(--ink-3);font-size:12px;margin:16px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.login .fine{font-size:12.5px;color:var(--ink-3);margin-top:20px;line-height:1.6}
+
+/* ============ MODAL / SHEET ============ */
+.backdrop{position:fixed;inset:0;z-index:60;background:rgba(6,8,9,.72);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);max-height:92vh;overflow:auto}
+.sheet-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 20px 0}
+.sheet-h h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.025em}
+.sheet-h p{margin:4px 0 0;font-size:13.5px;color:var(--ink-2)}
+.sheet-b{padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px}
+.lbl{font-size:12.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px}
+.inp{width:100%;min-height:46px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:0 14px;outline:none;font-size:15px}
+.inp:focus{border-color:var(--lime)}
+.pricebox{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.pricebox .v{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--lime-text)}
+.breakdown{border:1px solid var(--line-soft);border-radius:var(--r);padding:12px 14px;font-size:13.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:7px}
+.breakdown .li{display:flex;justify-content:space-between;gap:10px}
+.breakdown .li b{color:var(--ink);font-family:var(--mono);font-weight:700}
+.breakdown .li.total{border-top:1px solid var(--line-soft);padding-top:8px;color:var(--ink)}
+.pay{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.payopt{border:1px solid var(--line);background:var(--surface-2);border-radius:var(--r);padding:12px;cursor:pointer;text-align:left}
+.payopt b{display:block;font-size:13.5px}
+.payopt span{font-size:11.5px;color:var(--ink-3)}
+.payopt[aria-pressed="true"]{border-color:var(--lime);background:var(--lime-soft)}
+.notice{display:flex;gap:9px;font-size:12.5px;color:var(--ink-2);background:var(--violet-soft);border-radius:var(--r);padding:11px 13px;line-height:1.45}
+.notice b{color:var(--violet-text)}
+.done{text-align:center;padding:14px 4px 4px}
+.done .tick{width:52px;height:52px;border-radius:50%;background:var(--lime-soft);display:grid;place-items:center;margin:0 auto 14px}
+.done .tick svg{width:24px;height:24px;stroke:var(--lime-text);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.done h3{margin:0 0 6px;font-size:19px;font-weight:800;letter-spacing:-.02em}
+.done p{margin:0 0 18px;color:var(--ink-2);font-size:14px}
+@media (max-width:560px){
+  .backdrop{align-items:flex-end;padding:0}
+  .sheet{max-width:none;border-radius:20px 20px 0 0;border-bottom:0;animation:up .22s ease-out}
+  @keyframes up{from{transform:translateY(24px)}to{transform:none}}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ============ RESPONSIVE ============ */
+@media (min-width:1024px){
+  .rail{display:flex}
+  .app{padding-left:var(--rail)}
+}
+@media (max-width:1023px){
+  .topnav .hide-sm{display:none}
+}
+@media (max-width:700px){
+  .row{grid-template-columns:30px 44px minmax(0,1fr);gap:11px;padding:12px;row-gap:8px}
+  .row.plain{grid-template-columns:30px 44px minmax(0,1fr)}
+  .ava,.row.plain .ava{width:44px;height:44px;border-radius:12px;font-size:16px}
+  .rprice{grid-column:3;justify-self:start;text-align:left;font-size:16px}
+  .row .rprice{opacity:1!important}
+  .rdesc{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .claim-pill{display:none}
+  h1.claim{font-size:27px;gap:8px}
+  .field{min-height:48px}
+  .btn-primary{width:100%}
+  .live .hide-xs{display:none}
+}
+
+/* telefon oldin ko'rish rejimi */
+body.phone-mode{background:var(--bg-2);padding:18px 0}
+body.phone-mode .app{max-width:392px;margin:0 auto;padding-left:0;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:var(--bg);box-shadow:var(--shadow)}
+body.phone-mode .rail{display:none}
+body.phone-mode .topnav .hide-sm{display:none}
+body.phone-mode .board{grid-template-columns:minmax(0,1fr)}
+body.phone-mode .side{position:static}
+</style>
+
+<div class="app">
+  <!-- ======= RUNG RAIL ======= -->
+  <aside class="rail" aria-label="Asosiy menyu">
+    <a class="rail-mark" href="#/" aria-label="Rung — bosh sahifa"><i></i><i></i><i></i></a>
+    <nav class="rail-nav" id="railNav">
+      <button class="rung" data-go="/" aria-current="page">top</button>
+      <button class="rung" data-go="/kunlik">kun</button>
+      <button class="rung" data-go="/kategoriyalar">kat</button>
+      <button class="rung" data-go="/qoshish">+kanal</button>
+      <button class="rung" data-go="/haqida">haq</button>
+      <button class="rung" data-go="/qoidalar">qoi</button>
+    </nav>
+    <div class="rail-foot">
+      <button class="icon-btn" id="phoneBtn" title="Mobil ko'rinish" aria-label="Mobil ko'rinish">
+        <svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
+      </button>
+      <div class="rail-b">1 B = 1 000 so'm</div>
+    </div>
+  </aside>
+
+  <div class="viewport">
+    <!-- ======= TOPBAR ======= -->
+    <header class="topbar">
+      <div class="wrap">
+        <div class="topbar-in">
+          <a class="brand" href="#/"><span class="brand-mark"><i></i><i></i><i></i></span>rung</a>
+          <span class="live"><span class="dot"></span><b class="num">37</b> onlayn <span class="hide-xs">· bugun <b class="num">2 145</b> tashrif · statistika →</span></span>
+          <nav class="topnav">
+            <a href="#/kunlik" class="hide-sm">Kunlik</a>
+            <a href="#/kategoriyalar" class="hide-sm">Kategoriyalar</a>
+            <a href="#/haqida" class="hide-sm">Haqida</a>
+            <a href="#/qoidalar" class="hide-sm">Qoidalar</a>
+            <button class="icon-btn" id="searchBtn" aria-label="Qidirish"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
+            <button class="icon-btn" id="themeBtn" aria-label="Mavzuni almashtirish"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg></button>
+            <a href="#/kirish"><button class="btn-login">Kirish</button></a>
+          </nav>
+        </div>
+        <div id="searchRow" hidden style="padding-bottom:4px">
+          <label class="field" style="max-width:520px;min-height:44px">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            <input id="searchInput" placeholder="Kanal nomi yoki @manzili" aria-label="Kanallar orasidan qidirish">
+          </label>
+        </div>
+        <div class="catbar" id="catbar" hidden></div>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ======= BOSH SAHIFA ======= -->
+      <section id="page-home">
+        <div class="wrap">
+          <div class="hero">
+            <div class="periods" id="periods" role="tablist" aria-label="Davrlar"></div>
+            <p class="period-note" id="periodNote"></p>
+            <h1 class="claim">
+              <span id="claimText">1-o'rinni</span>
+              <button class="step" id="minus" aria-label="Narxni kamaytirish">−</button>
+              <span class="price-big"><span class="num" id="heroPrice">149</span> B</span>
+              <button class="step" id="plus" aria-label="Narxni oshirish">+</button>
+              <span>ga oling</span>
+            </h1>
+            <p class="uzs">≈ <span class="num" id="heroUzs">149 000</span> so'm · to'lov Telegram Stars yoki Paynet orqali</p>
+            <div class="claimbar">
+              <label class="field">
+                <svg viewBox="0 0 24 24"><path d="M21 4 3 11l6 2.5L11.5 20 21 4Z"/></svg>
+                <input id="heroHandle" placeholder="@kanal yoki t.me havolasi" aria-label="Kanal manzili">
+              </label>
+              <select class="field" id="heroCat" aria-label="Kategoriya"></select>
+              <button class="btn-primary" id="heroClaim">O'rinni olish</button>
+            </div>
+            <p style="margin:14px 0 0;font-size:13.5px;color:var(--ink-3)">Kanalingiz hali ro'yxatda yo'qmi? <a href="#/qoshish" style="color:var(--lime-text);font-weight:600">Avval kanalni qo'shing →</a></p>
+          </div>
+
+          <div class="board">
+            <div>
+              <div id="list"></div>
+              <div class="pager" id="pager"></div>
+              <p class="pg-info" id="pagerInfo"></p>
+            </div>
+            <aside class="side">
+              <div class="card">
+                <div class="card-h" id="sideTitle">Bugungi reyting <a href="#/kunlik">Hammasi →</a></div>
+                <div id="sideList"></div>
+              </div>
+              <div class="card wallet">
+                <div class="card-h">Hamyoningiz</div>
+                <div class="bal num">24,0 B</div>
+                <p>≈ 24 000 so'm · oxirgi to'ldirish 3 kun oldin</p>
+                <button class="btn-ghost" style="width:100%" id="topupBtn">Hamyonni to'ldirish</button>
+              </div>
+              <div class="card">
+                <div class="card-h">Qanday ishlaydi</div>
+                <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Har bir o'rinning narxi bor. <b style="color:var(--ink)">k</b>-o'rinni olish uchun shu o'rindagi kanaldan <b style="color:var(--ink)">1 B</b> ko'p to'laysiz. Ular bir pog'ona pastga tushadi. <a href="#/qoidalar" style="color:var(--lime-text)">Qoidalar →</a></p>
+              </div>
+            </aside>
+          </div>
+
+          <section class="stats">
+            <h2>Rung <b>31 kun</b> oldin ishga tushdi. O'shandan beri:</h2>
+            <div class="stat-grid">
+              <div class="stat"><div class="v num">38 412</div><div class="k">tashrif (tekshirilgan, botlarsiz)</div></div>
+              <div class="stat accent"><div class="v num">812 B</div><div class="k">o'rinlar uchun to'langan</div></div>
+              <div class="stat"><div class="v num">126</div><div class="k">ro'yxatdagi kanal</div></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ======= KUNLIK ======= -->
+      <section id="page-kunlik" hidden>
+        <div class="wrap">
+          <div class="page-head">
+            <h1>Kunlik taxtalar</h1>
+            <p>Har kun yarim tunda (Toshkent vaqti) taxta yopiladi va yangisi 1 B dan boshlanadi. Yopilgan kun natijalari shu yerda qoladi.</p>
+          </div>
+          <div class="daycards" id="dayCards"></div>
+        </div>
+      </section>
+
+      <!-- ======= KATEGORIYALAR ======= -->
+      <section id="page-kategoriyalar" hidden>
+        <div class="wrap">
+          <div class="page-head">
+            <h1>Kategoriyalar</h1>
+            <p>Reklama beruvchilar kanalni mavzusi bo'yicha qidiradi. Har bir kategoriyaning o'z reytingi bor.</p>
+          </div>
+          <div class="hot" id="hotCats"></div>
+          <div class="catgrid" id="catGrid"></div>
+        </div>
+      </section>
+
+      <!-- ======= QOIDALAR ======= -->
+      <section id="page-qoidalar" hidden>
+        <div class="wrap prose">
+          <div class="page-head" style="padding-bottom:0"><h1>Qoidalar</h1><p>Qisqa va ochiq. Savol qolsa — <a href="https://t.me/rung_uz_bot" style="color:var(--lime-text)">@rung_uz_bot</a>.</p></div>
+
+          <h2>Taxtalar</h2>
+          <p>Har bir davr — alohida bozor: <strong>butun davr</strong>, <strong>kunlik</strong>, <strong>haftalik</strong>, <strong>oylik</strong>, <strong>fasl</strong> va <strong>yillik</strong>. Davr tugaganda taxta yopiladi, yangisi yana <code>1 B</code> dan boshlanadi. Avtomatik uzaytirish yoqilgan bo'lsa va hamyonda pul yetsa, kanal yangi davrga eng past narxda qayta kiradi; aks holda "Yakunlanganlar" ro'yxatiga o'tadi.</p>
+          <p>Bo'sh davr ko'rsatilmaydi: faqat kamida bitta faol kanali bor taxta sarlavhada chiqadi.</p>
+
+          <h2>Reyting qanday hisoblanadi</h2>
+          <ul>
+            <li>O'rin — hisoblanadigan qiymat: avval <strong>to'langan B</strong> bo'yicha, teng bo'lsa <strong>kim oldin kirgani</strong> bo'yicha.</li>
+            <li>Eng past narx — <code>1 B</code>. Bidlar faqat butun B da.</li>
+            <li><strong>k</strong>-o'rinni olish uchun shu o'rindagi kanal to'lagan summadan <code>1 B</code> ko'p to'laysiz.</li>
+            <li>1 B = 1 000 so'm. Interfeysda faqat B ko'rsatiladi.</li>
+            <li>Soxta yoki o'zini-o'zi ko'tarish uchun qilingan bidlar taqiqlanadi.</li>
+          </ul>
+
+          <h2>Nimani joylash mumkin</h2>
+          <ul>
+            <li>Hozircha faqat <strong>Telegram kanallari</strong>. Guruh, bot, mini-app va saytlar keyingi bosqichda.</li>
+            <li>Kanal egaligi tasdiqlanishi shart: faqat <strong>tasdiqlangan</strong> egalar o'rin sotib oladi.</li>
+            <li>Taqiqlangan mavzular: dori-darmon va tibbiyot, moliya/kredit/kripto, alkogol va tamaki, qimor, kattalar uchun kontent.</li>
+            <li>Har bir pulli o'rin <strong>"Reklama"</strong> deb belgilanadi va to'langan B miqdori ochiq ko'rsatiladi.</li>
+          </ul>
+
+          <h2>To'lovdan keyin</h2>
+          <p>O'rin to'lov tasdiqlangan zahoti ochiladi. To'lov qaytarilmaydi — istisno: xizmat nosozligi. Telegram Stars orqali to'lovni beta davrida admin qo'lda qaytarishi mumkin, agar kirim qilingan B hali sarflanmagan bo'lsa.</p>
+          <p>Paynet orqali to'ldirish faqat oddiy saytda ishlaydi, Telegram ichidagi Mini App'da emas — Telegram raqamli tovar uchun Stars talab qiladi.</p>
+        </div>
+      </section>
+
+      <!-- ======= KANAL QO'SHISH ======= -->
+      <section id="page-qoshish" hidden>
+        <div class="wrap">
+          <div class="page-head">
+            <h1>Kanal qo'shish</h1>
+            <p>Avval kanal ro'yxatga tushadi, keyin egaligi tasdiqlanadi. Faqat tasdiqlangan egalar o'rin sotib oladi.</p>
+          </div>
+          <div class="board" style="padding-top:22px">
+            <div class="card">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div><p class="lbl">Kanal manzili</p><input class="inp" id="aHandle" placeholder="@kanal yoki https://t.me/kanal"></div>
+                <div><p class="lbl">Ko'rinadigan nom</p><input class="inp" id="aName" placeholder="Masalan: Kodlash.uz"></div>
+                <div><p class="lbl">Bir qatorli tavsif</p><input class="inp" id="aDesc" maxlength="90" placeholder="Reklama beruvchi nimani ko'radi (90 belgigacha)"></div>
+                <div><p class="lbl">Kategoriya</p><select class="inp" id="aCat" style="cursor:pointer"></select></div>
+                <div>
+                  <p class="lbl">Egalikni tasdiqlash</p>
+                  <div class="breakdown" style="gap:10px">
+                    <div class="li"><span>1. Botni kanalga admin qiling</span><b class="num">@rung_uz_bot</b></div>
+                    <div class="li"><span>2. Kod postini joylang</span><b class="num">RUNG-4F2A</b></div>
+                    <div class="li"><span>3. Bot tekshiradi</span><b style="color:var(--lime-text)">~1 daqiqa</b></div>
+                  </div>
+                </div>
+                <div class="notice"><span>⌁</span><span>Taqiqlangan mavzular: tibbiyot va dori, moliya/kredit/kripto, alkogol va tamaki, qimor, kattalar uchun kontent. <b>Har bir pulli o'rin "Reklama" deb belgilanadi.</b></span></div>
+                <button class="btn-primary" id="aGo" style="width:100%">Kanalni yuborish</button>
+                <p style="margin:0;font-size:12.5px;color:var(--ink-3)">Yuborish pul talab qilmaydi. O'rin sotib olish tasdiqdan keyin ochiladi.</p>
+              </div>
+            </div>
+            <aside class="side">
+              <div class="card">
+                <div class="card-h">Reytingda shunday ko'rinadi</div>
+                <div id="aPreview"></div>
+              </div>
+              <div class="card">
+                <div class="card-h">Keyin nima bo'ladi</div>
+                <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Tasdiqlangunga qadar kanal "Katalog" bo'limida pulsiz turadi va "Egasi tasdiqlanmagan" deb belgilanadi. Tasdiqdan keyin istalgan o'rinni sotib olishingiz mumkin.</p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======= HAQIDA ======= -->
+      <section id="page-haqida" hidden>
+        <div class="wrap">
+          <div class="page-head">
+            <h1>Rung nima?</h1>
+            <p>Reklama beruvchi o'zbek Telegram kanallarini bir joyda ko'radi. Kanal egasi esa yuqoriga chiqish uchun to'laydi — reyting shu tariqa ochiq auksiyonga aylanadi.</p>
+          </div>
+          <div class="prose" style="padding-top:8px">
+            <h2>Nega bu ishlaydi</h2>
+            <p>Oddiy katalogda kim yuqorida turishini admin hal qiladi. Rung'da buni bozor hal qiladi: kim ko'proq to'lasa, o'sha yuqorida. Narx ochiq ko'rinadi, ya'ni reklama beruvchi kanal o'ziga qanchalik ishonishini darrov ko'radi.</p>
+            <p>Har bir pulli o'rin <strong>"Reklama"</strong> deb belgilanadi va to'langan summa yashirilmaydi. Soxta bid yoki o'zini-o'zi ko'tarish taqiqlanadi.</p>
+
+            <h2>Raqamlar</h2>
+          </div>
+          <div class="stat-grid" style="margin-bottom:34px">
+            <div class="stat"><div class="v num">38 412</div><div class="k">tashrif</div></div>
+            <div class="stat accent"><div class="v num">812 B</div><div class="k">to'langan</div></div>
+            <div class="stat"><div class="v num">148 B</div><div class="k">eng yuqori o'rin narxi</div></div>
+            <div class="stat"><div class="v num">126</div><div class="k">kanal ro'yxatda</div></div>
+            <div class="stat"><div class="v num">9</div><div class="k">bugun qo'shilgan</div></div>
+            <div class="stat accent"><div class="v num">31 B</div><div class="k">bugun to'langan</div></div>
+          </div>
+          <div class="prose" style="padding-top:0">
+            <h2>1-o'rinni egallaganlar nima deydi</h2>
+          </div>
+          <div class="hot" style="padding-top:0">
+            <div class="hotcard"><div class="lab">@KODLASH_UZ</div><p style="margin:10px 0 0;color:var(--ink-2);font-size:14.5px">"Uch kun 1-o'rinda turdim — 40 ga yaqin yangi reklama so'rovi keldi. Odatdagi katalogdan tezroq."</p></div>
+            <div class="hotcard"><div class="lab">@SMM_USTAXONA</div><p style="margin:10px 0 0;color:var(--ink-2);font-size:14.5px">"Narx ochiq turgani yoqdi. Qancha to'laganim ko'rinib turadi, bu ishonch beradi."</p></div>
+            <div class="hotcard"><div class="lab">@TOSHKENT_ISH</div><p style="margin:10px 0 0;color:var(--ink-2);font-size:14.5px">"Kunlik taxta arzon — 5 B ga sinab ko'rdim, keyin oylikka o'tdim."</p></div>
+          </div>
+          <p style="text-align:center;margin:34px 0 0;font-size:13px;color:var(--ink-3)">Yuqoridagi fikrlar prototip uchun namunaviy matn.</p>
+        </div>
+      </section>
+
+      <!-- ======= KIRISH ======= -->
+      <section id="page-kirish" hidden>
+        <div class="wrap">
+          <div class="login">
+            <div class="brand"><span class="brand-mark"><i></i><i></i><i></i></span>rung</div>
+            <h1>Bir pog'ona yuqoriga</h1>
+            <p class="sub">Kanal qo'shish va o'rin sotib olish uchun kiring. Bitta akkaunt — ham saytda, ham botda.</p>
+            <button class="authbtn tg">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 4 3 11l5.5 2L19 6.5 10.5 15l-.3 4.3L13 16.8l4 3.2L21 4Z"/></svg>
+              Telegram orqali davom etish
+            </button>
+            <button class="authbtn">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              Google akkaunti bilan kirish
+            </button>
+            <div class="or">yoki</div>
+            <button class="authbtn" style="min-height:46px;font-size:14px;color:var(--ink-2)">Botda ochish: @rung_uz_bot</button>
+            <p class="fine">Davom etish orqali siz <a href="#/qoidalar" style="color:var(--lime-text)">qoidalar</a> va maxfiylik siyosatiga rozilik bildirasiz. Kanal egaligi alohida tasdiqlanadi.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div>Rung — o'zbek Telegram kanallari uchun ochiq reyting · <a href="https://t.me/rung_uz_bot" style="color:var(--lime-text)">@rung_uz_bot</a></div>
+        <div class="flinks">
+          <a href="#/qoidalar">Qoidalar</a><span>·</span>
+          <a href="#/qoidalar">Savol-javob</a><span>·</span>
+          <a href="#/qoidalar">Shartlar</a><span>·</span>
+          <a href="#/qoidalar">Maxfiylik</a><span>·</span>
+          <a href="#/">Jonli statistika</a>
+        </div>
+        <div class="slogan">BIR POG'ONA YUQORIGA</div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<div class="backdrop" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" id="sheet"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- MA'LUMOT (namuna) ---------- */
+  var CATS = {
+    texnologiya:{n:"Texnologiya",c:"#B8F03C"},
+    biznes:{n:"Biznes",c:"#7C6CFF"},
+    marketing:{n:"Marketing",c:"#FF9F6B"},
+    talim:{n:"Ta'lim",c:"#5ED3F3"},
+    ish:{n:"Ish o'rinlari",c:"#F3C94F"},
+    dizayn:{n:"Dizayn",c:"#FF7FB6"},
+    yangilik:{n:"Yangiliklar",c:"#9AA6AE"},
+    avto:{n:"Avto",c:"#63E6A8"},
+    oshxona:{n:"Oshxona",c:"#F58A5B"},
+    sayohat:{n:"Sayohat",c:"#8FD0FF"},
+    kitob:{n:"Kitoblar",c:"#C9A227"},
+    sport:{n:"Sport",c:"#6BE0D0"},
+    oila:{n:"Oila",c:"#E78FD0"}
+  };
+
+  // p: davr bo'yicha to'langan B. Davrda yo'q bo'lsa — kalit yo'q.
+  var CH = [
+    {h:"@kodlash_uz",n:"Kodlash.uz",d:"Dasturlashni noldan: Python, JS va haftalik amaliy loyihalar.",c:"texnologiya",s:84200,k:1240,t:"2 hafta oldin",v:true,g:["#B8F03C","#6AA80C"],p:{a:148,d:12,w:30,m:61,y:95}},
+    {h:"@tadbirkor_kunligi",n:"Tadbirkor kunligi",d:"O'zbekistondagi kichik biznes: soliq, hisob-kitob, real raqamlar.",c:"biznes",s:61400,k:980,t:"3 hafta oldin",v:true,g:["#7C6CFF","#4B3BD1"],p:{a:120,d:8,w:22,m:40,y:70}},
+    {h:"@smm_ustaxona",n:"SMM ustaxona",d:"Targetolog va kontent-menejerlar uchun keys va shablonlar.",c:"marketing",s:44800,k:1516,t:"3 hafta oldin",v:true,g:["#FF9F6B","#D2591F"],p:{a:96,d:5,m:28,y:24}},
+    {h:"@toshkent_ish",n:"Toshkent ish o'rinlari",d:"Har kuni 20+ yangi vakansiya: IT, savdo, logistika.",c:"ish",s:132000,k:2870,t:"1 oy oldin",v:true,g:["#F3C94F","#B4860A"],p:{a:74,w:14,m:15}},
+    {h:"@ingliz_bilan",n:"Ingliz tili bilan",d:"Kunlik 5 daqiqalik darslar, IELTS lug'ati va audio mashqlar.",c:"talim",s:97300,k:1102,t:"1 oy oldin",v:true,g:["#5ED3F3","#1E86AC"],p:{a:61,d:3,w:9}},
+    {h:"@dizayn_labi",n:"Dizayn labi",d:"Figma darslari, o'zbekcha tipografika va portfolio tahlili.",c:"dizayn",s:28700,k:640,t:"2 hafta oldin",v:true,g:["#FF7FB6","#C8367C"],p:{a:47,m:7}},
+    {h:"@avtobozor_uz",n:"Avto bozor",d:"Narx monitoringi, e'lonlar va xizmat ko'rsatish maslahatlari.",c:"avto",s:156000,k:3190,t:"3 hafta oldin",v:false,g:["#63E6A8","#1F9A67"],p:{a:33,d:1}},
+    {h:"@oshxona_sirlari",n:"Oshxona sirlari",d:"Har kuni bitta retsept: o'zbek va jahon taomlari, video bilan.",c:"oshxona",s:203000,k:2044,t:"1 oy oldin",v:true,g:["#F58A5B","#C24E1C"],p:{a:25,w:4}},
+    {h:"@kitobxon_klub",n:"Kitobxon klub",d:"Oylik kitob tanlovi, qisqa konspektlar va muhokama.",c:"kitob",s:41200,k:512,t:"2 hafta oldin",v:true,g:["#C9A227","#8A6A06"],p:{a:18,m:2}},
+    {h:"@sayohat_xaritasi",n:"Sayohat xaritasi",d:"O'zbekiston bo'ylab marshrutlar, narxlar va mavsum maslahatlari.",c:"sayohat",s:36900,k:388,t:"1 hafta oldin",v:false,g:["#8FD0FF","#3B86C9"],p:{a:12,w:1}},
+    {h:"@startap_xronika",n:"Startap xronikasi",d:"Mahalliy startaplar, investitsiya yangiliklari va intervyular.",c:"biznes",s:19400,k:221,t:"6 kun oldin",v:true,g:["#A79BFF","#5A49C9"],p:{a:8,y:6}},
+    {h:"@yangilik_24",n:"Yangilik 24",d:"Kuniga uch marta: qisqa, manbasi ko'rsatilgan yangiliklar.",c:"yangilik",s:74500,k:1870,t:"4 kun oldin",v:false,g:["#9AA6AE","#5C676D"],p:{a:5,w:2}},
+    {h:"@freelance_uz",n:"Frilanser jamiyati",d:"Upwork va mahalliy buyurtmalar, shartnoma va to'lov tajribasi.",c:"ish",s:23800,k:404,t:"2 kun oldin",v:true,g:["#F3C94F","#9C7A12"],p:{a:3,m:1}},
+    {h:"@mobilograf_uz",n:"Mobilograf",d:"Telefonda suratga olish va montaj: bir daqiqalik darslar.",c:"dizayn",s:15600,k:96,t:"9 soat oldin",v:false,g:["#FF7FB6","#A82F76"],p:{a:1,d:1}}
+  ];
+
+  // pulsiz katalog (Rung jamoasi seed)
+  var FREE = [
+    {h:"@rung_uz",n:"Rung yangiliklari",d:"Platforma yangiliklari, haftalik top va yopilgan taxtalar.",c:"texnologiya",s:1240,k:58,t:"bugun",v:true,free:"Rung jamoasi",g:["#B8F03C","#4E7A06"]},
+    {h:"@dev_kundalik",n:"Dev kundaligi",d:"Bitta dasturchining kundalik ish jarayoni va xatolari.",c:"texnologiya",s:3870,k:31,t:"5 kun oldin",v:false,free:"Egasi tasdiqlanmagan",g:["#9AA6AE","#4B5458"]}
+  ];
+
+  var PERIODS = [
+    {k:"a",n:"Butun davr",note:"Umumiy taxta — hech qachon yopilmaydi."},
+    {k:"d",n:"Bugun",live:true,note:"Har kuni 00:00 da (Toshkent) yopiladi · <span class='num'>13:24:51</span> qoldi"},
+    {k:"w",n:"Hafta",note:"Dushanba 00:00 da yangilanadi · <span class='num'>4 kun</span> qoldi"},
+    {k:"m",n:"Oy",note:"1-sentabrda yangilandi · <span class='num'>11 kun</span> qoldi"},
+    {k:"y",n:"Yil",note:"2026-yil taxtasi · <span class='num'>102 kun</span> qoldi"},
+    {k:"s",n:"Fasl",note:""} // faol kanali yo'q — ko'rsatilmaydi
+  ];
+
+  var PER_PAGE = 12;
+  var state = {period:"a", cat:"all", q:"", page:1};
+
+  /* ---------- YORDAMCHILAR ---------- */
+  function $(s,r){return (r||document).querySelector(s)}
+  function el(t,cls,html){var e=document.createElement(t); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e}
+  function nf(x){return String(x).replace(/\B(?=(\d{3})+(?!\d))/g," ")}
+  function subs(x){return x>=1000 ? (Math.round(x/100)/10+"").replace(".",",")+" ming" : x}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]})}
+  function initials(n){var p=n.replace(/[^\p{L}\p{N} ]/gu,"").split(" ").filter(Boolean); return ((p[0]||"R")[0]+(p[1]?p[1][0]:"")).toUpperCase()}
+  function board(k){
+    return CH.filter(function(x){return x.p[k]!=null})
+             .slice().sort(function(a,b){return b.p[k]-a.p[k]})
+             .map(function(x,i){return {ch:x, price:x.p[k], rank:i+1}});
+  }
+  function visiblePeriods(){return PERIODS.filter(function(p){return board(p.k).length>0})}
+  function avatar(ch,cls){
+    var a=el("div",(cls||"")+" ava");
+    a.style.background="linear-gradient(140deg,"+ch.g[0]+","+ch.g[1]+")";
+    a.textContent=initials(ch.n);
+    return a;
+  }
+  var ICON_V='<span class="vbadge" title="Egasi tasdiqlangan"><svg viewBox="0 0 24 24"><path d="M12 2.6l2.3 1.7 2.8-.3 1 2.7 2.4 1.5-.9 2.7.9 2.7-2.4 1.5-1 2.7-2.8-.3L12 21.4 9.7 19.7l-2.8.3-1-2.7-2.4-1.5.9-2.7-.9-2.7 2.4-1.5 1-2.7 2.8.3z" opacity=".22"/><path d="M8.6 12.3l2.3 2.3 4.6-4.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--violet-text)"/></svg></span>';
+
+  /* ---------- QATOR ---------- */
+  function rowEl(item, idx){
+    var ch=item.ch, tinted=item.rank<=9;
+    var r=el("div","row"+(tinted?"":" plain"));
+    if(tinted){ r.style.setProperty("--a", ((10-item.rank)/9).toFixed(2)); r.dataset.top=item.rank; }
+    var cat=CATS[ch.c];
+
+    r.appendChild(el("div","rank num", typeof item.rank==="number" ? "#"+item.rank : "—"));
+    r.appendChild(avatar(ch));
+
+    var mid=el("div");
+    var t=el("p","rtitle"); t.innerHTML=esc(ch.n)+(ch.v?ICON_V:"");
+    mid.appendChild(t);
+    mid.appendChild(el("p","rdesc",esc(ch.d)));
+    var meta=el("p","rmeta");
+    meta.innerHTML='<span class="sq" style="--c:'+cat.c+'"></span><b>'+cat.n+'</b>'
+      +'<span class="sep">·</span>'+esc(ch.t)
+      +'<span class="sep">·</span><span class="num">'+esc(ch.h)+'</span>'
+      +'<span class="sep">·</span><span class="num">'+subs(ch.s)+'</span> obunachi'
+      +'<span class="sep">·</span><span class="num">'+nf(ch.k)+'</span> o\'tish'
+      +'<span class="sep">·</span>'+(ch.free
+          ? '<span class="adlabel free'+(ch.free.indexOf("tasdiq")>0?" unclaimed":"")+'">'+esc(ch.free)+'</span>'
+          : '<span class="adlabel">Reklama · <span class="num">'+item.price+' B</span> to\'langan</span>');
+    mid.appendChild(meta);
+    r.appendChild(mid);
+
+    if(!ch.free){
+      r.appendChild(el("div","rprice",'<span class="num">'+item.price+'</span> B'));
+      var pill=el("button","claim-pill",'Bu o\'rinni <span class="num">'+(item.price+1)+' B</span> ga oling');
+      pill.addEventListener("click",function(e){e.stopPropagation(); openClaim(item.rank,item.price+1,ch.h)});
+      r.appendChild(pill);
+      r.addEventListener("click",function(){ if(window.matchMedia("(hover:none)").matches) openClaim(item.rank,item.price+1,ch.h) });
+    }else{
+      r.appendChild(el("div","rprice",'<span style="color:var(--ink-3);font-size:14px">pulsiz</span>'));
+    }
+    return r;
+  }
+
+  function miniEl(item){
+    var m=el("div","mini");
+    m.appendChild(el("div","rank num","#"+item.rank));
+    m.appendChild(avatar(item.ch));
+    m.appendChild(el("div","mini-n",esc(item.ch.n)));
+    m.appendChild(el("div","mini-p",'<span class="num">'+item.price+'</span> B'));
+    return m;
+  }
+
+  /* ---------- BOSH SAHIFANI CHIZISH ---------- */
+  function renderPeriods(){
+    var box=$("#periods"); box.innerHTML="";
+    visiblePeriods().forEach(function(p){
+      var b=el("button","ptab",(p.live?'<span class="dot"></span>':"")+p.n);
+      b.setAttribute("role","tab");
+      b.setAttribute("aria-selected", state.period===p.k ? "true":"false");
+      b.addEventListener("click",function(){state.period=p.k; state.page=1; renderHome()});
+      box.appendChild(b);
+    });
+  }
+
+  function renderCatbar(){
+    var box=$("#catbar"); box.hidden=false; box.innerHTML="";
+    var list=[{k:"all",n:"Hammasi",c:"var(--ink-3)"}].concat(Object.keys(CATS).map(function(k){return {k:k,n:CATS[k].n,c:CATS[k].c}}));
+    list.forEach(function(c){
+      var b=el("button","cpill",'<span class="sq" style="--c:'+c.c+'"></span>'+c.n);
+      b.setAttribute("aria-pressed", state.cat===c.k?"true":"false");
+      b.addEventListener("click",function(){state.cat=(state.cat===c.k?"all":c.k); state.page=1; renderHome()});
+      box.appendChild(b);
+    });
+  }
+
+  function renderHome(){
+    renderPeriods();
+    renderCatbar();
+
+    var p = PERIODS.filter(function(x){return x.k===state.period})[0];
+    $("#periodNote").innerHTML = p.note;
+
+    var all = board(state.period);
+    var top = all[0];
+    var next = top ? top.price+1 : 1;
+    if(!state.heroTouched) state.heroPrice = next;
+    if(state.heroPrice < next) state.heroPrice = next;
+    $("#claimText").textContent = (state.period==="d" ? "Bugungi 1-o'rinni" : "1-o'rinni");
+    $("#heroPrice").textContent = state.heroPrice;
+    $("#heroUzs").textContent = nf(state.heroPrice*1000);
+    $("#minus").disabled = state.heroPrice <= next;
+
+    // filtr
+    var q = state.q.trim().toLowerCase();
+    var filtered = all.filter(function(i){
+      var okc = state.cat==="all" || i.ch.c===state.cat;
+      var okq = !q || (i.ch.n+" "+i.ch.h+" "+i.ch.d).toLowerCase().indexOf(q)>=0;
+      return okc && okq;
+    });
+
+    var list=$("#list"); list.innerHTML="";
+
+    if(!filtered.length){
+      var e=el("div","empty");
+      e.innerHTML='<div class="rungs"><i></i><i></i><i></i></div>'
+        +'<h3>Bu yerda hali hech kim yo\'q</h3>'
+        +'<p>'+(q ? 'Qidiruv bo\'yicha kanal topilmadi.' : (state.cat==="all" ? 'Bu davrda birorta ham faol kanal yo\'q.' : '“'+CATS[state.cat].n+'” bo\'yicha hozircha bo\'sh. Birinchi bo\'lib 1 B ga 1-o\'rinni egallashingiz mumkin.'))+'</p>'
+        +'<button class="btn-primary" id="emptyClaim">1-o\'rinni 1 B ga olish</button>';
+      list.appendChild(e);
+      $("#emptyClaim").addEventListener("click",function(){openClaim(1,1,"")});
+      $("#pager").innerHTML=""; $("#pagerInfo").textContent="";
+    }else{
+      var pages = Math.ceil(filtered.length/PER_PAGE);
+      if(state.page>pages) state.page=1;
+      var start=(state.page-1)*PER_PAGE;
+      var slice=filtered.slice(start,start+PER_PAGE);
+
+      slice.forEach(function(item,i){
+        list.appendChild(rowEl(item,i));
+        if(item.rank===10 && slice.length>i+1){
+          list.appendChild(activityEl());
+          var d=el("div","divider",'<span>TOP 10</span>');
+          list.appendChild(d);
+        }
+      });
+
+      // pulsiz katalog — faqat umumiy taxtada va filtrsiz
+      if(state.period==="a" && state.cat==="all" && !q && state.page===pages){
+        var dv=el("div","divider",'<span>KATALOG · PULSIZ</span>');
+        list.appendChild(dv);
+        FREE.forEach(function(ch,i){ list.appendChild(rowEl({ch:ch,price:0,rank:"—"},i)) });
+      }
+      renderPager(filtered.length,pages);
+    }
+
+    // sidebar: umumiy taxtada bugungini ko'rsatamiz, aks holda umumiyni
+    var sideKey = state.period==="a" ? "d" : "a";
+    var sideBoard = board(sideKey).slice(0,5);
+    $("#sideTitle").innerHTML = (sideKey==="d" ? '<span style="display:inline-flex;align-items:center;gap:7px"><span class="dot"></span>Bugungi reyting</span>' : "Umumiy reyting")
+      + '<a href="#'+(sideKey==="d"?"/kunlik":"/")+'">Hammasi →</a>';
+    var sl=$("#sideList"); sl.innerHTML="";
+    sideBoard.forEach(function(i){sl.appendChild(miniEl(i))});
+  }
+
+  function activityEl(){
+    var wrap=el("section","activity");
+    wrap.innerHTML='<h2><span class="dot"></span>So\'nggi harakatlar</h2>';
+    var acts=el("div","acts");
+    [[13,"#14",1,"9 soat oldin"],[6,"#7",33,"11 soat oldin"],[12,"#12",5,"1 kun oldin"],[10,"#10",12,"1 kun oldin"],[8,"#8",25,"2 kun oldin"]]
+    .forEach(function(a){
+      var ch=CH[a[0]-1]; var c=el("div","act");
+      c.appendChild(avatar(ch));
+      var b=el("div");
+      b.appendChild(el("p","act-n",esc(ch.n)));
+      b.appendChild(el("p","act-m",a[1]+" · "+a[2]+" B · "+a[3]));
+      c.appendChild(b); acts.appendChild(c);
+    });
+    wrap.appendChild(acts);
+    return wrap;
+  }
+
+  function renderPager(total,pages){
+    var box=$("#pager"); box.innerHTML="";
+    function pbtn(label,pg,dis,cur){
+      var b=el("button","pg",label); b.disabled=!!dis;
+      if(cur)b.setAttribute("aria-current","true");
+      b.addEventListener("click",function(){state.page=pg; renderHome(); window.scrollTo({top:0,behavior:"smooth"})});
+      return b;
+    }
+    box.appendChild(pbtn("‹",state.page-1,state.page===1));
+    for(var i=1;i<=pages;i++) box.appendChild(pbtn(String(i),i,false,i===state.page));
+    box.appendChild(pbtn("›",state.page+1,state.page===pages));
+    var from=(state.page-1)*PER_PAGE+1, to=Math.min(total,state.page*PER_PAGE);
+    $("#pagerInfo").textContent = from+"–"+to+" / jami "+total+" kanal";
+  }
+
+  /* ---------- KUNLIK ---------- */
+  function renderDaily(){
+    var box=$("#dayCards"); box.innerHTML="";
+    var days=[
+      {t:"Bugun · 20-sentabr",live:true,n:5,k:"d",note:"Yarim tunda yopiladi, keyin natija qotadi."},
+      {t:"19-sentabr, payshanba",n:7,k:"w",note:"Yopilgan · 1-o'rin 9 B da yakunlandi."},
+      {t:"18-sentabr, chorshanba",n:4,k:"y",note:"Yopilgan · o'sha kuni 3 ta yangi kanal qo'shildi."}
+    ];
+    days.forEach(function(d){
+      var c=el("div","day"+(d.live?" live":""));
+      var h=el("div","day-h");
+      h.innerHTML='<h3>'+d.t+'</h3>'
+        +(d.live?'<span class="tag on"><span class="dot"></span>Jonli · <span class="num">13:24:51</span> qoldi</span>':'<span class="tag">Yopilgan</span>')
+        +'<span class="tag"><span class="num">'+d.n+'</span> kanal</span>';
+      c.appendChild(h);
+      c.appendChild(el("p",null,'<span style="color:var(--ink-2);font-size:13.5px">'+d.note+'</span>'));
+      var rows=el("div","day-rows");
+      board(d.k).slice(0,3).forEach(function(i){rows.appendChild(miniEl(i))});
+      c.appendChild(rows);
+      var a=el("div","day-acts");
+      if(d.live){
+        var b1=el("button","btn-primary","O'rin olish");
+        b1.style.minHeight="42px"; b1.style.fontSize="14px";
+        b1.addEventListener("click",function(){var t=board("d")[0]; openClaim(1,(t?t.price:0)+1,"")});
+        a.appendChild(b1);
+      }
+      var b2=el("button","btn-ghost","Barcha o'rinlar"); b2.style.fontSize="14px";
+      b2.addEventListener("click",function(){location.hash="#/"});
+      a.appendChild(b2);
+      c.appendChild(a);
+      box.appendChild(c);
+    });
+  }
+
+  /* ---------- KATEGORIYALAR ---------- */
+  function renderCats(){
+    var counts={};
+    CH.forEach(function(x){counts[x.c]=(counts[x.c]||0)+1});
+    var keys=Object.keys(CATS).sort(function(a,b){return (counts[b]||0)-(counts[a]||0)});
+
+    var hot=$("#hotCats"); hot.innerHTML="";
+    keys.slice(0,3).forEach(function(k,i){
+      var lead=board("a").filter(function(x){return x.ch.c===k})[0];
+      var c=el("div","hotcard"+(i===0?" first":""));
+      c.innerHTML='<div class="lab">'+(i===0?"ENG QIZG'IN · #1":"#"+(i+1))+'</div>'
+        +'<h3>'+CATS[k].n+'</h3>'
+        +'<div class="cnt num" style="color:var(--ink-3);font-size:12.5px">'+(counts[k]||0)+' kanal · oxirgi bid 4 soat oldin</div>';
+      if(lead){var m=miniEl(lead); m.style.marginTop="10px"; c.appendChild(m)}
+      hot.appendChild(c);
+    });
+
+    var grid=$("#catGrid"); grid.innerHTML="";
+    keys.forEach(function(k){
+      var items=board("a").filter(function(x){return x.ch.c===k}).slice(0,3);
+      var c=el("div","catcard");
+      c.innerHTML='<h3><span class="sq" style="--c:'+CATS[k].c+'"></span>'+CATS[k].n+'</h3>'
+        +'<p class="cnt">'+(items.length?items.length+" kanal":"hali bo'sh")+'</p>';
+      if(items.length){ items.forEach(function(i){c.appendChild(miniEl(i))}) }
+      else{
+        var b=el("button","btn-ghost","1 B ga birinchi bo'ling");
+        b.style.width="100%"; b.style.fontSize="13.5px"; b.style.minHeight="40px";
+        b.addEventListener("click",function(){openClaim(1,1,"")});
+        c.appendChild(b);
+      }
+      grid.appendChild(c);
+    });
+  }
+
+  /* ---------- KANAL QO'SHISH ---------- */
+  function renderAdd(){
+    var sel=$("#aCat");
+    if(!sel.options.length){
+      sel.innerHTML='<option value="">Kategoriyani tanlang</option>'
+        +Object.keys(CATS).map(function(k){return '<option value="'+k+'">'+CATS[k].n+'</option>'}).join("");
+      ["#aHandle","#aName","#aDesc"].forEach(function(id){$(id).addEventListener("input",drawPreview)});
+      sel.addEventListener("change",drawPreview);
+      $("#aGo").addEventListener("click",function(){
+        var box=$("#aPreview");
+        box.innerHTML='<div class="done" style="padding-top:4px">'
+          +'<div class="tick"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg></div>'
+          +'<h3>Kanal yuborildi</h3>'
+          +'<p>Endi <span class="num">RUNG-4F2A</span> kodini kanalga joylang — bot uni ko\'rgach, egalik tasdiqlanadi.</p>'
+          +'<button class="btn-ghost" id="aBack" style="width:100%">Reytingga qaytish</button></div>';
+        $("#aBack").addEventListener("click",function(){location.hash="#/"});
+      });
+    }
+    drawPreview();
+  }
+  function drawPreview(){
+    var box=$("#aPreview"); if(!box) return;
+    var name=$("#aName").value.trim()||"Kanalingiz nomi";
+    var ch={
+      h:$("#aHandle").value.trim()||"@kanal",
+      n:name,
+      d:$("#aDesc").value.trim()||"Bir qatorli tavsif shu yerda ko'rinadi.",
+      c:$("#aCat").value||"texnologiya",
+      s:0,k:0,t:"hozir",v:false,free:"Egasi tasdiqlanmagan",
+      g:[CATS[$("#aCat").value||"texnologiya"].c,"#3A4147"]
+    };
+    box.innerHTML="";
+    var r=rowEl({ch:ch,price:0,rank:"—"},0);
+    r.style.pointerEvents="none";
+    box.appendChild(r);
+  }
+
+  /* ---------- CLAIM / CHECKOUT ---------- */
+  var claim={rank:1,price:1,min:1,handle:"",pay:"stars"};
+  function openClaim(rank,price,handle){
+    claim={rank:rank,price:price,min:price,handle:handle||"",pay:"stars"};
+    drawSheet(); $("#modal").hidden=false; document.body.style.overflow="hidden";
+    setTimeout(function(){var i=$("#mHandle"); if(i&&!claim.handle)i.focus()},40);
+  }
+  function closeClaim(){$("#modal").hidden=true; document.body.style.overflow=""}
+
+  function drawSheet(){
+    var wallet=24, need=Math.max(0,claim.price-wallet);
+    var s=$("#sheet");
+    s.innerHTML=
+      '<div class="sheet-h">'
+      +'<div><h2 id="sheetTitle">'+(claim.rank==="—"?"O'rin olish":claim.rank+"-o'rinni olish")+'</h2>'
+      +'<p>To\'lov tasdiqlangach o\'rin darhol ochiladi.</p></div>'
+      +'<button class="icon-btn" id="mClose" aria-label="Yopish"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>'
+      +'</div>'
+      +'<div class="sheet-b">'
+      +'<div><p class="lbl">Kanal</p><input class="inp" id="mHandle" placeholder="@kanal yoki t.me havolasi" value="'+esc(claim.handle)+'"></div>'
+      +'<div><p class="lbl">Narx</p><div class="pricebox">'
+        +'<button class="step" id="mMinus" aria-label="Kamaytirish">−</button>'
+        +'<div style="text-align:center"><div class="v"><span class="num">'+claim.price+'</span> B</div>'
+        +'<div style="font-size:12px;color:var(--ink-3)">≈ <span class="num">'+nf(claim.price*1000)+'</span> so\'m</div></div>'
+        +'<button class="step" id="mPlus" aria-label="Oshirish">+</button>'
+      +'</div></div>'
+      +'<div class="breakdown">'
+        +'<div class="li"><span>Bu o\'rindagi kanal to\'lagan</span><b>'+(claim.min-1)+' B</b></div>'
+        +'<div class="li"><span>Ustiga eng kam qadam</span><b>+1 B</b></div>'
+        +'<div class="li"><span>Hamyon balansi</span><b>'+wallet+' B</b></div>'
+        +'<div class="li total"><span>To\'lash kerak</span><b>'+(need>0?need+" B":"0 B — balansdan yechiladi")+'</b></div>'
+      +'</div>'
+      +(need>0
+        ? '<div><p class="lbl">To\'lov usuli</p><div class="pay">'
+          +'<button class="payopt" data-pay="stars" aria-pressed="'+(claim.pay==="stars")+'"><b>Telegram Stars</b><span>botda, bir zumda</span></button>'
+          +'<button class="payopt" data-pay="paynet" aria-pressed="'+(claim.pay==="paynet")+'"><b>Paynet (so\'m)</b><span>faqat saytda, qo\'lda tasdiq</span></button>'
+          +'</div></div>'
+        : '')
+      +'<div class="notice"><span>⌁</span><span>Bu o\'rin <b>“Reklama · '+claim.price+' B to\'langan”</b> deb belgilanadi. Kanal egaligi tasdiqlanmagan bo\'lsa, to\'lov tasdiqdan keyin amalga oshadi.</span></div>'
+      +'<button class="btn-primary" id="mGo" style="width:100%">'+(need>0?"To\'lash va o\'rinni olish":"O\'rinni olish")+'</button>'
+      +'<p style="margin:0;text-align:center;font-size:12px;color:var(--ink-3)">To\'lov qaytarilmaydi · <a href="#/qoidalar" style="color:var(--lime-text)">qoidalar</a></p>'
+      +'</div>';
+
+    $("#mClose").addEventListener("click",closeClaim);
+    $("#mMinus").disabled = claim.price<=claim.min;
+    $("#mMinus").addEventListener("click",function(){if(claim.price>claim.min){claim.price--;drawSheet()}});
+    $("#mPlus").addEventListener("click",function(){claim.price++;drawSheet()});
+    Array.prototype.forEach.call(s.querySelectorAll(".payopt"),function(b){
+      b.addEventListener("click",function(){claim.pay=b.dataset.pay; drawSheet()});
+    });
+    $("#mGo").addEventListener("click",function(){
+      claim.handle=$("#mHandle").value||claim.handle;
+      s.innerHTML='<div class="sheet-b"><div class="done">'
+        +'<div class="tick"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg></div>'
+        +'<h3>'+(claim.rank==="—"?"So'rov qabul qilindi":claim.rank+"-o'rin siznikida")+'</h3>'
+        +'<p>'+(claim.pay==="paynet"
+            ? 'Paynet kodi botga yuborildi. To\'lov cheki tekshirilgach, o\'rin ochiladi (odatda 10 daqiqa ichida).'
+            : 'Telegram Stars hisobingizdan yechildi va '+claim.price+' B kirim qilindi.')+'</p>'
+        +'<button class="btn-primary" id="mDone" style="width:100%">Reytingga qaytish</button>'
+        +'</div></div>';
+      $("#mDone").addEventListener("click",closeClaim);
+    });
+  }
+
+  /* ---------- ROUTER ---------- */
+  var PAGES=["/","/kunlik","/kategoriyalar","/qoshish","/haqida","/qoidalar","/kirish"];
+  function route(){
+    var h=(location.hash||"#/").slice(1);
+    if(PAGES.indexOf(h)<0) h="/";
+    ["home","kunlik","kategoriyalar","qoshish","haqida","qoidalar","kirish"].forEach(function(id){
+      var sec=document.getElementById("page-"+id);
+      if(sec) sec.hidden = !( (h==="/"&&id==="home") || h==="/"+id );
+    });
+    $("#catbar").hidden = h!=="/";
+    if(h!=="/") $("#searchRow").hidden = true;
+    Array.prototype.forEach.call(document.querySelectorAll(".rung"),function(b){
+      if(b.dataset.go===h) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
+    });
+    if(h==="/") renderHome();
+    if(h==="/kunlik") renderDaily();
+    if(h==="/kategoriyalar") renderCats();
+    if(h==="/qoshish") renderAdd();
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange",route);
+  Array.prototype.forEach.call(document.querySelectorAll(".rung"),function(b){
+    b.addEventListener("click",function(){location.hash="#"+b.dataset.go});
+  });
+
+  /* ---------- TOPBAR HARAKATLARI ---------- */
+  function applyTheme(t){
+    if(t) document.documentElement.setAttribute("data-theme",t);
+    try{ localStorage.setItem("rung-theme", t) }catch(e){}
+  }
+  try{
+    var saved=localStorage.getItem("rung-theme");
+    if(saved) document.documentElement.setAttribute("data-theme",saved);
+  }catch(e){}
+  $("#themeBtn").addEventListener("click",function(){
+    var cur=document.documentElement.getAttribute("data-theme");
+    if(!cur) cur = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    applyTheme(cur==="dark"?"light":"dark");
+  });
+  $("#phoneBtn").addEventListener("click",function(){document.body.classList.toggle("phone-mode")});
+  $("#searchBtn").addEventListener("click",function(){
+    if(location.hash!=="#/") location.hash="#/";
+    var row=$("#searchRow");
+    row.hidden=!row.hidden;
+    if(!row.hidden){ $("#searchInput").focus() }
+    else { state.q=""; $("#searchInput").value=""; state.page=1; renderHome() }
+  });
+  $("#searchInput").addEventListener("input",function(){
+    state.q=this.value; state.page=1; renderHome();
+  });
+  $("#minus").addEventListener("click",function(){state.heroTouched=true; state.heroPrice--; renderHome()});
+  $("#plus").addEventListener("click",function(){state.heroTouched=true; state.heroPrice++; renderHome()});
+  $("#heroClaim").addEventListener("click",function(){
+    var top=board(state.period)[0];
+    openClaim(1, state.heroPrice, $("#heroHandle").value);
+    claim.min = top ? top.price+1 : 1; drawSheet();
+  });
+  $("#topupBtn").addEventListener("click",function(){openClaim("—",5,"")});
+  $("#modal").addEventListener("click",function(e){if(e.target===this) closeClaim()});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#modal").hidden) closeClaim()});
+
+  // kategoriya select
+  var sel=$("#heroCat");
+  sel.innerHTML='<option value="">Kategoriyani tanlang</option>'+Object.keys(CATS).map(function(k){return '<option value="'+k+'">'+CATS[k].n+'</option>'}).join("");
+
+  route();
+})();
+</script>
