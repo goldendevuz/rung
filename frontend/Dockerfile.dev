@@ -2,11 +2,12 @@
 FROM node:20-alpine
 
 WORKDIR /app
-RUN npm install -g pnpm
 
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install 2>/dev/null || pnpm install
+# Install packages with npm (avoids pnpm 9+ ERR_PNPM_IGNORED_BUILDS for esbuild)
+COPY package.json ./
+RUN npm install
 
 COPY . .
 EXPOSE 5173
-CMD ["pnpm", "dev", "--host", "0.0.0.0"]
+# Use npm run dev — vite.config.ts already sets host:true and port:5173
+CMD ["npm", "run", "dev"]

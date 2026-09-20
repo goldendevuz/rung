@@ -32,5 +32,12 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.40",
     "@playwright/test": "^1.46.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "better-sqlite3",
+      "canvas"
+    ]
   }
 }
