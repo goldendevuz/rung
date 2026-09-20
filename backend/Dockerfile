@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir uv
 
 COPY pyproject.toml ./
-RUN uv pip install --system --no-cache -r pyproject.toml
+RUN uv pip install --system --no-cache -r pyproject.toml && \
+    uv pip install --system --no-cache pytest pytest-asyncio httpx mypy ruff
 
 COPY . .
 

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { fetchPublicStats } from '../api/client';
 
 export function Topbar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -16,8 +18,12 @@ export function Topbar() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // TODO: Use real API data for stats
-  const showLiveStats = import.meta.env.VITE_SHOW_LIVE_STATS === 'true'; 
+  const { data: stats } = useQuery({
+    queryKey: ['stats'],
+    queryFn: fetchPublicStats
+  });
+
+  const showLiveStats = import.meta.env.VITE_SHOW_LIVE_STATS === 'true' && stats?.online_now != null;
 
   return (
     <header className="topbar">
@@ -30,8 +36,8 @@ export function Topbar() {
           {showLiveStats && (
             <span className="live">
               <span className="dot" />
-              <b className="num">37</b> onlayn{' '}
-              <span className="hide-xs">· bugun <b className="num">2 145</b> tashrif · statistika →</span>
+              <b className="num">{stats.online_now || 0}</b> onlayn{' '}
+              <span className="hide-xs">· bugun <b className="num">{new Intl.NumberFormat('ru-RU').format(stats.visits_today || 0).replace(',', ' ')}</b> tashrif · statistika →</span>
             </span>
           )}
           <nav className="topnav">

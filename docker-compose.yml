@@ -137,7 +137,10 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+    volumes:
+      - ./backend:/app
     profiles: [dev]
+
     healthcheck:
       test: ["CMD", "python", "-c",
         "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]

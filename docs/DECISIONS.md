@@ -41,3 +41,11 @@ check that verifies the config is loadable and the server is in a working state.
 ### D009: Postgres and Redis dev ports bound to 127.0.0.1 only
 Publishing on 0.0.0.0 exposes dev DB/cache to the local network. Changed to
 127.0.0.1:5432:5432 and 127.0.0.1:6379:6379 per security requirement.
+
+## 2026-09-20 — S1
+
+### D010: Topbar logic moves to real API endpoints
+Topbar statistics and totals are fetched from /api/v1/stats/public. Hardcoded dummy data is replaced by TanStack Query calls fetching live metrics from the backend.
+
+### D011: S1 testing strategy uses shared session event_loop
+Because SQLAlchemy syncio engines attach to the event loop on first initialization, the pytest test suite for S1 is grouped into a single test or configured with a session-scoped event_loop fixture to avoid " Future attached to a different loop\
