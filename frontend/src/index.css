@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 /* ============ TOKENS — qorong'i (asosiy identifikatsiya) ============ */
+:root {
   color-scheme: dark;
   --bg:#0D0F11; --bg-2:#101316; --surface:#16191D; --surface-2:#1C2026;
   --line:#262B31; --line-soft:#1E2329;

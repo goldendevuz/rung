@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchPublicStats } from '../api/client';
 import { nf } from '../utils/formatters';

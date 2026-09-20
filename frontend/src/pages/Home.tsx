@@ -24,7 +24,7 @@ const PERIOD_NOTES: Record<string, string> = {
 export function Home() {
   const [period, setPeriod] = useState<string>('all_time');
   const [cat, setCat] = useState<string>('all');
-  const [search, setSearch] = useState<string>('');
+  const [search] = useState<string>('');
   const [page, setPage] = useState<number>(1);
 
   const { data: tabs = [] } = useQuery({

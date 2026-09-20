@@ -45,3 +45,12 @@ shots:
 		  npm install @playwright/test@$(PW_VER) --no-package-lock -q && \
 		  cp /tmp/shots.js . && node shots.js"
 	@echo "Saved: $(SHOTS_DIR)/desktop-1440x900.png, $(SHOTS_DIR)/mobile-390x844.png"
+
+smoke:
+	docker run --rm --network host \
+		-v $(PWD)/deploy/shots/smoke.js:/tmp/smoke.js:ro \
+		mcr.microsoft.com/playwright:v$(PW_VER)-jammy \
+		bash -c "mkdir -p /tmp/pw && cd /tmp/pw && \
+		  npm init -y -q 2>/dev/null && \
+		  npm install @playwright/test@$(PW_VER) --no-package-lock -q && \
+		  cp /tmp/smoke.js . && node smoke.js"
