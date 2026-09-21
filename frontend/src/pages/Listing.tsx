@@ -1,21 +1,13 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { fetchListing } from '../api/client';
 
 export const Listing = () => {
   const { slug } = useParams<{ slug: string }>();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['listing', slug],
-    queryFn: async () => {
-      const res = await fetch(`/api/v1/listings/${slug}`);
-      if (!res.ok) {
-        if (res.status === 404) {
-          throw new Error('Not Found');
-        }
-        throw new Error('Server Error');
-      }
-      return res.json();
-    },
+    queryFn: () => fetchListing(slug!),
     retry: false,
   });
 
@@ -50,14 +42,14 @@ export const Listing = () => {
           <h1>{data.name}</h1>
           <p className="rdesc">{data.description}</p>
           <div className="rmeta" style={{ marginTop: '14px' }}>
-            <span className="sq" style={{ background: data.category?.color || 'var(--ink-3)' }}></span>
-            <b>{data.category?.name_uz || 'Kategoriya'}</b>
+            <span className="sq" style={{ background: data.category?.color || data.category_color || 'var(--ink-3)' }}></span>
+            <b>{data.category?.name_uz || data.category_slug || 'Kategoriya'}</b>
             <span className="sep">·</span>
             {data.subscribers?.toLocaleString('ru-RU')} obunachi
           </div>
           <br />
           <a
-            href={data.url}
+            href={data.url || `https://t.me/${data.handle?.replace('@', '') || slug}`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"

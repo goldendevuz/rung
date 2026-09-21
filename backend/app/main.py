@@ -86,6 +86,28 @@ async def demo_mode_middleware(request: Request, call_next):
             category = request.query_params.get("category")
             q = request.query_params.get("q")
             return JSONResponse(content=get_demo_board_current(period_type, page, category, q))
+        elif path.startswith("/api/v1/listings/"):
+            slug = path.split("/")[-1]
+            if slug == "kodlash_uz":
+                return JSONResponse(content={
+                    "slug": "kodlash_uz",
+                    "handle": "@kodlash_uz",
+                    "name": "Kodlash.uz",
+                    "description": "O'zbekistondagi eng yirik dasturlash kanali. Bizning kanalda siz dasturlash sirlarini organishingiz, python, javascript, va boshqa dasturlash tillari boyicha darslarni kuzatib borishingiz mumkin. Har kuni yangi malumotlar va qiziqarli maqolalar chop etiladi. Shuningdek, bizning obunachilarimiz orasida tajribali mutaxassislar ham mavjud bo'lib, ular sizga maslahatlar berishadi. Bu O'zbekistonning eng katta IT hamjamiyati bo'lib, bu yerda o'rganish, ishlash va rivojlanish uchun barcha imkoniyatlar mavjud. Biz bilan birga bo'ling va o'z bilimingizni oshiring!",
+                    "category_slug": "dasturlash",
+                    "category_color": "#2563EB",
+                    "subscribers": 84200,
+                    "verified": True,
+                    "claimed": True,
+                    "free_label": None,
+                    "gradient_start": "#2563EB",
+                    "gradient_end": "#1E3A8A",
+                    "clickthroughs": 1289,
+                    "created_at": "2026-05-24T08:08:05.033794Z",
+                    "status": "active"
+                })
+            elif slug == "yoq-bunday-kanal":
+                return JSONResponse(status_code=404, content={"detail": "Not Found"})
         elif path.startswith("/api/v1/boards/") and path.endswith("/quote"):
             # Mock quote for demo
             board_id = int(path.split("/")[-2])

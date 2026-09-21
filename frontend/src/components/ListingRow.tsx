@@ -61,7 +61,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
           <span className="sep">·</span>
           {ch.t} {/* Time added */}
           <span className="sep">·</span>
-          <span className="num">{ch.h}</span>
+          
           <span className="sep">·</span>
           <span className="num">{subs(ch.s)}</span> obunachi
           <span className="sep">·</span>
