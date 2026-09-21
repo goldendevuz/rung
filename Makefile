@@ -4,8 +4,11 @@ COMPOSE  = docker compose
 PW_VER   = 1.46.0
 SHOTS_DIR = docs/screenshots/s1
 
-up:
+up: pick-ports
 	$(COMPOSE) --profile dev up -d --build
+
+pick-ports:
+	@bash scripts/pick-ports.sh
 
 down:
 	$(COMPOSE) --profile dev --profile prod --profile tunnel down
@@ -25,8 +28,13 @@ test:
 lint:
 	$(COMPOSE) exec backend ruff check . && mypy app
 
-prod-up:
+prod-up: check-demo
 	$(COMPOSE) --profile prod up -d --build
+
+check-demo:
+	@if grep -q 'ENV=prod' .env && grep -q 'PUBLIC_BASE_URL=https://rung.uz' .env && grep -q 'SHOW_DEMO_BUTTON=true' .env; then \
+		echo "ERROR: Demo button is enabled on final production URL (rung.uz). Remove SHOW_DEMO_BUTTON=true."; exit 1; \
+	fi
 
 shell-backend:
 	$(COMPOSE) exec backend bash

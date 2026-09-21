@@ -43,6 +43,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    mem_limit: 256m
+    memswap_limit: 256m
+    command: postgres -c shared_buffers=64MB -c max_connections=20
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -75,6 +78,9 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+    mem_limit: 64m
+    memswap_limit: 64m
+    command: redis-server --maxmemory 48mb --maxmemory-policy noeviction
   migrate:
     build:
       context: ./backend
@@ -194,6 +200,8 @@ services:
       FLOOR_B: ${FLOOR_B:-1}
       MIN_STEP_B: ${MIN_STEP_B:-1}
       ENABLED_LISTING_KINDS: ${ENABLED_LISTING_KINDS:-channel}
+      WORKERS: '1'
+      WEB_CONCURRENCY: '1'
     depends_on:
       migrate_prod:
         condition: service_completed_successfully
@@ -211,6 +219,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    mem_limit: 256m
+    memswap_limit: 256m
   worker:
     build: &id001
       context: ./backend
@@ -331,11 +341,8 @@ services:
       retries: 5
       start_period: 10s
   caddy:
-    image: caddy:2-alpine
     restart: unless-stopped
     volumes:
-    - ./deploy/caddy/prod/Caddyfile:/etc/caddy/Caddyfile:ro
-    - ./frontend/dist:/srv/www:ro
     - caddy_data:/data
     - caddy_config:/config
     depends_on:
@@ -345,14 +352,17 @@ services:
     - prod
     healthcheck:
       test:
-      - CMD
-      - wget
-      - -qO-
-      - http://localhost:2019/config/
+      - CMD-SHELL
+      - wget -qO- http://127.0.0.1:80/healthz || exit 1
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 10s
+    mem_limit: 64m
+    memswap_limit: 64m
+    build:
+      context: .
+      dockerfile: deploy/caddy/prod/Dockerfile
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run
@@ -364,6 +374,8 @@ services:
     profiles:
     - tunnel
     - prod
+    mem_limit: 64m
+    memswap_limit: 64m
   worker_prod:
     build: *id001
     command: *id002
@@ -377,6 +389,8 @@ services:
     profiles:
     - prod
     healthcheck: *id004
+    mem_limit: 192m
+    memswap_limit: 192m
   bot_prod:
     build: *id005
     restart: unless-stopped
@@ -384,6 +398,8 @@ services:
     profiles:
     - prod
     healthcheck: *id007
+    mem_limit: 256m
+    memswap_limit: 256m
 volumes:
   postgres_data: null
   redis_data: null

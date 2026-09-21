@@ -24,8 +24,26 @@ export function Topbar() {
   });
 
   const showLiveStats = import.meta.env.VITE_SHOW_LIVE_STATS === 'true' && stats?.online_now != null;
+  const showDemoBtn = import.meta.env.VITE_SHOW_DEMO_BUTTON === 'true';
+  const isDemo = typeof window !== 'undefined' && localStorage.getItem('rung_demo') === '1';
+
+  const enableDemo = () => {
+    localStorage.setItem('rung_demo', '1');
+    window.location.reload();
+  };
+  const disableDemo = () => {
+    localStorage.removeItem('rung_demo');
+    window.location.reload();
+  };
 
   return (
+    <>
+    {isDemo && (
+      <div style={{ background: '#f59e0b', color: '#000', padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+        Demo ma'lumotlar, haqiqiy emas
+        <button onClick={disableDemo} style={{ marginLeft: '16px', padding: '4px 8px', border: '1px solid #000', borderRadius: '4px', background: 'transparent', cursor: 'pointer', fontWeight: 'bold' }}>Chiqish</button>
+      </div>
+    )}
     <header className="topbar">
       <div className="wrap">
         <div className="topbar-in">
@@ -51,6 +69,9 @@ export function Topbar() {
             <button className="icon-btn" onClick={toggleTheme} aria-label="Mavzuni almashtirish">
               <svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" /></svg>
             </button>
+            {showDemoBtn && !isDemo && (
+              <button onClick={enableDemo} style={{ padding: '4px 12px', background: '#f59e0b', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Demo</button>
+            )}
             <Link to="/kirish"><button className="btn-login">Kirish</button></Link>
           </nav>
         </div>
@@ -65,5 +86,6 @@ export function Topbar() {
         {/* Category bar will be rendered conditionally in the Category page or Search */}
       </div>
     </header>
+    </>
   );
 }

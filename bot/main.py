@@ -21,7 +21,11 @@ async def main() -> None:
         format='%(asctime)s %(levelname)s %(name)s %(message)s',
     )
 
-    bot_token = os.getenv('BOT_TOKEN', '').strip()
+    env = os.getenv('ENV', 'dev')
+    if env == 'dev':
+        bot_token = os.getenv('BOT_TOKEN_DEV', os.getenv('BOT_TOKEN', '')).strip()
+    else:
+        bot_token = os.getenv('BOT_TOKEN', '').strip()
 
     if not bot_token:
         logger.warning('BOT_TOKEN is not set - bot idle')

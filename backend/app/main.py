@@ -4,11 +4,19 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.api.v1.router import router as api_v1_router
+from app.demo.fixtures import (
+    get_demo_categories,
+    get_demo_stats,
+    get_demo_tabs,
+    get_demo_board_current,
+    get_demo_daily_history,
+)
 
 settings = get_settings()
 
@@ -50,6 +58,31 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+@app.middleware("http")
+async def demo_mode_middleware(request: Request, call_next):
+    if request.headers.get("x-rung-demo") == "1":
+        if request.method not in ["GET", "OPTIONS"]:
+            return JSONResponse(status_code=403, content={"detail": "Demo rejimida ruxsat etilmagan"})
+            
+        path = request.url.path
+        if path == "/api/v1/categories":
+            return JSONResponse(content=get_demo_categories())
+        elif path == "/api/v1/stats/public":
+            return JSONResponse(content=get_demo_stats())
+        elif path == "/api/v1/boards/tabs":
+            return JSONResponse(content=get_demo_tabs())
+        elif path == "/api/v1/boards/daily/history":
+            return JSONResponse(content=get_demo_daily_history())
+        elif path.startswith("/api/v1/boards/") and path.endswith("/current"):
+            period_type = path.split("/")[-2]
+            page = int(request.query_params.get("page", 1))
+            category = request.query_params.get("category")
+            q = request.query_params.get("q")
+            return JSONResponse(content=get_demo_board_current(period_type, page, category, q))
+            
+    response = await call_next(request)
+    return response
 
 
 @app.get('/healthz', tags=['health'])
