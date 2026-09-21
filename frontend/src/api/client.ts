@@ -9,7 +9,7 @@ function getHeaders() {
 }
 
 export async function fetchTabs() {
-  const res = await fetch(\/boards/tabs\, { headers: getHeaders() });
+  const res = await fetch(`${API_BASE}/boards/tabs`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch tabs');
   return res.json();
 }
@@ -19,7 +19,7 @@ export async function fetchBoard(periodType: string, page: number = 1, category?
   if (category) params.set('category', category);
   if (q) params.set('q', q);
   
-  const res = await fetch(\/boards/\/current?\, { headers: getHeaders() });
+  const res = await fetch(`${API_BASE}/boards/${periodType}/current?${params.toString()}`, { headers: getHeaders() });
   if (!res.ok) {
     if (res.status === 404) return null;
     throw new Error('Failed to fetch board');
@@ -28,25 +28,25 @@ export async function fetchBoard(periodType: string, page: number = 1, category?
 }
 
 export async function fetchCategories() {
-  const res = await fetch(\/categories\, { headers: getHeaders() });
+  const res = await fetch(`${API_BASE}/categories`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch categories');
   return res.json();
 }
 
 export async function fetchPublicStats() {
-  const res = await fetch(\/stats/public\, { headers: getHeaders() });
+  const res = await fetch(`${API_BASE}/stats/public`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch stats');
   return res.json();
 }
 
 export async function fetchQuote(boardId: number, targetRank: number) {
-  const res = await fetch(\/boards/\/quote?target_rank=\, { headers: getHeaders() });
+  const res = await fetch(`${API_BASE}/boards/${boardId}/quote?target_rank=${targetRank}`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch quote');
   return res.json();
 }
 
 export async function fetchPublicConfig() {
-  const res = await fetch(\/public-config\);
+  const res = await fetch(`${API_BASE}/public-config`);
   if (!res.ok) throw new Error('Failed to fetch public config');
   return res.json() as Promise<{
     show_demo_button: boolean;
@@ -58,7 +58,7 @@ export async function fetchPublicConfig() {
 }
 
 export async function fetchListing(slug: string) {
-  const res = await fetch(\/listings/\, { headers: getHeaders() });
+  const res = await fetch(`${API_BASE}/listings/${slug}`, { headers: getHeaders() });
   if (!res.ok) {
     if (res.status === 404) throw new Error('Not Found');
     throw new Error('Server Error');
