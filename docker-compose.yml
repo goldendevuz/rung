@@ -140,14 +140,17 @@ services:
       WEBAPP_URL: ${WEBAPP_URL:-http://localhost}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
       SHOW_PAYMENT_DETAILS: ${SHOW_PAYMENT_DETAILS:-false}
-      STARS_ENABLED: ${STARS_ENABLED:-true}
-      PAYNET_ENABLED: ${PAYNET_ENABLED:-true}
+      STARS_ENABLED: ${STARS_ENABLED:-false}
+      PAYNET_ENABLED: ${PAYNET_ENABLED:-false}
       SEED_DEMO: ${SEED_DEMO:-false}
       B_UNIT_UZS: ${B_UNIT_UZS:-1000}
       STARS_UNITS_PER_STAR: ${STARS_UNITS_PER_STAR:-200}
       FLOOR_B: ${FLOOR_B:-1}
       MIN_STEP_B: ${MIN_STEP_B:-1}
       ENABLED_LISTING_KINDS: ${ENABLED_LISTING_KINDS:-channel}
+      GOOGLE_AUTH_ENABLED: ${GOOGLE_AUTH_ENABLED:-false}
+      SHOW_DEMO_BUTTON: ${SHOW_DEMO_BUTTON:-false}
+      PAYMENT_PROVIDER_TEXT: ${PAYMENT_PROVIDER_TEXT:-to'lov tez orada}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -192,8 +195,8 @@ services:
       WEBAPP_URL: ${WEBAPP_URL:-http://localhost}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
       SHOW_PAYMENT_DETAILS: ${SHOW_PAYMENT_DETAILS:-false}
-      STARS_ENABLED: ${STARS_ENABLED:-true}
-      PAYNET_ENABLED: ${PAYNET_ENABLED:-true}
+      STARS_ENABLED: ${STARS_ENABLED:-false}
+      PAYNET_ENABLED: ${PAYNET_ENABLED:-false}
       SEED_DEMO: ${SEED_DEMO:-false}
       B_UNIT_UZS: ${B_UNIT_UZS:-1000}
       STARS_UNITS_PER_STAR: ${STARS_UNITS_PER_STAR:-200}
@@ -202,6 +205,9 @@ services:
       ENABLED_LISTING_KINDS: ${ENABLED_LISTING_KINDS:-channel}
       WORKERS: '1'
       WEB_CONCURRENCY: '1'
+      GOOGLE_AUTH_ENABLED: ${GOOGLE_AUTH_ENABLED:-false}
+      SHOW_DEMO_BUTTON: ${SHOW_DEMO_BUTTON:-false}
+      PAYMENT_PROVIDER_TEXT: ${PAYMENT_PROVIDER_TEXT:-to'lov tez orada}
     depends_on:
       migrate_prod:
         condition: service_completed_successfully
@@ -244,6 +250,13 @@ services:
       STARS_UNITS_PER_STAR: ${STARS_UNITS_PER_STAR:-200}
       FLOOR_B: ${FLOOR_B:-1}
       MIN_STEP_B: ${MIN_STEP_B:-1}
+      SEED_DEMO: ${SEED_DEMO:-false}
+      STARS_ENABLED: ${STARS_ENABLED:-false}
+      PAYNET_ENABLED: ${PAYNET_ENABLED:-false}
+      GOOGLE_AUTH_ENABLED: ${GOOGLE_AUTH_ENABLED:-false}
+      SHOW_DEMO_BUTTON: ${SHOW_DEMO_BUTTON:-false}
+      PAYMENT_PROVIDER_TEXT: ${PAYMENT_PROVIDER_TEXT:-to'lov tez orada}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -276,6 +289,13 @@ services:
       ADMIN_TG_IDS: ${ADMIN_TG_IDS:-}
       BACKEND_URL: http://backend_prod:8000
       ENV: ${ENV:-prod}
+      SEED_DEMO: ${SEED_DEMO:-false}
+      STARS_ENABLED: ${STARS_ENABLED:-false}
+      PAYNET_ENABLED: ${PAYNET_ENABLED:-false}
+      GOOGLE_AUTH_ENABLED: ${GOOGLE_AUTH_ENABLED:-false}
+      SHOW_DEMO_BUTTON: ${SHOW_DEMO_BUTTON:-false}
+      PAYMENT_PROVIDER_TEXT: ${PAYMENT_PROVIDER_TEXT:-to'lov tez orada}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
     profiles:
     - dev
     healthcheck: &id007
