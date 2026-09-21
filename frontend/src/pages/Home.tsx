@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchTabs, fetchBoard, fetchCategories, fetchQuote, fetchPublicStats } from '../api/client';
+import { fetchTabs, fetchBoard, fetchCategories, fetchQuote, fetchPublicStats , fetchPublicConfig } from '../api/client';
 import { formatB } from '../utils/formatters';
 import { ListingRow, MiniListing } from '../components/ListingRow';
 
@@ -81,6 +81,11 @@ export function Home() {
   const displayPriceUnits = Math.max(heroPriceUnits ?? basePriceUnits, basePriceUnits);
   const note = PERIOD_NOTES[period] || '';
 
+  const { data: publicConfig } = useQuery({
+    queryKey: ['public-config'],
+    queryFn: fetchPublicConfig,
+    staleTime: 5 * 60 * 1000,
+  });
   const { data: stats } = useQuery({
     queryKey: ['stats'],
     queryFn: fetchPublicStats,
@@ -140,7 +145,7 @@ export function Home() {
             >+</button>
             <span>ga oling</span>
           </h1>
-          <p className="uzs">≈ <span className="num">{new Intl.NumberFormat('ru-RU').format(displayPriceUnits).replace(',', ' ')}</span> so'm · to'lov Telegram Stars yoki Paynet orqali</p>
+          <p className="uzs">≈ <span className="num">{new Intl.NumberFormat('ru-RU').format(displayPriceUnits).replace(',', ' ')}</span> so'm · {publicConfig?.payment_provider_text ?? "to'lov tez orada"}</p>
           
           <div className="claimbar">
             <label className="field">

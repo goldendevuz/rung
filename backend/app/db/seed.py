@@ -56,8 +56,6 @@ CATEGORIES = [
     {"slug": "dizayn",       "name_uz": "Dizayn",              "color": "#DB2777", "icon": "🎨", "sort_order": 11},
     {"slug": "dasturlash",   "name_uz": "Dasturlash",          "color": "#2563EB", "icon": "💻", "sort_order": 12},
     {"slug": "texnologiya",  "name_uz": "Texnologiya",         "color": "#D97706", "icon": "⚙️", "sort_order": 13},
-    # biznes is not in the 13 but used by startupuz — map to texnologiya or add
-    {"slug": "biznes",       "name_uz": "Biznes",              "color": "#059669", "icon": "💼", "sort_order": 14},
 ]
 
 # ── Channels ──────────────────────────────────────────────────────────────────
@@ -83,7 +81,7 @@ CHANNELS = [
     },
     {
         "slug": "startupuz", "handle": "@startupuz", "name": "Startup Uzbekistan",
-        "category": "biznes", "subscribers": 22100, "clicks": 612,
+        "category": "saas", "subscribers": 22100, "clicks": 612,
         "verified": True, "claimed": True,
         "g": ["#059669", "#064E3B"],
         "paid": {"a": 15, "d": 3, "w": 7, "m": 11, "y": 13},
@@ -240,13 +238,18 @@ async def _get_or_create_board(
     return board
 
 
-async def run_seed() -> None:
-    """Idempotent seed — inserts only missing rows."""
+async def seed_reference() -> None:
+    """Seed reference data (13 categories + settings). Always runs on deploy, idempotent."""
     async with async_session_factory() as session:
         async with session.begin():
             await _seed_categories(session)
             await _seed_settings(session)
+    logger.info("Reference seed complete.")
 
+
+async def seed_demo() -> None:
+    """Seed demo listings and boards. Only when SEED_DEMO=true, idempotent."""
+    async with async_session_factory() as session:
         async with session.begin():
             await _seed_listings(session)
 
@@ -256,7 +259,14 @@ async def run_seed() -> None:
         async with session.begin():
             await _seed_closed_daily_boards(session)
 
-    logger.info("Seed complete.")
+    logger.info("Demo seed complete.")
+
+
+async def run_seed() -> None:
+    """Idempotent seed — kept for backward-compat (make seed). Runs both phases."""
+    await seed_reference()
+    await seed_demo()
+    logger.info("Full seed complete.")
 
 
 async def _seed_categories(session: AsyncSession) -> None:

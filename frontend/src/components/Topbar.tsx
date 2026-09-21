@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchPublicStats } from '../api/client';
+import { fetchPublicStats, fetchPublicConfig } from '../api/client';
 
 export function Topbar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -24,7 +24,12 @@ export function Topbar() {
   });
 
   const showLiveStats = import.meta.env.VITE_SHOW_LIVE_STATS === 'true' && stats?.online_now != null;
-  const showDemoBtn = import.meta.env.VITE_SHOW_DEMO_BUTTON === 'true';
+  const { data: publicConfig } = useQuery({
+    queryKey: ['public-config'],
+    queryFn: fetchPublicConfig,
+    staleTime: 5 * 60 * 1000,
+  });
+  const showDemoBtn = publicConfig?.show_demo_button ?? false;
   const isDemo = typeof window !== 'undefined' && localStorage.getItem('rung_demo') === '1';
 
   const enableDemo = () => {

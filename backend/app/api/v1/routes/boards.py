@@ -136,7 +136,16 @@ async def get_board_current(
     )
     board = board_result.scalar_one_or_none()
     if board is None:
-        raise HTTPException(status_code=404, detail="No active board for this period")
+        return BoardPage(
+            period_type=period_type,
+            period_key=period_key,
+            board_id=0,
+            entries=[],
+            total=0,
+            page=page,
+            page_size=PAGE_SIZE,
+            total_pages=1,
+        )
 
     # Base query: active entries with listing + category
     base_q = (

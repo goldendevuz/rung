@@ -1,4 +1,4 @@
-.PHONY: up down logs test lint seed migrate build shell-backend shell-bot shots
+.PHONY: up down logs test lint seed migrate build shell-backend shell-bot shots audit
 
 COMPOSE  = docker compose
 PW_VER   = 1.46.0
@@ -62,3 +62,17 @@ smoke:
 		  npm init -y -q 2>/dev/null && \
 		  npm install @playwright/test@$(PW_VER) --no-package-lock -q && \
 		  cp /tmp/smoke.js . && node smoke.js"
+
+audit:
+	@mkdir -p deploy/audit/shots
+	docker run --rm --network host \
+		-e BASE=$(or $(BASE),https://rung.shats.uz) \
+		-e EXPECT_DEMO=$(or $(EXPECT_DEMO),true) \
+		-v $(PWD)/deploy/audit/audit.mjs:/tmp/audit.mjs:ro \
+		-v $(PWD)/deploy/audit/shots:/tmp/pw/shots \
+		mcr.microsoft.com/playwright:v$(PW_VER)-jammy \
+		bash -c "mkdir -p /tmp/pw && cd /tmp/pw && \
+		  npm init -y -q 2>/dev/null && \
+		  npm install playwright@$(PW_VER) --no-package-lock -q && \
+		  node /tmp/audit.mjs"
+

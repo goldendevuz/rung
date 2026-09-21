@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install packages with npm (avoids pnpm 9+ ERR_PNPM_IGNORED_BUILDS for esbuild)
 COPY package.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY . .
 EXPOSE 5173

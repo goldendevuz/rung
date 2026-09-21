@@ -36,8 +36,11 @@ class Settings(BaseSettings):
 
     DEV_AUTH: bool = False
     SEED_DEMO: bool = False
-    STARS_ENABLED: bool = True
-    PAYNET_ENABLED: bool = True
+    STARS_ENABLED: bool = False
+    PAYNET_ENABLED: bool = False
+    GOOGLE_AUTH_ENABLED: bool = False
+    SHOW_DEMO_BUTTON: bool = False
+    PAYMENT_PROVIDER_TEXT: str = "to'lov tez orada"
     SHOW_PAYMENT_DETAILS: bool = False
     SHOW_LIVE_STATS: bool = False
     ENABLED_LISTING_KINDS: str = 'channel'

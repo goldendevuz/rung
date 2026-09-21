@@ -44,3 +44,15 @@ export async function fetchQuote(boardId: number, targetRank: number) {
   if (!res.ok) throw new Error('Failed to fetch quote');
   return res.json();
 }
+
+export async function fetchPublicConfig() {
+  const res = await fetch(`${API_BASE}/public-config`);
+  if (!res.ok) throw new Error('Failed to fetch public config');
+  return res.json() as Promise<{
+    show_demo_button: boolean;
+    google_auth_enabled: boolean;
+    stars_enabled: boolean;
+    paynet_enabled: boolean;
+    payment_provider_text: string;
+  }>;
+}

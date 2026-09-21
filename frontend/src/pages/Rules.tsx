@@ -31,8 +31,7 @@ export function Rules() {
         </ul>
 
         <h2>To'lovdan keyin</h2>
-        <p>O'rin to'lov tasdiqlangan zahoti ochiladi. To'lov qaytarilmaydi — istisno: xizmat nosozligi. Telegram Stars orqali to'lovni beta davrida admin qo'lda qaytarishi mumkin, agar kirim qilingan B hali sarflanmagan bo'lsa.</p>
-        <p>Paynet orqali to'ldirish faqat oddiy saytda ishlaydi, Telegram ichidagi Mini App'da emas — Telegram raqamli tovar uchun Stars talab qiladi.</p>
+        <p>O'rin to'lov tasdiqlangan zahoti ochiladi. To'lov qaytarilmaydi — istisno: xizmat nosozligi. To'lovni beta davrida admin qo'lda qaytarishi mumkin, agar kirim qilingan B hali sarflanmagan bo'lsa.</p>
       </div>
     </section>
   );

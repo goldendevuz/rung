@@ -295,6 +295,7 @@ services:
     restart: unless-stopped
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
+      VITE_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
     volumes:
     - ./frontend:/app
     - /app/node_modules
@@ -363,6 +364,8 @@ services:
     build:
       context: .
       dockerfile: deploy/caddy/prod/Dockerfile
+      args:
+        VITE_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://rung.uz}
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run

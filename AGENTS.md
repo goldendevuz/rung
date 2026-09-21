@@ -42,11 +42,12 @@ This file is deliberately short. Details live in `docs/spec/*.md`.
 | `docs/spec/03-listings-clicks-data-api.md` | listings, moderation, click stats, data model, API |
 | `docs/spec/04-bot-and-engineering.md` | bot behavior, tests, CI, Docker, security rules |
 | `docs/spec/05-ui-ux.md` | design identity, palette, screens, motion, i18n |
+| `docs/spec/06-checkout-uz.md` | Checkout.uz automatic UZS payments (STARS_ENABLED=false, PAYNET_ENABLED=false, GOOGLE_AUTH_ENABLED=false) |
 
 ## 4. Environments
 
 - Local: WSL Ubuntu 22.04, repo at `/home/kai/projects/rung`. GitHub: private repo `rung` under `goldendevuz` (use `gh`; if unauthenticated, tell the owner exactly what to run).
-- Env vars (all in `.env.example`): `ENV`, `POSTGRES_*`, `REDIS_URL`, `SECRET_KEY`, `INTERNAL_API_TOKEN`, `BOT_TOKEN`, `BOT_USERNAME=rung_uz_bot`, `ADMIN_TG_IDS=557407324`, `GOOGLE_CLIENT_ID/SECRET`, `PUBLIC_BASE_URL`, `WEBAPP_URL`, `DEV_AUTH`, `SHOW_PAYMENT_DETAILS=false`, `SEED_DEMO`, `TZ=Asia/Tashkent`.
+- Env vars (all in `.env.example`): `ENV`, `POSTGRES_*`, `REDIS_URL`, `SECRET_KEY`, `INTERNAL_API_TOKEN`, `BOT_TOKEN`, `BOT_USERNAME=rung_uz_bot`, `ADMIN_TG_IDS=557407324`, `GOOGLE_CLIENT_ID/SECRET`, `PUBLIC_BASE_URL`, `WEBAPP_URL`, `DEV_AUTH`, `SHOW_PAYMENT_DETAILS=false`, `SEED_DEMO`, `STARS_ENABLED=false`, `PAYNET_ENABLED=false`, `GOOGLE_AUTH_ENABLED=false`, `SHOW_DEMO_BUTTON`, `PAYMENT_PROVIDER_TEXT`, `TZ=Asia/Tashkent`.
 - No domain yet. Browser testing: `http://localhost` (local) or the VPS IP over HTTP. Telegram Mini Apps need HTTPS: use a cloudflared quick tunnel (`tunnel` profile, temporary URL) for testing; `rung.uz` and a named cloudflared tunnel come later.
 - Production target (deploy phase only, after explicit owner approval): Hetzner Ubuntu VPS, repo cloned into `/root/projects/rung`, `prod` profile.
 

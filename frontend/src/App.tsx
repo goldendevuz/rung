@@ -6,6 +6,9 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Rules } from './pages/Rules';
 import { Kategoriyalar } from './pages/Kategoriyalar';
+import { Login } from './pages/Login';
+import { AddChannel } from './pages/AddChannel';
+import { Listing } from './pages/Listing';
 
 // Dummy components for other pages until we implement them
 const Kunlik = () => (
@@ -16,29 +19,20 @@ const Kunlik = () => (
         <p>Har kun yarim tunda (Toshkent vaqti) taxta yopiladi va yangisi 1 B dan boshlanadi. Yopilgan kun natijalari shu yerda qoladi.</p>
       </div>
       <div className="daycards" id="dayCards">
-        <p>API integratsiyasi jarayonda...</p>
+        <p className="empty-state">Hali yopilgan kunlik reyting yo'q</p>
       </div>
     </div>
   </section>
 );
 
-const AddChannel = () => (
-  <section id="page-qoshish">
+const NotFound = () => (
+  <section id="page-404">
     <div className="wrap">
-      <div className="page-head">
-        <h1>Kanal qo'shish</h1>
-        <p>Avval kanal ro'yxatga tushadi, keyin egaligi tasdiqlanadi. Faqat tasdiqlangan egalar o'rin sotib oladi.</p>
-      </div>
-      <div className="board" style={{ paddingTop: '22px' }}>
-        <p>Tez kunda...</p>
-      </div>
+      <br/>
+      <h1>Sahifa topilmadi (404)</h1>
     </div>
   </section>
 );
-
-const Login = () => <div className="wrap"><br/><h1>Kirish sahifasi</h1></div>;
-const Listing = () => <div className="wrap"><br/><h1>Kanal Sahifasi</h1></div>;
-const NotFound = () => <div className="wrap"><br/><h1>Sahifa topilmadi (404)</h1></div>;
 
 const queryClient = new QueryClient();
 

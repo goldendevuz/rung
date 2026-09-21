@@ -17,8 +17,11 @@ export function Kategoriyalar() {
         </div>
         
         {isLoading && <p>Yuklanmoqda...</p>}
+        {!isLoading && categories.length === 0 && (
+          <p className="empty-state">Hali kategoriyalar qo'shilmagan</p>
+        )}
         
-        {!isLoading && (
+        {!isLoading && categories.length > 0 && (
           <div className="catgrid" id="catGrid">
             {categories.map((c: any) => (
               <div className="catcard" key={c.slug}>

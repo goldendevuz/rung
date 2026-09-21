@@ -29,6 +29,15 @@ export function About() {
           <div className="stat"><div className="v num">{stats ? nf(stats.highest_price/1000) : 0} B</div><div className="k">eng yuqori o'rin narxi</div></div>
           <div className="stat"><div className="v num">{stats ? nf(stats.total_listings) : 0}</div><div className="k">kanal ro'yxatda</div></div>
         </div>
+        <div className="prose" style={{ paddingTop: 0 }}>
+          <h2>1-o'rinni egallaganlar nima deydi</h2>
+        </div>
+        <div className="hot" style={{ paddingTop: 0 }}>
+          <div className="hotcard"><div className="lab">@KODLASH_UZ</div><p style={{ margin: '10px 0 0', color: 'var(--ink-2)', fontSize: '14.5px' }}>"Uch kun 1-o'rinda turdim — 40 ga yaqin yangi reklama so'rovi keldi. Odatdagi katalogdan tezroq."</p></div>
+          <div className="hotcard"><div className="lab">@SMM_USTAXONA</div><p style={{ margin: '10px 0 0', color: 'var(--ink-2)', fontSize: '14.5px' }}>"Narx ochiq turgani yoqdi. Qancha to'laganim ko'rinib turadi, bu ishonch beradi."</p></div>
+          <div className="hotcard"><div className="lab">@TOSHKENT_ISH</div><p style={{ margin: '10px 0 0', color: 'var(--ink-2)', fontSize: '14.5px' }}>"Kunlik taxta arzon — 5 B ga sinab ko'rdim, keyin oylikka o'tdim."</p></div>
+        </div>
+        <p style={{ textAlign: 'center', margin: '34px 0 0', fontSize: '13px', color: 'var(--ink-3)' }}>Yuqoridagi fikrlar prototip uchun namunaviy matn.</p>
       </div>
     </section>
   );

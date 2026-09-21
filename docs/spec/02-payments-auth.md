@@ -30,3 +30,23 @@
 ### Dev-only login and temporary environments
 - `DEV_AUTH=true` enables `POST /api/v1/auth/dev-login` (pick or create a fake user with google and/or telegram identity, optional admin flag). The app MUST refuse to start if `ENV=prod` and `DEV_AUTH=true`. It exists so that Google OAuth (which needs a stable public domain) does not block testing before rung.uz exists.
 - Google OAuth redirect URIs cannot be a bare IP address. `http://localhost` works. A tunnel URL works only if you add that exact URL to the Google console. Real Telegram login (initData) works on any HTTPS URL.
+
+---
+
+## Decisions (2026-09-21) — overrides to sections above
+
+### Flags
+- `STARS_ENABLED=false` — Stars code kept, not deleted. Flag default changed to false.
+- `PAYNET_ENABLED=false` — Paynet code kept, not deleted. Flag default changed to false.
+- `GOOGLE_AUTH_ENABLED=false` — Google OAuth code kept, not deleted. The login page hides the Google button when this flag is false.
+
+### Payment provider
+Payments will be automatic UZS through **Checkout.uz** (see `docs/spec/06-checkout-uz.md`).
+Implementation is deferred to a later slice. For now, `PAYMENT_PROVIDER_TEXT=to'lov tez orada` is the placeholder shown to users.
+
+### Authentication — Telegram only (current)
+- Website login: `https://t.me/rung_uz_bot?start=login_<one-time-token>` deep link.
+  User clicks → Telegram opens bot → bot verifies and calls backend with the one-time token → backend issues session cookie → user is redirected back to the site.
+- Mini App: `initData` HMAC validation (unchanged, see §7 above).
+- Google OAuth stays behind `GOOGLE_AUTH_ENABLED` flag. The login page shows only the Telegram button when the flag is false.
+- The hero note and claim sheet must NOT mention Stars or Paynet by name; they show `PAYMENT_PROVIDER_TEXT` from `GET /api/v1/public-config`.
