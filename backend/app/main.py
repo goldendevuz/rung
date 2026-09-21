@@ -80,12 +80,22 @@ async def demo_mode_middleware(request: Request, call_next):
             return JSONResponse(content=get_demo_tabs())
         elif path == "/api/v1/boards/daily/history":
             return JSONResponse(content=get_demo_daily_history())
-        elif path.startswith("/api/v1/boards/") and path.endswith("/current"):
+                elif path.startswith("/api/v1/boards/") and path.endswith("/current"):
             period_type = path.split("/")[-2]
             page = int(request.query_params.get("page", 1))
             category = request.query_params.get("category")
             q = request.query_params.get("q")
             return JSONResponse(content=get_demo_board_current(period_type, page, category, q))
+        elif path.startswith("/api/v1/boards/") and path.endswith("/quote"):
+            # Mock quote for demo
+            board_id = int(path.split("/")[-2])
+            target_rank = int(request.query_params.get("target_rank", 1))
+            return JSONResponse(content={
+                "board_id": board_id,
+                "target_rank": target_rank,
+                "quote": 50000,
+                "quote_usd": 4.0
+            })
             
     response = await call_next(request)
     return response
