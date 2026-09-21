@@ -80,7 +80,7 @@ async def demo_mode_middleware(request: Request, call_next):
             return JSONResponse(content=get_demo_tabs())
         elif path == "/api/v1/boards/daily/history":
             return JSONResponse(content=get_demo_daily_history())
-                elif path.startswith("/api/v1/boards/") and path.endswith("/current"):
+        elif path.startswith("/api/v1/boards/") and path.endswith("/current"):
             period_type = path.split("/")[-2]
             page = int(request.query_params.get("page", 1))
             category = request.query_params.get("category")
