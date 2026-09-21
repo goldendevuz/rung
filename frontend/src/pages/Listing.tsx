@@ -36,7 +36,7 @@ export const Listing = () => {
         <div className="wrap">
           <br />
           <h1>Kanal topilmadi</h1>
-          <p>Bunday kanal mavjud emas.</p>
+          <p>Bunday kanal mavjud emas. Ehtimol, manzil xato kiritilgandir yoki kanal egasi tomonidan ochirilgan bolishi mumkin. Iltimos, URL manzilini qayta tekshirib koring yoki boshqa kanallarni izlab koring.</p>
         </div>
       </section>
     );

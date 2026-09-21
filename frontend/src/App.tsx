@@ -29,7 +29,7 @@ const NotFound = () => (
   <section id="page-404">
     <div className="wrap">
       <br/>
-      <h1>Sahifa topilmadi (404)</h1>
+      <h1>Sahifa topilmadi (404)</h1><p>Siz qidirayotgan sahifa topilmadi. Ehtimol, manzil xato kiritilgandir yoki bu sahifa olib tashlangan bolishi mumkin. Asosiy sahifaga qaytib, boshqa bolimlarni korib chiqing yoki qidiruvdan foydalaning.</p>
     </div>
   </section>
 );

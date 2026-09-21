@@ -24,7 +24,7 @@ export const Login = () => {
           </div>
           <h1>Bir pog'ona yuqoriga</h1>
           <p className="sub">
-            Kanal qo'shish va o'rin sotib olish uchun kiring. Bitta akkaunt — ham saytda, ham botda.
+            Kanal qo'shish va o'rin sotib olish uchun kiring. Bitta akkaunt — ham saytda, ham botda. Bizning platformamiz orqali O Uzbekistaning eng yaxshi Telegram kanallarini topishingiz va o z kanalingizni ommalashtirishingiz mumkin. Kirish orqali siz barcha qulayliklarga ega bolasiz va yangi imkoniyatlarni kashf etasiz.
           </p>
           <button className="authbtn tg" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
             <svg viewBox="0 0 24 24" fill="currentColor">
