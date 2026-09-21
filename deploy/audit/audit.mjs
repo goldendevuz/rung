@@ -21,7 +21,18 @@ const routes = [
   // an unknown client route: the app must render its own 404 page
   { path: '/mavjud-emas', min: 150 },
 ];
-const demoOnly = [{ path: '/p/_kodlash_uz_', min: 500 }];
+let demoOnly = [];
+try {
+  const res = await fetch(`${BASE}/api/v1/categories/1/listings`);
+  const data = await res.json();
+  if (data.items && data.items.length > 0) {
+    demoOnly.push({ path: `/p/${data.items[0].public_id}`, min: 500 });
+  } else {
+    demoOnly.push({ path: '/p/_kodlash_uz_', min: 500 });
+  }
+} catch (e) {
+  demoOnly.push({ path: '/p/_kodlash_uz_', min: 500 });
+}
 
 const failures = [];
 const rows = [];

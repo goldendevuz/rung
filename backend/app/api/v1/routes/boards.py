@@ -140,7 +140,7 @@ async def get_board_current(
         return BoardPage(
             period_type=period_type,
             period_key=period_key,
-            board_id=0,
+            board_id="0",
             entries=[],
             total=0,
             page=page,
@@ -195,7 +195,7 @@ async def get_board_current(
     return BoardPage(
         period_type=period_type,
         period_key=period_key,
-        board_id=board.id,
+        board_id=str(board.id),
         entries=entry_outs,
         total=total,
         page=page,
