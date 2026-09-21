@@ -2,10 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPublicStats, fetchPublicConfig } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Topbar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [theme, setTheme] = React.useState(() => localStorage.getItem('theme') || 'dark');
+  const { user, logout } = useAuth();
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -77,7 +79,15 @@ export function Topbar() {
             {showDemoBtn && !isDemo && (
               <button onClick={enableDemo} style={{ padding: '4px 12px', background: '#f59e0b', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Demo</button>
             )}
-            <Link to="/kirish"><button className="btn-login">Kirish</button></Link>
+            {user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {user.photo_url && <img src={user.photo_url} alt="Avatar" style={{ width: 28, height: 28, borderRadius: '50%' }} />}
+                <span className="hide-sm" style={{ fontWeight: '500' }}>{user.first_name || user.username}</span>
+                <button className="btn-login" onClick={logout} style={{ marginLeft: 8 }}>Chiqish</button>
+              </div>
+            ) : (
+              <Link to="/kirish"><button className="btn-login">Kirish</button></Link>
+            )}
           </nav>
         </div>
         {searchOpen && (

@@ -183,6 +183,7 @@ export function Home() {
                   price: entry.paid_b,
                   priceUnits: entry.paid_units,
                   ch: {
+                    public_id: entry.listing.public_id,
                     n: entry.listing.name,
                     h: entry.listing.handle,
                     d: entry.listing.description,
@@ -198,7 +199,7 @@ export function Home() {
                 };
 
                 return (
-                  <React.Fragment key={entry.listing.slug}>
+                  <React.Fragment key={entry.listing.public_id}>
                     <ListingRow item={mappedItem} onClaim={() => {}} />
                     {entry.rank === 10 && i < entries.length - 1 && (
                       <div className="divider"><span>TOP 10</span></div>
@@ -240,11 +241,12 @@ export function Home() {
                     rank: entry.rank,
                     price: entry.paid_b,
                     ch: {
+                      public_id: entry.listing.public_id,
                       n: entry.listing.name,
                       g: [entry.listing.gradient_start, entry.listing.gradient_end],
                     }
                   };
-                  return <MiniListing key={entry.listing.slug} item={mappedItem} />;
+                  return <MiniListing key={entry.listing.public_id} item={mappedItem} />;
                 })}
               </div>
             </div>

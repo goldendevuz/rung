@@ -13,11 +13,10 @@ class Base(DeclarativeBase):
 
 
 class IDMixin:
-    """Integer PK + public UUID."""
+    """UUID Primary Key."""
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    uuid: Mapped[str] = mapped_column(
-        String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4())
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
 
 
@@ -39,5 +38,5 @@ class SoftDeleteMixin:
     """Soft-delete fields — no hard deletes in application code."""
 
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    deleted_by: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    deleted_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     delete_reason: Mapped[str | None] = mapped_column(String(512), nullable=True)

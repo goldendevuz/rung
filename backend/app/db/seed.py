@@ -62,7 +62,7 @@ CATEGORIES = [
 # per-period paid B: keys a/d/w/m/y
 CHANNELS = [
     {
-        "slug": "kodlash_uz", "handle": "@kodlash_uz", "name": "Kodlash.uz",
+        "public_id": "_kodlash_uz_", "handle": "@kodlash_uz", "name": "Kodlash.uz",
         "category": "dasturlash", "subscribers": 84200, "clicks": 1289,
         "verified": True, "claimed": True,
         "g": ["#2563EB", "#1E3A8A"],
@@ -71,7 +71,7 @@ CHANNELS = [
         "age_days": 120,
     },
     {
-        "slug": "aibiz", "handle": "@aibiz_uz", "name": "AI Biz",
+        "public_id": "aibiz", "handle": "@aibiz_uz", "name": "AI Biz",
         "category": "ai", "subscribers": 31400, "clicks": 847,
         "verified": True, "claimed": True,
         "g": ["#7C3AED", "#4C1D95"],
@@ -80,7 +80,7 @@ CHANNELS = [
         "age_days": 95,
     },
     {
-        "slug": "startupuz", "handle": "@startupuz", "name": "Startup Uzbekistan",
+        "public_id": "startupuz", "handle": "@startupuz", "name": "Startup Uzbekistan",
         "category": "saas", "subscribers": 22100, "clicks": 612,
         "verified": True, "claimed": True,
         "g": ["#059669", "#064E3B"],
@@ -89,7 +89,7 @@ CHANNELS = [
         "age_days": 80,
     },
     {
-        "slug": "techuz", "handle": "@techuz", "name": "Tech Uzbekistan",
+        "public_id": "techuz", "handle": "@techuz", "name": "Tech Uzbekistan",
         "category": "texnologiya", "subscribers": 18600, "clicks": 534,
         "verified": True, "claimed": True,
         "g": ["#D97706", "#92400E"],
@@ -98,7 +98,7 @@ CHANNELS = [
         "age_days": 75,
     },
     {
-        "slug": "designuz", "handle": "@designuz_uz", "name": "Design UZ",
+        "public_id": "designuz", "handle": "@designuz_uz", "name": "Design UZ",
         "category": "dizayn", "subscribers": 14200, "clicks": 423,
         "verified": True, "claimed": True,
         "g": ["#DB2777", "#831843"],
@@ -107,7 +107,7 @@ CHANNELS = [
         "age_days": 65,
     },
     {
-        "slug": "kriptauz", "handle": "@kripta_uz", "name": "Kripta UZ",
+        "public_id": "kriptauz", "handle": "@kripta_uz", "name": "Kripta UZ",
         "category": "moliya", "subscribers": 12800, "clicks": 398,
         "verified": True, "claimed": True,
         "g": ["#0891B2", "#164E63"],
@@ -116,7 +116,7 @@ CHANNELS = [
         "age_days": 60,
     },
     {
-        "slug": "gaminguz", "handle": "@gaminguz", "name": "Gaming UZ",
+        "public_id": "gaminguz", "handle": "@gaminguz", "name": "Gaming UZ",
         "category": "oyinlar", "subscribers": 11500, "clicks": 367,
         "verified": False, "claimed": True,
         "g": ["#4F46E5", "#1E1B4B"],
@@ -125,7 +125,7 @@ CHANNELS = [
         "age_days": 55,
     },
     {
-        "slug": "mobiluz", "handle": "@mobiluz", "name": "Mobil UZ",
+        "public_id": "mobiluz", "handle": "@mobiluz", "name": "Mobil UZ",
         "category": "mobil", "subscribers": 10200, "clicks": 312,
         "verified": False, "claimed": True,
         "g": ["#16A34A", "#14532D"],
@@ -134,7 +134,7 @@ CHANNELS = [
         "age_days": 50,
     },
     {
-        "slug": "ecomuz", "handle": "@ecomuz", "name": "E-commerce UZ",
+        "public_id": "ecomuz", "handle": "@ecomuz", "name": "E-commerce UZ",
         "category": "ecommerce", "subscribers": 9100, "clicks": 287,
         "verified": False, "claimed": True,
         "g": ["#EA580C", "#7C2D12"],
@@ -143,7 +143,7 @@ CHANNELS = [
         "age_days": 45,
     },
     {
-        "slug": "saasuz", "handle": "@saasuz", "name": "SaaS UZ",
+        "public_id": "saasuz", "handle": "@saasuz", "name": "SaaS UZ",
         "category": "saas", "subscribers": 8400, "clicks": 241,
         "verified": False, "claimed": True,
         "g": ["#7C6CFF", "#3730A3"],
@@ -152,7 +152,7 @@ CHANNELS = [
         "age_days": 40,
     },
     {
-        "slug": "markaztv", "handle": "@markaztv", "name": "Markaz TV",
+        "public_id": "markaztv", "handle": "@markaztv", "name": "Markaz TV",
         "category": "marketing", "subscribers": 7200, "clicks": 198,
         "verified": False, "claimed": True,
         "g": ["#0EA5E9", "#075985"],
@@ -161,7 +161,7 @@ CHANNELS = [
         "age_days": 35,
     },
     {
-        "slug": "devtoolsuz", "handle": "@devtoolsuz", "name": "Dev Tools UZ",
+        "public_id": "devtoolsuz", "handle": "@devtoolsuz", "name": "Dev Tools UZ",
         "category": "devtools", "subscribers": 6100, "clicks": 167,
         "verified": False, "claimed": True,
         "g": ["#8B5CF6", "#4C1D95"],
@@ -170,7 +170,7 @@ CHANNELS = [
         "age_days": 30,
     },
     {
-        "slug": "eduuz", "handle": "@eduuz", "name": "Edu UZ",
+        "public_id": "eduuz", "handle": "@eduuz", "name": "Edu UZ",
         "category": "talim", "subscribers": 5200, "clicks": 143,
         "verified": False, "claimed": True,
         "g": ["#10B981", "#064E3B"],
@@ -179,7 +179,7 @@ CHANNELS = [
         "age_days": 25,
     },
     {
-        "slug": "produz", "handle": "@produz", "name": "Prod UZ",
+        "public_id": "produz", "handle": "@produz", "name": "Prod UZ",
         "category": "mahsuldorlik", "subscribers": 4100, "clicks": 118,
         "verified": False, "claimed": True,
         "g": ["#F59E0B", "#78350F"],
@@ -192,7 +192,7 @@ CHANNELS = [
 # Free catalog (not in any paid board)
 FREE_CHANNELS = [
     {
-        "slug": "rung_team", "handle": "@rung_uz", "name": "Rung jamoasi",
+        "public_id": "rung_team", "handle": "@rung_uz", "name": "Rung jamoasi",
         "category": "texnologiya", "subscribers": 0, "clicks": 0,
         "verified": True, "claimed": True,
         "g": ["#B8F03C", "#4D6B08"],
@@ -201,7 +201,7 @@ FREE_CHANNELS = [
         "age_days": 200,
     },
     {
-        "slug": "anon_channel", "handle": "@anon_kanal", "name": "Noma'lum kanal",
+        "public_id": "anon_channel", "handle": "@anon_kanal", "name": "Noma'lum kanal",
         "category": "texnologiya", "subscribers": 1200, "clicks": 45,
         "verified": False, "claimed": False,
         "g": ["#6D7679", "#3A4147"],
@@ -294,7 +294,7 @@ async def _seed_settings(session: AsyncSession) -> None:
     await session.flush()
 
 
-async def _get_category_id(session: AsyncSession, slug: str) -> int | None:
+async def _get_category_id(session: AsyncSession, slug: str) -> str | None:
     result = await session.execute(select(Category).where(Category.slug == slug))
     cat = result.scalar_one_or_none()
     return cat.id if cat else None
@@ -305,7 +305,7 @@ async def _seed_listings(session: AsyncSession) -> None:
 
     for ch in CHANNELS + FREE_CHANNELS:
         exists = (
-            await session.execute(select(Listing).where(Listing.slug == ch["slug"]))
+            await session.execute(select(Listing).where(Listing.public_id == ch["public_id"]))
         ).scalar_one_or_none()
         if exists is not None:
             continue
@@ -315,7 +315,7 @@ async def _seed_listings(session: AsyncSession) -> None:
         created = (ref_now - age).astimezone(timezone.utc)
 
         listing = Listing(
-            slug=ch["slug"],
+            public_id=ch["public_id"],
             kind="channel",
             handle=ch["handle"],
             name=ch["name"],
@@ -360,7 +360,7 @@ async def _seed_boards_and_entries(session: AsyncSession) -> None:
 
     for ch in CHANNELS:
         listing_result = await session.execute(
-            select(Listing).where(Listing.slug == ch["slug"])
+            select(Listing).where(Listing.public_id == ch["public_id"])
         )
         listing = listing_result.scalar_one_or_none()
         if listing is None:
@@ -432,7 +432,7 @@ async def _seed_closed_daily_boards(session: AsyncSession) -> None:
         # Add top 3 channels for this closed board
         for i, ch in enumerate(CHANNELS[:3]):
             listing_result = await session.execute(
-                select(Listing).where(Listing.slug == ch["slug"])
+                select(Listing).where(Listing.public_id == ch["public_id"])
             )
             listing = listing_result.scalar_one_or_none()
             if listing is None:

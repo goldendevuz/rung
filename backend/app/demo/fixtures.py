@@ -8,7 +8,7 @@ from app.core.money import units_to_b_display
 
 def _format_listing(ch: dict, clickthroughs: int = 0) -> dict:
     return {
-        "slug": ch["slug"],
+        "public_id": ch["public_id"],
         "handle": ch["handle"],
         "name": ch["name"],
         "description": ch.get("desc"),
@@ -101,7 +101,7 @@ def get_demo_board_current(period_type: str, page: int = 1, category: str = None
     return {
         "period_type": period_type,
         "period_key": period_key,
-        "board_id": 999,
+        "board_id": "99999999-9999-4999-8999-999999999999",
         "entries": entry_outs,
         "total": total,
         "page": page,

@@ -21,27 +21,37 @@ class CategoryOut(BaseModel):
 
 # ── Listing (compact, for board rows) ─────────────────────────────────────────
 
-class ListingCompact(BaseModel):
+class ListingMini(BaseModel):
+    """Minimal listing info for board cards/lists."""
     model_config = ConfigDict(from_attributes=True)
 
-    slug: str
-    handle: str
+    public_id: str
+    kind: str
     name: str
-    description: str | None
-    category_slug: str | None
-    category_color: str | None
-    subscribers: int
+    handle: str
     verified: bool
-    claimed: bool
-    free_label: str | None
     gradient_start: str
     gradient_end: str
+    subscribers: int
+    category_slug: str | None
+    category_color: str | None
+
+class ListingResponse(ListingMini):
+    """Extended listing info for /listings/{public_id}."""
+    description: str | None
+    url: str | None
+    claimed: bool
+    free_label: str | None
+    stats_daily: list[dict] = []
     clickthroughs: int = 0
     created_at: datetime
 
 
+ListingCompact = ListingMini
+
+
 class ListingDetail(ListingCompact):
-    """Extended listing info for /listings/{slug}."""
+    """Extended listing info for /listings/{public_id}."""
     status: str
 
 
@@ -67,7 +77,7 @@ class BoardEntryOut(BaseModel):
 class BoardPage(BaseModel):
     period_type: str
     period_key: str
-    board_id: int
+    board_id: str
     entries: list[BoardEntryOut]
     total: int
     page: int
@@ -86,7 +96,7 @@ class DailyHistoryBoard(BaseModel):
 # ── Quote ─────────────────────────────────────────────────────────────────────
 
 class QuoteOut(BaseModel):
-    board_id: int
+    board_id: str
     target_rank: int
     holder_paid_b: str
     holder_paid_units: int

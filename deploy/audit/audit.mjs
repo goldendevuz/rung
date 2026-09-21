@@ -21,7 +21,7 @@ const routes = [
   // an unknown client route: the app must render its own 404 page
   { path: '/mavjud-emas', min: 150 },
 ];
-const demoOnly = [{ path: '/p/kodlash_uz', min: 500 }];
+const demoOnly = [{ path: '/p/_kodlash_uz_', min: 500 }];
 
 const failures = [];
 const rows = [];
@@ -35,9 +35,11 @@ async function walk(mode, page, list, errors) {
     const shot = 'shots/' + mode + (r.path === '/' ? '_home' : r.path.replace(/\//g, '_')) + '.png';
     await page.screenshot({ path: shot, fullPage: true });
     const errs = errors.filter((e) => !(r.ignore && r.ignore.test(e)));
-    rows.push({ mode, route: r.path, status: resp.status(), chars: text.length, errors: errs });
+    const hasScroll = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+    rows.push({ mode, route: r.path, status: resp.status(), chars: text.length, errors: errs, hasScroll });
     if (resp.status() >= 400) failures.push(`${mode} ${r.path}: HTTP ${resp.status()}`);
     if (text.length < r.min) failures.push(`${mode} ${r.path}: only ${text.length} chars (min ${r.min})`);
+    if (hasScroll) failures.push(`${mode} ${r.path}: horizontal scroll detected`);
     if (errs.length) failures.push(`${mode} ${r.path}: ${errs.length} console/API errors: ${errs.join(' | ')}`);
   }
 }

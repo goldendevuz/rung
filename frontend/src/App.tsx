@@ -9,6 +9,7 @@ import { Kategoriyalar } from './pages/Kategoriyalar';
 import { Login } from './pages/Login';
 import { AddChannel } from './pages/AddChannel';
 import { Listing } from './pages/Listing';
+import { AuthProvider } from './contexts/AuthContext';
 
 // Dummy components for other pages until we implement them
 const Kunlik = () => (
@@ -39,22 +40,24 @@ const queryClient = new QueryClient();
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/kunlik" element={<Kunlik />} />
-            <Route path="/kategoriyalar" element={<Kategoriyalar />} />
-            <Route path="/qoshish" element={<AddChannel />} />
-            <Route path="/haqida" element={<About />} />
-            <Route path="/qoidalar" element={<Rules />} />
-            <Route path="/kirish" element={<Login />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/p/:slug" element={<Listing />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/kunlik" element={<Kunlik />} />
+              <Route path="/kategoriyalar" element={<Kategoriyalar />} />
+              <Route path="/qoshish" element={<AddChannel />} />
+              <Route path="/haqida" element={<About />} />
+              <Route path="/qoidalar" element={<Rules />} />
+              <Route path="/kirish" element={<Login />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/p/:public_id" element={<Listing />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

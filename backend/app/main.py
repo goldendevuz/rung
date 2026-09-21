@@ -86,11 +86,10 @@ async def demo_mode_middleware(request: Request, call_next):
             category = request.query_params.get("category")
             q = request.query_params.get("q")
             return JSONResponse(content=get_demo_board_current(period_type, page, category, q))
-        elif path.startswith("/api/v1/listings/"):
-            slug = path.split("/")[-1]
-            if slug == "kodlash_uz":
+        elif "/api/v1/listings/" in path:
+            if "_kodlash_uz_" in path:
                 return JSONResponse(content={
-                    "slug": "kodlash_uz",
+                    "public_id": "_kodlash_uz_",
                     "handle": "@kodlash_uz",
                     "name": "Kodlash.uz",
                     "description": "O'zbekistondagi eng yirik dasturlash kanali. Bizning kanalda siz dasturlash sirlarini organishingiz, python, javascript, va boshqa dasturlash tillari boyicha darslarni kuzatib borishingiz mumkin. Har kuni yangi malumotlar va qiziqarli maqolalar chop etiladi. Shuningdek, bizning obunachilarimiz orasida tajribali mutaxassislar ham mavjud bo'lib, ular sizga maslahatlar berishadi. Bu O'zbekistonning eng katta IT hamjamiyati bo'lib, bu yerda o'rganish, ishlash va rivojlanish uchun barcha imkoniyatlar mavjud. Biz bilan birga bo'ling va o'z bilimingizni oshiring!",
@@ -106,17 +105,20 @@ async def demo_mode_middleware(request: Request, call_next):
                     "created_at": "2026-05-24T08:08:05.033794Z",
                     "status": "active"
                 })
-            elif slug == "yoq-bunday-kanal":
+            elif "yoq-bunday-kanal" in path:
                 return JSONResponse(status_code=404, content={"detail": "Not Found"})
         elif path.startswith("/api/v1/boards/") and path.endswith("/quote"):
             # Mock quote for demo
-            board_id = int(path.split("/")[-2])
+            board_id = path.split("/")[-2]
             target_rank = int(request.query_params.get("target_rank", 1))
             return JSONResponse(content={
                 "board_id": board_id,
                 "target_rank": target_rank,
-                "quote": 50000,
-                "quote_usd": 4.0
+                "holder_paid_b": "49",
+                "holder_paid_units": 49000,
+                "min_cost_b": "50",
+                "min_cost_units": 50000,
+                "resulting_rank": target_rank,
             })
             
     response = await call_next(request)

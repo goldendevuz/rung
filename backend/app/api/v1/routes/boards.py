@@ -32,7 +32,8 @@ PAGE_SIZE = 12
 
 def _listing_to_compact(listing: Listing, clickthroughs: int = 0) -> ListingCompact:
     return ListingCompact(
-        slug=listing.slug,
+        public_id=listing.public_id,
+        kind=listing.kind,
         handle=listing.handle,
         name=listing.name,
         description=listing.description,
@@ -250,7 +251,7 @@ async def get_daily_history(db: Annotated[AsyncSession, Depends(get_db)]) -> lis
 
 @router.get("/{board_id}/quote", response_model=QuoteOut)
 async def get_quote(
-    board_id: int,
+    board_id: str,
     db: Annotated[AsyncSession, Depends(get_db)],
     target_rank: int = Query(..., ge=1),
 ) -> QuoteOut:

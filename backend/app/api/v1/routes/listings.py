@@ -16,15 +16,15 @@ from app.schemas.public import ListingDetail
 router = APIRouter(prefix="/listings", tags=["listings"])
 
 
-@router.get("/{slug}", response_model=ListingDetail)
+@router.get("/{public_id}", response_model=ListingDetail)
 async def get_listing(
-    slug: str,
+    public_id: str,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ListingDetail:
-    """Get a single listing by slug."""
+    """Get a single listing by public_id."""
     result = await db.execute(
         select(Listing)
-        .where(Listing.slug == slug, Listing.deleted_at.is_(None))
+        .where(Listing.public_id == public_id, Listing.deleted_at.is_(None))
         .options(selectinload(Listing.category))
     )
     listing = result.scalar_one_or_none()
@@ -40,7 +40,8 @@ async def get_listing(
     clickthroughs = int(clicks_result.scalar_one() or 0)
 
     return ListingDetail(
-        slug=listing.slug,
+        public_id=listing.public_id,
+        kind=listing.kind,
         handle=listing.handle,
         name=listing.name,
         description=listing.description,

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from sqlalchemy import BigInteger, Date, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import BigInteger, Date, ForeignKey, Index, UniqueConstraint, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, IDMixin, TimestampMixin
@@ -12,8 +12,8 @@ from app.db.base import Base, IDMixin, TimestampMixin
 class ListingStatsDaily(Base, IDMixin, TimestampMixin):
     __tablename__ = "listing_stats_daily"
 
-    listing_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, index=True
+    listing_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, index=True
     )
     stat_date: Mapped[date] = mapped_column(Date, nullable=False)
 

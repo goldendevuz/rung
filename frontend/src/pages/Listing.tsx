@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchListing } from '../api/client';
 
 export const Listing = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { public_id } = useParams<{ public_id: string }>();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['listing', slug],
-    queryFn: () => fetchListing(slug!),
+    queryKey: ['listing', public_id],
+    queryFn: () => fetchListing(public_id!),
     retry: false,
   });
 
@@ -49,7 +49,7 @@ export const Listing = () => {
           </div>
           <br />
           <a
-            href={data.url || `https://t.me/${data.handle?.replace('@', '') || slug}`}
+            href={data.url || `https://t.me/${data.handle?.replace('@', '')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"
