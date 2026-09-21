@@ -56,7 +56,7 @@ def get_demo_tabs() -> list[dict]:
             tabs.append({
                 "period_type": period_type,
                 "active_count": count,
-                "ends_at": ends_at.isoformat(),
+                "ends_at": ends_at.isoformat() if ends_at else None,
                 "seconds_remaining": seconds_until_period_end(period_type, ref)
             })
     return tabs
@@ -129,7 +129,7 @@ def get_demo_daily_history() -> list[dict]:
         
         history.append({
             "period_key": period_key,
-            "ends_at": ends_at.isoformat(),
+            "ends_at": ends_at.isoformat() if ends_at else None,
             "top3": top3
         })
     return history
