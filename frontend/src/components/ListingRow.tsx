@@ -73,7 +73,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
             </span>
           ) : (
             <span className="adlabel">
-              Reklama · <span className="num">{item.price} B</span> to'langan
+              <span className="num">{item.price} B</span>
             </span>
           )}
         </p>
