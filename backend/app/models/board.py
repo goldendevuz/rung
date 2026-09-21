@@ -35,11 +35,11 @@ class Board(Base, IDMixin, TimestampMixin):
 class BoardEntry(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "board_entries"
 
-    board_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False, index=True
+    board_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("boards.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    listing_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, index=True
+    listing_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
     # paid_units: whole B * 1000; 0 for free catalog entries

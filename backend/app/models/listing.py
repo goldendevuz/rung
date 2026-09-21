@@ -28,8 +28,8 @@ class Listing(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     url: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     # Category FK
-    category_id: Mapped[str | None] = mapped_column(
-        String(36), ForeignKey("categories.id", ondelete="SET NULL"), nullable=True, index=True
+    category_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True, index=True
     )
     category: Mapped["Category"] = relationship("Category", back_populates="listings")  # noqa: F821
 

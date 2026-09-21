@@ -92,7 +92,7 @@ services:
     environment:
       TZ: ${TZ:-Asia/Tashkent}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      DATABASE_URL: postgresql+asyncpg://rung:${POSTGRES_PASSWORD}@postgres_prod:5432/rung
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -110,7 +110,7 @@ services:
     environment:
       TZ: ${TZ:-Asia/Tashkent}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      DATABASE_URL: postgresql+asyncpg://rung:${POSTGRES_PASSWORD}@postgres_prod:5432/rung
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
     depends_on:
       postgres_prod:
         condition: service_healthy
@@ -125,7 +125,7 @@ services:
     environment:
       TZ: ${TZ:-Asia/Tashkent}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      DATABASE_URL: postgresql+asyncpg://rung:${POSTGRES_PASSWORD}@postgres_prod:5432/rung
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
@@ -180,7 +180,7 @@ services:
     environment:
       TZ: ${TZ:-Asia/Tashkent}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      DATABASE_URL: postgresql+asyncpg://rung:${POSTGRES_PASSWORD}@postgres_prod:5432/rung
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       REDIS_URL: ${REDIS_URL:-redis://redis_prod:6379/0}
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
@@ -239,7 +239,7 @@ services:
     environment: &id003
       TZ: ${TZ:-Asia/Tashkent}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      DATABASE_URL: postgresql+asyncpg://rung:${POSTGRES_PASSWORD}@postgres_prod:5432/rung
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       REDIS_URL: ${REDIS_URL:-redis://redis_prod:6379/0}
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
