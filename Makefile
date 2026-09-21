@@ -74,5 +74,5 @@ audit:
 		bash -c "mkdir -p /tmp/pw && cd /tmp/pw && \
 		  npm init -y -q 2>/dev/null && \
 		  npm install playwright@$(PW_VER) --no-package-lock -q && \
-		  node /tmp/audit.mjs"
+		  cp /tmp/audit.mjs . && node audit.mjs"
 
