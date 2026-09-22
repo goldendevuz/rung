@@ -19,7 +19,7 @@ from app.models.stats import ListingStatsDaily
 router = APIRouter(tags=["clicks"])
 
 
-@router.get("/go/{listing_id}")
+@router.api_route("/go/{listing_id}", methods=["GET", "HEAD"])
 async def redirect_to_listing(
     listing_id: str,
     request: Request,
