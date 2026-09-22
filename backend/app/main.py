@@ -12,6 +12,7 @@ from app.core.config import get_settings
 from app.api.v1.router import router as api_v1_router
 from app.demo.fixtures import (
     get_demo_categories,
+    get_demo_listing,
     get_demo_stats,
     get_demo_tabs,
     get_demo_board_current,
@@ -65,50 +66,35 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+
 @app.middleware("http")
 async def demo_mode_middleware(request: Request, call_next):
     if request.headers.get("x-rung-demo") == "1":
         if request.method not in ["GET", "OPTIONS"]:
             return JSONResponse(status_code=403, content={"detail": "Demo rejimida ruxsat etilmagan"})
-            
+
         path = request.url.path
+
         if path == "/api/v1/categories":
             return JSONResponse(content=get_demo_categories())
+
         elif path == "/api/v1/stats/public":
             return JSONResponse(content=get_demo_stats())
+
         elif path == "/api/v1/boards/tabs":
             return JSONResponse(content=get_demo_tabs())
+
         elif path == "/api/v1/boards/daily/history":
             return JSONResponse(content=get_demo_daily_history())
+
         elif path.startswith("/api/v1/boards/") and path.endswith("/current"):
             period_type = path.split("/")[-2]
             page = int(request.query_params.get("page", 1))
             category = request.query_params.get("category")
             q = request.query_params.get("q")
             return JSONResponse(content=get_demo_board_current(period_type, page, category, q))
-        elif "/api/v1/listings/" in path:
-            if "_kodlash_uz_" in path:
-                return JSONResponse(content={
-                    "public_id": "_kodlash_uz_",
-                    "handle": "@kodlash_uz",
-                    "name": "Kodlash.uz",
-                    "description": "O'zbekistondagi eng yirik dasturlash kanali. Bizning kanalda siz dasturlash sirlarini organishingiz, python, javascript, va boshqa dasturlash tillari boyicha darslarni kuzatib borishingiz mumkin. Har kuni yangi malumotlar va qiziqarli maqolalar chop etiladi. Shuningdek, bizning obunachilarimiz orasida tajribali mutaxassislar ham mavjud bo'lib, ular sizga maslahatlar berishadi. Bu O'zbekistonning eng katta IT hamjamiyati bo'lib, bu yerda o'rganish, ishlash va rivojlanish uchun barcha imkoniyatlar mavjud. Biz bilan birga bo'ling va o'z bilimingizni oshiring!",
-                    "category_slug": "dasturlash",
-                    "category_color": "#2563EB",
-                    "subscribers": 84200,
-                    "verified": True,
-                    "claimed": True,
-                    "free_label": None,
-                    "gradient_start": "#2563EB",
-                    "gradient_end": "#1E3A8A",
-                    "clickthroughs": 1289,
-                    "created_at": "2026-05-24T08:08:05.033794Z",
-                    "status": "active"
-                })
-            elif "yoq-bunday-kanal" in path:
-                return JSONResponse(status_code=404, content={"detail": "Not Found"})
+
         elif path.startswith("/api/v1/boards/") and path.endswith("/quote"):
-            # Mock quote for demo
             board_id = path.split("/")[-2]
             target_rank = int(request.query_params.get("target_rank", 1))
             return JSONResponse(content={
@@ -120,7 +106,20 @@ async def demo_mode_middleware(request: Request, call_next):
                 "min_cost_units": 50000,
                 "resulting_rank": target_rank,
             })
-            
+
+        elif path.startswith("/api/v1/listings/"):
+            # Extract public_id from path: /api/v1/listings/<public_id>
+            parts = path.split("/")
+            if len(parts) >= 5:
+                public_id = parts[4]
+                if public_id == "yoq-bunday-kanal":
+                    return JSONResponse(status_code=404, content={"detail": "Not Found"})
+                listing = get_demo_listing(public_id)
+                if listing is not None:
+                    return JSONResponse(content=listing)
+                # Unknown demo listing → 404
+                return JSONResponse(status_code=404, content={"detail": "Listing not found"})
+
     response = await call_next(request)
     return response
 
