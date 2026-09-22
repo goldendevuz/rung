@@ -208,7 +208,7 @@ export function Home() {
                 );
               })}
             </div>
-            {boardPage && boardPage.total_pages > 1 && (
+            {boardPage && boardPage.total > 0 && boardPage.total_pages > 1 && (
               <div className="pager" id="pager">
                 <button 
                   className="pg-btn" 
@@ -225,7 +225,7 @@ export function Home() {
                 >›</button>
               </div>
             )}
-            {boardPage && (
+            {boardPage && boardPage.total > 0 && (
               <p className="pg-info" id="pagerInfo">
                 {((page - 1) * boardPage.page_size) + 1}–{Math.min(boardPage.total, page * boardPage.page_size)} / jami {boardPage.total} kanal
               </p>
