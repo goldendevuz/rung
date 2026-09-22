@@ -1,0 +1,62 @@
+docker run --rm --network host \
+	-e BASE=https://rung.shats.uz \
+	-e EXPECT_DEMO=true \
+	-v /home/kai/projects/rung/deploy/audit/audit.mjs:/tmp/audit.mjs:ro \
+	-v /home/kai/projects/rung/deploy/audit/shots:/tmp/pw/shots \
+	mcr.microsoft.com/playwright:v1.46.0-jammy \
+	bash -c "mkdir -p /tmp/pw && cd /tmp/pw && \
+	  npm init -y -q 2>/dev/null && \
+	  npm install playwright@1.46.0 --no-package-lock -q && \
+	  cp /tmp/audit.mjs . && node audit.mjs"
+Wrote to /tmp/pw/package.json:
+
+{
+  "name": "pw",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
+
+
+
+
+added 2 packages, and audited 3 packages in 9s
+
+1 high severity vulnerability
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+{"mode":"normal","route":"/","status":200,"chars":2895,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/kunlik","status":200,"chars":272,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/kategoriyalar","status":200,"chars":623,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/qoshish","status":200,"chars":939,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/haqida","status":200,"chars":1098,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/qoidalar","status":200,"chars":1528,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/kirish","status":200,"chars":621,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/login","status":200,"chars":621,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/p/yoq-bunday-kanal","status":200,"chars":311,"errors":[],"hasScroll":false}
+{"mode":"normal","route":"/mavjud-emas","status":200,"chars":322,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/","status":200,"chars":2931,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/kunlik","status":200,"chars":305,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/kategoriyalar","status":200,"chars":656,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/qoshish","status":200,"chars":972,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/haqida","status":200,"chars":1131,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/qoidalar","status":200,"chars":1561,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/kirish","status":200,"chars":654,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/login","status":200,"chars":654,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/p/yoq-bunday-kanal","status":200,"chars":344,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/mavjud-emas","status":200,"chars":355,"errors":[],"hasScroll":false}
+{"mode":"demo","route":"/p/_kodlash_uz_","status":200,"chars":344,"errors":["404 /api/v1/listings/_kodlash_uz_","Failed to load resource: the server responded with a status of 404 ()"],"hasScroll":false}
+
+AUDIT FAILED:
+ - demo /p/_kodlash_uz_: only 344 chars (min 500)
+ - demo /p/_kodlash_uz_: 2 console/API errors: 404 /api/v1/listings/_kodlash_uz_ | Failed to load resource: the server responded with a status of 404 ()
+make: *** [Makefile:68: audit] Error 1

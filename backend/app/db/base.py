@@ -1,7 +1,8 @@
 """SQLAlchemy declarative base and shared mixins."""
 from __future__ import annotations
 
-import uuid
+import secrets
+import string
 from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, String, func
@@ -12,12 +13,16 @@ class Base(DeclarativeBase):
     pass
 
 
+def generate_public_id() -> str:
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(12))
+
 class IDMixin:
-    """Integer PK + public UUID."""
+    """Integer PK + public ID."""
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    uuid: Mapped[str] = mapped_column(
-        String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4())
+    public_id: Mapped[str] = mapped_column(
+        String(12), unique=True, nullable=False, index=True, default=generate_public_id
     )
 
 

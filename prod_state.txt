@@ -1,0 +1,38 @@
+coolify-ubuntu-4gb-nbg1-1
+/root
+3422ba5 Fix board_id validation error and audit.mjs dynamic fetching
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	backend/remove_demo.py
+
+nothing added to commit but untracked files present (use "git add" to track)
+NAME                   IMAGE                           COMMAND                  SERVICE         CREATED          STATUS                          PORTS
+rung-backend-1         rung-backend                    "uvicorn app.main:ap…"   backend         30 minutes ago   Up 29 minutes (healthy)         127.0.0.1:8000->8000/tcp
+rung-backend_prod-1    rung-backend_prod               "uvicorn app.main:ap…"   backend_prod    39 minutes ago   Up 39 minutes (healthy)         
+rung-bot_prod-1        rung-bot_prod                   "python -m main"         bot_prod        43 minutes ago   Restarting (1) 19 seconds ago   
+rung-caddy-1           rung-caddy                      "caddy run --config …"   caddy           43 minutes ago   Up 43 minutes (healthy)         80/tcp, 443/tcp, 2019/tcp, 443/udp
+rung-cloudflared-1     cloudflare/cloudflared:latest   "cloudflared --no-au…"   cloudflared     43 minutes ago   Up 43 minutes                   
+rung-postgres-1        postgres:16-alpine              "docker-entrypoint.s…"   postgres        30 minutes ago   Up 30 minutes (healthy)         127.0.0.1:5432->5432/tcp
+rung-postgres_prod-1   postgres:16-alpine              "docker-entrypoint.s…"   postgres_prod   12 hours ago     Up 12 hours (healthy)           5432/tcp
+rung-redis-1           redis:7-alpine                  "docker-entrypoint.s…"   redis           30 minutes ago   Up 30 minutes (healthy)         127.0.0.1:6379->6379/tcp
+rung-redis_prod-1      redis:7-alpine                  "docker-entrypoint.s…"   redis_prod      12 hours ago     Up 12 hours (healthy)           6379/tcp
+rung-worker-1          rung-worker                     "python -m app.worke…"   worker          30 minutes ago   Up 29 minutes (healthy)         
+rung-worker_prod-1     rung-worker_prod                "python -m app.worke…"   worker_prod     39 minutes ago   Up 39 minutes (healthy)         
+CONTAINER              REPOSITORY               TAG                 PLATFORM            IMAGE ID            SIZE                CREATED
+rung-backend-1         rung-backend             latest              linux/amd64         75411ea7649e        375MB               30 minutes ago
+rung-backend_prod-1    rung-backend_prod        latest              linux/amd64         3e2962db5c4a        375MB               39 minutes ago
+rung-bot_prod-1        rung-bot_prod            latest              linux/amd64         0bee77511729        194MB               43 minutes ago
+rung-caddy-1           rung-caddy               latest              linux/amd64         b0a59552add9        64MB                43 minutes ago
+rung-cloudflared-1     cloudflare/cloudflared   latest              linux/amd64         79d7f1cf5d9a        63.9MB              3 weeks ago
+rung-migrate-1         rung-migrate             latest              linux/amd64         756aac91e0b1        375MB               30 minutes ago
+rung-migrate_prod-1    rung-migrate_prod        latest              linux/amd64         419b8c8b780c        375MB               39 minutes ago
+rung-postgres-1        postgres                 16-alpine           linux/amd64         75f5a96988cd        294MB               5 weeks ago
+rung-postgres_prod-1   postgres                 16-alpine           linux/amd64         75f5a96988cd        294MB               5 weeks ago
+rung-redis-1           redis                    7-alpine            linux/amd64         5509c0097c60        39.1MB              4 weeks ago
+rung-redis_prod-1      redis                    7-alpine            linux/amd64         5509c0097c60        39.1MB              4 weeks ago
+rung-worker-1          rung-worker              latest              linux/amd64         3502bc386a35        375MB               30 minutes ago
+rung-worker_prod-1     rung-worker_prod         latest              linux/amd64         5725cfdaa9f1        375MB               39 minutes ago
+

@@ -41,8 +41,8 @@ def get_demo_stats() -> dict:
     return {
         "total_listings": len(CHANNELS) + len(FREE_CHANNELS),
         "total_entries": len(CHANNELS) * 4,  # roughly
-        "online_now": None,
-        "visits_today": None,
+        "online_now": 28,
+        "visits_today": 1420,
         "total_paid_units": 150000
     }
 

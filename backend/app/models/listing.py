@@ -7,18 +7,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, IDMixin, SoftDeleteMixin, TimestampMixin
 
 
-import secrets
-import string
-
-def generate_public_id() -> str:
-    alphabet = string.ascii_letters + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(8))
 
 class Listing(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "listings"
 
     # Identity
-    public_id: Mapped[str] = mapped_column(String(12), unique=True, nullable=False, index=True, default=generate_public_id)
     kind: Mapped[str] = mapped_column(String(32), nullable=False, default="channel")
 
     # Content
