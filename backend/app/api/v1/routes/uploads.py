@@ -18,8 +18,12 @@ router = APIRouter(prefix="/uploads", tags=["uploads"])
 logger = logging.getLogger(__name__)
 
 # Base upload directory
-UPLOAD_DIR = Path("uploads/logos")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR = Path("/app/uploads/logos")
+try:
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    UPLOAD_DIR = Path("/tmp/uploads/logos")
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_IMAGE_TYPES = {
     "image/jpeg": ".jpg",

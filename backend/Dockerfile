@@ -16,7 +16,7 @@ RUN uv pip install --system --no-cache -r pyproject.toml && \
 
 COPY . .
 
-RUN useradd -m -u 1000 appuser && chown -R appuser /app
+RUN mkdir -p /app/uploads/logos && useradd -m -u 1000 appuser && chown -R appuser /app
 USER appuser
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
