@@ -24,5 +24,11 @@
   - `PATCH /api/v1/users/me/listings/{id}` for updating channel logo, name, and description.
   - `AddListingModal.tsx` now has a dedicated, modern image upload input with preview, change, and remove controls.
   - `ListingRow.tsx`, `Listing.tsx`, and `Profile.tsx` updated to render logos with smooth fallback to gradient initials.
+- Live Analytics & DataFast Public Dashboard:
+  - DataFast tracking script active in `frontend/index.html`.
+  - Topbar `.live` badge dynamically rendered with pulsing green indicator, active visitor counts, daily visit metrics, and direct link to public DataFast dashboard (`https://datafa.st/share/6ab279beba28fc830cd8714b`).
+  - `/statistika` route added with live metric summary cards and embedded DataFast analytics dashboard.
+  - Prototype footer integrated in `Layout.tsx` with links to Qoidalar, Savol-javob, Shartlar, Maxfiylik, and Jonli statistika.
+
 
 

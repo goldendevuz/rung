@@ -11,6 +11,7 @@ import { Profile } from './pages/Profile';
 import { AddChannel } from './pages/AddChannel';
 import { Listing } from './pages/Listing';
 import { Wallet } from './pages/Wallet';
+import { Statistika } from './pages/Statistika';
 import { AuthProvider } from './contexts/AuthContext';
 
 // Dummy components for other pages until we implement them
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="/profil" element={<Profile />} />
               <Route path="/hamyon" element={<Wallet />} />
               <Route path="/wallet" element={<Wallet />} />
+              <Route path="/statistika" element={<Statistika />} />
               <Route path="/p/:id" element={<Listing />} />
               <Route path="*" element={<NotFound />} />
             </Route>

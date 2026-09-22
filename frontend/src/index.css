@@ -106,8 +106,14 @@ main{flex:1;padding-block:0 56px}
 .brand-mark i:nth-child(1){width:9px;opacity:.45}
 .brand-mark i:nth-child(2){width:14px;opacity:.72}
 .brand-mark i:nth-child(3){width:20px}
-.live{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-pill);font-size:12.5px;color:var(--ink-2);background:var(--surface)}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 3px var(--lime-soft)}
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(0.95); opacity: 0.85; box-shadow: 0 0 0 0 rgba(184, 240, 60, 0.6); }
+  50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 0 5px rgba(184, 240, 60, 0); }
+}
+.live{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-pill);font-size:12.5px;color:var(--ink-2);background:var(--surface);transition:all .15s ease}
+a.live:hover{border-color:var(--lime);color:var(--ink);background:rgba(184, 240, 60, 0.05)}
+a.live:hover .stat-arrow{color:var(--lime-text)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 3px var(--lime-soft);animation:pulse-dot 2s infinite ease-in-out;flex-shrink:0}
 .live b{color:var(--ink);font-weight:700}
 .topnav{margin-left:auto;display:flex;align-items:center;gap:4px}
 .topnav a{padding:7px 11px;border-radius:var(--r-sm);font-size:14px;font-weight:600;color:var(--ink-2)}

@@ -57,7 +57,8 @@ export function Topbar() {
 
   const { data: stats } = useQuery({
     queryKey: ['stats'],
-    queryFn: fetchPublicStats
+    queryFn: fetchPublicStats,
+    refetchInterval: 30000,
   });
 
   const showLiveStats = stats?.online_now != null;
@@ -94,11 +95,20 @@ export function Topbar() {
             rung
           </Link>
           {showLiveStats && (
-            <span className="live">
+            <a
+              href="https://datafa.st/share/6ab279beba28fc830cd8714b"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="live"
+              title="Jonli statistikani ko'rish (DataFast)"
+              style={{ textDecoration: 'none' }}
+            >
               <span className="dot" />
-              <b className="num">{stats.online_now || 0}</b> onlayn{' '}
-              <span className="hide-xs">· bugun <b className="num">{new Intl.NumberFormat('ru-RU').format(stats.visits_today || 0).replace(',', ' ')}</b> tashrif · statistika →</span>
-            </span>
+              <b className="num">{stats.online_now || 1}</b> onlayn{' '}
+              <span className="hide-xs">
+                · bugun <b className="num">{new Intl.NumberFormat('uz-UZ').format(stats.visits_today || 1).replace(',', ' ')}</b> tashrif · <span className="stat-arrow" style={{ textDecoration: 'underline' }}>statistika →</span>
+              </span>
+            </a>
           )}
           <nav className="topnav">
             <Link to="/kunlik" className="hide-sm">Kunlik</Link>
