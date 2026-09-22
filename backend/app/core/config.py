@@ -40,10 +40,16 @@ class Settings(BaseSettings):
     PAYNET_ENABLED: bool = False
     GOOGLE_AUTH_ENABLED: bool = False
     SHOW_DEMO_BUTTON: bool = False
-    PAYMENT_PROVIDER_TEXT: str = "to'lov tez orada"
+    PAYMENT_PROVIDER_TEXT: str = "avtomatik to'lov: Click, Payme (inPAY)"
     SHOW_PAYMENT_DETAILS: bool = False
     SHOW_LIVE_STATS: bool = False
     ENABLED_LISTING_KINDS: str = 'channel'
+
+    INPAY_MERCHANT_ID: str = ''
+    INPAY_MERCHANT_TOKEN: str = ''
+    INPAY_CALLBACK_URL: str = 'https://rung.shats.uz/api/v1/payments/inpay/callback'
+    INPAY_RETURN_URL: str = 'https://rung.shats.uz/hamyon'
+    INPAY_BASE_URL: str = 'https://inpay.uz/api/v1'
 
     B_UNIT_UZS: int = 1000
     STARS_UNITS_PER_STAR: int = 200

@@ -191,7 +191,21 @@ export function Profile() {
             </h1>
             <div style={{ color: 'var(--fg-dim)', fontSize: '14px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
               <span>ID: <strong>{user.telegram_id}</strong></span>
-              <span>Balans: <strong style={{ color: 'var(--brand)', fontFamily: 'var(--mono)', fontSize: '16px' }}>{user.balance?.toLocaleString()} B</strong></span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Balans: <strong style={{ color: 'var(--brand)', fontFamily: 'var(--mono)', fontSize: '16px' }}>{user.balance?.toLocaleString()} B</strong>
+                <Link to="/hamyon" style={{
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  background: 'rgba(184, 240, 60, 0.15)',
+                  color: 'var(--brand)',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  textDecoration: 'none',
+                  border: '1px solid rgba(184, 240, 60, 0.3)'
+                }}>
+                  + To'ldirish
+                </Link>
+              </span>
             </div>
           </div>
           <button className="btn-secondary" onClick={logout} style={{ padding: '8px 16px', borderRadius: '10px' }}>

@@ -57,10 +57,45 @@ export async function fetchPublicConfig() {
   }>;
 }
 
-export async function fetchListing(id: string) {
-  const res = await fetch(`${API_BASE}/listings/${id}`, { headers: getHeaders() });
-  if (!res.ok) throw new Error('Not found');
+export async function fetchListing(slug: string) {
+  const res = await fetch(`${API_BASE}/listings/${slug}`, { headers: getHeaders() });
+  if (!res.ok) {
+    if (res.status === 404) throw new Error('Not Found');
+    throw new Error('Server Error');
+  }
   return res.json();
+}
+
+export async function createTopup(b_amount: number) {
+  const res = await fetch(`${API_BASE}/wallet/topup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getHeaders(),
+    },
+    body: JSON.stringify({ b_amount }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "To'lovni boshlashda xatolik yuz berdi");
+  }
+  return res.json() as Promise<{ pay_url: string; order_id: string }>;
+}
+
+export async function fetchTopupStatus(orderId: string) {
+  const res = await fetch(`${API_BASE}/wallet/topup/${orderId}`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error('Holatni tekshirishda xatolik yuz berdi');
+  }
+  return res.json() as Promise<{
+    order_id: string;
+    b_amount: number;
+    amount_uzs: number;
+    status: 'pending' | 'completed' | 'failed';
+    created_at: string;
+  }>;
 }
 
 export async function fetchMyListings() {

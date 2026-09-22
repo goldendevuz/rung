@@ -116,6 +116,23 @@ export function Topbar() {
             )}
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Link to="/hamyon" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '5px 12px',
+                  borderRadius: '20px',
+                  background: 'rgba(184, 240, 60, 0.1)',
+                  border: '1px solid rgba(184, 240, 60, 0.25)',
+                  color: 'var(--brand)',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  textDecoration: 'none',
+                  fontFamily: 'var(--mono)'
+                }} title="Hamyonni to'ldirish">
+                  <span>{user.balance?.toLocaleString() ?? 0} B</span>
+                  <span style={{ fontSize: '11px', opacity: 0.8 }}>+</span>
+                </Link>
                 <Link to="/profil" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'var(--fg)', fontWeight: '500' }} className="user-profile-link">
                   <UserAvatar photoUrl={user.photo_url} name={user.first_name || user.username} />
                   <span className="hide-sm">{user.first_name || user.username}</span>

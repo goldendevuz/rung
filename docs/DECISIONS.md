@@ -45,3 +45,15 @@
 ### Hero and claim sheet copy
 - Neither mentions Stars nor Paynet. Payment provider line comes from `public-config.payment_provider_text`.
 - Rules page: Stars/Paynet-specific sentences removed from the "To'lovdan keyin" section.
+
+## S4 Decisions (2026-09-22)
+
+### inPAY.uz Automatic UZS Top-Up
+- Replaces Checkout.uz with **inPAY.uz** hosted checkout for automatic UZS payments (`1 B = 1000 UZS`).
+- Flow: Client calls `POST /api/v1/wallet/topup`, backend requests bearer token from inPAY (`GET /authorization/`, cached in Redis for ~23h), calls `POST /create/` with `callback_url` and `return_url`, stores pending `TopupOrder`, and returns `{pay_url, order_id}`.
+- Hosted checkout only (`pay_url`). Never calls `/api/v1/cardsystem/*`.
+- Webhook verification: `POST /api/v1/payments/inpay/callback` receives untrusted webhook. Backend verifies server-to-server via `GET /api/v1/transactions/?order_id=`. Wallet is credited only if status is `"success"` and amount matches.
+- Idempotency & Concurrency: DB unique constraint on `ref_id` in `LedgerEntry` prevents duplicate credit. Topup order row lock ensures state transitions (`pending` -> `completed`).
+- Reconciliation: arq worker runs `reconcile_inpay_topups` cron every minute checking pending orders older than 2 minutes against inPAY.
+- Polling: `GET /api/v1/wallet/topup/:order_id` provides authoritative DB status for frontend polling on return.
+

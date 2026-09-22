@@ -1,10 +1,19 @@
-"""arq worker entry point — S0 skeleton."""
+"""arq worker entry point."""
 from __future__ import annotations
 import asyncio
 import logging
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import arq
+from arq import cron
+from sqlalchemy import select
+
+from app.db.session import async_session_factory
+from app.models.topup import TopupOrder
+from app.models.user import User
+from app.models.ledger import LedgerEntry
+from app.services.inpay import verify_inpay_transaction, InPayError
 
 logger = logging.getLogger(__name__)
 HEARTBEAT = Path('/tmp/worker_heartbeat')
@@ -17,6 +26,74 @@ async def noop(ctx: dict) -> str:  # type: ignore[type-arg]
     return 'ok'
 
 
+async def reconcile_inpay_topups(ctx: dict) -> int:  # type: ignore[type-arg]
+    """
+    Reconciliation job (arq, every 1 minute):
+    Find top-up rows still pending for more than ~2 minutes,
+    call GET /transactions/?order_id= for each, and apply credit-only-after-server-check.
+    """
+    HEARTBEAT.touch()
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=2)
+    reconciled_count = 0
+
+    async with async_session_factory() as db:
+        stmt = (
+            select(TopupOrder)
+            .where(
+                TopupOrder.status == "pending",
+                TopupOrder.created_at <= cutoff,
+            )
+            .limit(50)
+        )
+        result = await db.execute(stmt)
+        pending_orders = result.scalars().all()
+
+        for order in pending_orders:
+            try:
+                verified = await verify_inpay_transaction(order.order_id)
+            except InPayError as e:
+                logger.warning("Reconciliation verify error for %s: %s", order.order_id, e)
+                continue
+
+            v_status = str(verified.get("status", "")).lower()
+            v_amount = verified.get("amount")
+            v_tx_id = verified.get("transaction_id") or ""
+
+            if v_status == "success" and v_amount == order.amount_uzs:
+                user_stmt = select(User).where(User.id == order.user_id).with_for_update()
+                user = (await db.execute(user_stmt)).scalar_one_or_none()
+                if not user:
+                    continue
+
+                ledger_stmt = select(LedgerEntry).where(LedgerEntry.ref_id == order.order_id)
+                existing_ledger = (await db.execute(ledger_stmt)).scalar_one_or_none()
+                if not existing_ledger:
+                    user.balance += order.b_amount
+                    ledger_entry = LedgerEntry(
+                        user_id=user.id,
+                        delta_units=order.b_amount,
+                        kind="topup_inpay_uz",
+                        ref_type="inpay_order",
+                        ref_id=order.order_id,
+                        balance_after=user.balance,
+                    )
+                    db.add(ledger_entry)
+
+                order.status = "completed"
+                order.transaction_id = v_tx_id
+                await db.commit()
+                reconciled_count += 1
+                logger.info("Reconciliation credited %s B for order %s", order.b_amount, order.order_id)
+
+            elif v_status in ["failed", "canceled", "cancelled", "rejected"]:
+                order.status = "failed"
+                order.transaction_id = v_tx_id
+                await db.commit()
+                logger.info("Reconciliation marked order %s as failed", order.order_id)
+
+    return reconciled_count
+
+
 async def startup(ctx: dict) -> None:  # type: ignore[type-arg]
     logger.info('Worker starting')
     HEARTBEAT.touch()
@@ -27,10 +104,10 @@ async def shutdown(ctx: dict) -> None:  # type: ignore[type-arg]
 
 
 class WorkerSettings:
-    functions = [noop]
+    functions = [noop, reconcile_inpay_topups]
+    cron_jobs = [cron(reconcile_inpay_topups, minute=None, second=0)]
     on_startup = startup
     on_shutdown = shutdown
-    # Write heartbeat on every job completion
     after_job_end = None
 
 
