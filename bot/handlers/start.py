@@ -21,7 +21,13 @@ async def cmd_start(message: Message, command: CommandObject) -> None:
             return
             
         await redis_client.set(key, f"confirmed:{message.from_user.id}", ex=300)
-        await message.answer("Kirish tasdiqlandi, saytga qaytishingiz mumkin")
+        
+        from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+        webapp_url = os.getenv('WEBAPP_URL', 'https://rung.uz')
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="Saytga qaytish", url=webapp_url)]
+        ])
+        await message.answer("Kirish tasdiqlandi, saytga qaytishingiz mumkin", reply_markup=kb)
         return
 
     await message.answer(
