@@ -124,11 +124,43 @@ async def create_listing(
     g_start = random.choice(colors)
     g_end = random.choice(colors)
     
+    # Clean handle and build URL
+    raw_handle = req.handle.strip()
+    clean_handle = raw_handle
+    for prefix in [
+        "https://t.me/", "http://t.me/", "t.me/",
+        "https://telegram.me/", "http://telegram.me/", "telegram.me/"
+    ]:
+        if clean_handle.lower().startswith(prefix):
+            clean_handle = clean_handle[len(prefix):]
+            break
+    clean_handle = clean_handle.lstrip("@").strip("/")
+    proper_handle = f"@{clean_handle}" if clean_handle else raw_handle
+    proper_url = f"https://t.me/{clean_handle}" if clean_handle else f"https://t.me/{raw_handle}"
+
+    # Auto-fetch subscriber count from Telegram Bot API if public channel
+    subscribers = 0
+    if clean_handle and settings.BOT_TOKEN:
+        try:
+            async with httpx.AsyncClient(timeout=4.0) as client:
+                res = await client.get(
+                    f"https://api.telegram.org/bot{settings.BOT_TOKEN}/getChatMemberCount",
+                    params={"chat_id": proper_handle}
+                )
+                if res.is_success:
+                    data = res.json()
+                    if data.get("ok"):
+                        subscribers = int(data.get("result", 0))
+        except Exception:
+            pass
+
     listing = Listing(
         kind=req.kind,
-        handle=req.handle,
+        handle=proper_handle,
         name=req.name,
         description=req.description,
+        url=proper_url,
+        subscribers=subscribers,
         category_id=cat.id,
         owner_id=user.id,
         status="active",

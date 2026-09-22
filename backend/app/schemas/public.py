@@ -51,7 +51,7 @@ class ListingResponse(ListingMini):
 ListingCompact = ListingMini
 
 
-class ListingDetail(ListingCompact):
+class ListingDetail(ListingResponse):
     """Extended listing info for /listings/{public_id}."""
     status: str
 

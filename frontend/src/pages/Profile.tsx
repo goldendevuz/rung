@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { fetchMyListings } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import AddListingModal from '../components/AddListingModal';
+import { getTelegramUrl, cleanTelegramHandle } from '../utils/formatters';
 
 function ChannelCard({ listing }: { listing: any }) {
   const gradient = listing.gradient_start && listing.gradient_end 
@@ -14,9 +15,8 @@ function ChannelCard({ listing }: { listing: any }) {
     ? listing.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
     : 'CH';
 
-  const tgUrl = listing.handle?.startsWith('http') 
-    ? listing.handle 
-    : `https://t.me/${(listing.handle || '').replace(/^@/, '')}`;
+  const tgUrl = getTelegramUrl(listing.handle, listing.url);
+  const displayHandle = cleanTelegramHandle(listing.handle) || listing.handle;
 
   return (
     <div 
@@ -81,7 +81,7 @@ function ChannelCard({ listing }: { listing: any }) {
               rel="noopener noreferrer"
               style={{ color: 'var(--brand)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
             >
-              {listing.handle?.startsWith('@') || listing.handle?.startsWith('http') ? listing.handle : `@${listing.handle}`}
+              {displayHandle}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
             </a>
             {listing.category_slug && (

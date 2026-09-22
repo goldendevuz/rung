@@ -203,6 +203,7 @@ select.field{flex:0 1 220px;appearance:none;cursor:pointer;font-weight:600;font-
 }
 .row:hover .claim-pill,.row:focus-within .claim-pill{opacity:1;pointer-events:auto;transform:translateY(-50%) translateX(0)}
 .row:hover .rprice,.row:focus-within .rprice{opacity:0}
+.claim-btn-mobile{display:none}
 @media (hover:none){.claim-pill{position:static;opacity:1;pointer-events:auto;transform:none;display:none}}
 
 .divider{display:flex;align-items:center;gap:16px;margin:26px 0 18px}
@@ -360,6 +361,13 @@ footer .slogan{font-family:var(--mono);font-size:12px;letter-spacing:.06em;margi
   .ava,.row.plain .ava{width:44px;height:44px;border-radius:12px;font-size:16px}
   .rprice{grid-column:3;justify-self:start;text-align:left;font-size:16px}
   .row .rprice{opacity:1!important}
+  .rprice-wrap{grid-column:3;justify-self:start;display:flex;align-items:center;gap:10px}
+  .claim-btn-mobile{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--lime);color:var(--lime-ink);border:0;border-radius:var(--r-pill);
+    padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  .claim-btn-mobile:active{transform:scale(0.97)}
   .rdesc{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .claim-pill{display:none}
   h1.claim{font-size:27px;gap:8px}

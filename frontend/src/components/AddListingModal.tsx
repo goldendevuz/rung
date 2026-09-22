@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchCategories, createListing } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { cleanTelegramHandle } from '../utils/formatters';
 
 interface AddListingModalProps {
   onClose: () => void;
@@ -37,16 +38,15 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
   const mutation = useMutation({
     mutationFn: createListing,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-listings'] });
+      queryClient.invalidateQueries({ queryKey: ['myListings'] });
       queryClient.invalidateQueries({ queryKey: ['board'] });
-      queryClient.invalidateQueries({ queryKey: ['stats'] });
-      queryClient.invalidateQueries({ queryKey: ['tabs'] });
+      queryClient.invalidateQueries({ queryKey: ['publicStats'] });
       refreshUser();
       alert("Kanal muvaffaqiyatli qo'shildi va 1 B to'lov bilan reytingga joylashtirildi!");
       onClose();
     },
-    onError: (err: Error) => {
-      alert(err.message || "Xatolik yuz berdi");
+    onError: (err: any) => {
+      alert(err.message || 'Xatolik yuz berdi');
     }
   });
 
@@ -56,9 +56,10 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
       alert("Iltimos, barcha kerakli maydonlarni to'ldiring.");
       return;
     }
+    const clean = cleanTelegramHandle(handle);
     mutation.mutate({
       kind,
-      handle: handle.trim(),
+      handle: clean || handle.trim(),
       name: name.trim(),
       description: description.trim(),
       category_slug: category,

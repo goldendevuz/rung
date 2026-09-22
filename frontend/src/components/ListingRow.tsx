@@ -1,6 +1,6 @@
 import React from 'react';
 import { initials, nf, subs, formatB } from '../utils/formatters';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ICON_V = (
   <span className="vbadge" title="Egasi tasdiqlangan">
@@ -21,6 +21,7 @@ function Avatar({ ch, className = '' }: { ch: any, className?: string }) {
 }
 
 export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void }) {
+  const navigate = useNavigate();
   const ch = item?.ch || item || {};
   const rank = typeof item?.rank === 'number' ? item.rank : undefined;
   const tinted = rank != null && rank <= 9;
@@ -34,18 +35,22 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
   const styles = tinted && rank != null ? { '--a': ((10 - rank) / 9).toFixed(2) } as React.CSSProperties : {};
   const className = `row ${tinted ? '' : 'plain'}`;
 
-  const hasHoverNone = window.matchMedia("(hover:none)").matches;
+  const handleRowClick = (e: React.MouseEvent) => {
+    // Do not navigate if user clicked on button or link
+    if ((e.target as HTMLElement).closest('button, a')) {
+      return;
+    }
+    if (ch.id) {
+      navigate(`/p/${ch.id}`);
+    }
+  };
 
   return (
     <div 
       className={className} 
-      style={styles} 
+      style={{ ...styles, cursor: 'pointer' }} 
       data-top={tinted ? item.rank : undefined}
-      onClick={() => {
-        if (hasHoverNone && !ch.free && onClaim) {
-          onClaim();
-        }
-      }}
+      onClick={handleRowClick}
     >
       <div className="rank num">{typeof item.rank === 'number' ? `#${item.rank}` : '—'}</div>
       <Avatar ch={ch} />
@@ -62,9 +67,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
           {cat.i ? <span style={{ marginRight: '4px' }}>{cat.i}</span> : <span className="sq" style={{ '--c': cat.c } as any} />}
           <b>{cat.n}</b>
           <span className="sep">·</span>
-          {ch.t} {/* Time added */}
-          <span className="sep">·</span>
-          
+          {ch.t}
           <span className="sep">·</span>
           <span className="num">{subs(ch.s)}</span> obunachi
           <span className="sep">·</span>
@@ -83,8 +86,20 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
       </div>
 
       {!ch.free ? (
-        <>
+        <div className="rprice-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div className="rprice"><span className="num">{item.price}</span> B</div>
+          {onClaim && (
+            <button 
+              className="claim-btn-mobile"
+              title="Bu o'rinni olish"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClaim();
+              }}
+            >
+              Olish
+            </button>
+          )}
           <button 
             className="claim-pill"
             onClick={(e) => {
@@ -94,7 +109,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
           >
             Bu o'rinni <span className="num">{formatB(item.priceUnits + 1000)} B</span> ga oling
           </button>
-        </>
+        </div>
       ) : (
         <div className="rprice"><span style={{ color: 'var(--ink-3)', fontSize: '14px' }}>pulsiz</span></div>
       )}

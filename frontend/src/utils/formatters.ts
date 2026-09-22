@@ -19,3 +19,37 @@ export function formatB(units: number | undefined | null): string {
   const b = units / 1000;
   return Number.isInteger(b) ? b.toString() : b.toString().replace('.', ',');
 }
+
+export function cleanTelegramHandle(handle?: string | null): string {
+  if (!handle) return '';
+  let clean = handle.trim();
+  for (const prefix of [
+    'https://t.me/', 'http://t.me/', 't.me/',
+    'https://telegram.me/', 'http://telegram.me/', 'telegram.me/'
+  ]) {
+    if (clean.toLowerCase().startsWith(prefix)) {
+      clean = clean.slice(prefix.length);
+      break;
+    }
+  }
+  clean = clean.replace(/^@/, '').replace(/\/+$/, '');
+  return clean ? `@${clean}` : '';
+}
+
+export function getTelegramUrl(handle?: string | null, url?: string | null): string {
+  if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+    return url;
+  }
+  if (!handle) return 'https://t.me';
+  const clean = handle.trim();
+  if (clean.startsWith('http://') || clean.startsWith('https://')) {
+    return clean;
+  }
+  if (clean.startsWith('t.me/')) {
+    return `https://${clean}`;
+  }
+  if (clean.startsWith('telegram.me/')) {
+    return `https://${clean}`;
+  }
+  return `https://t.me/${clean.replace(/^@/, '')}`;
+}
