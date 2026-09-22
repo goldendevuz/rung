@@ -282,7 +282,7 @@ services:
     environment: &id006
       TZ: ${TZ:-Asia/Tashkent}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      REDIS_URL: ${REDIS_URL:-redis://redis_prod:6379/0}
       BOT_TOKEN: ${BOT_TOKEN:-}
       BOT_USERNAME: ${BOT_USERNAME:-rung_uz_bot}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?INTERNAL_API_TOKEN is required}
