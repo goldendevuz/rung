@@ -12,4 +12,5 @@ class User(Base, IDMixin, TimestampMixin):
     username: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     first_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     photo_url: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    balance: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

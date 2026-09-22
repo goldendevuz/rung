@@ -76,6 +76,9 @@ async def get_avatar(tg_id: int):
         file_path = data["result"]["file_path"]
         
         file_url = f"https://api.telegram.org/file/bot{settings.BOT_TOKEN}/{file_path}"
-        req = client.build_request("GET", file_url)
-        r = await client.send(req, stream=True)
-        return StreamingResponse(r.aiter_raw(), media_type="image/jpeg")
+        r = await client.get(file_url)
+        if not r.is_success:
+            raise HTTPException(status_code=404, detail="Not found")
+            
+        from fastapi import Response
+        return Response(content=r.content, media_type="image/jpeg")
