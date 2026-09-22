@@ -36,7 +36,7 @@ def verify_telegram_init_data(init_data: str, bot_token: str) -> bool:
         return False
 
 
-def create_session_token(user_id: int) -> str:
+def create_session_token(user_id: str) -> str:
     header = {"alg": "HS256"}
     payload = {
         "sub": str(user_id),
@@ -45,11 +45,11 @@ def create_session_token(user_id: int) -> str:
     }
     return jwt.encode(header, payload, settings.SECRET_KEY).decode("utf-8")
 
-def verify_session_token(token: str) -> Optional[int]:
+def verify_session_token(token: str) -> Optional[str]:
     try:
         claims = jwt.decode(token, settings.SECRET_KEY)
         claims.validate()
-        return int(claims["sub"])
+        return str(claims["sub"])
     except JoseError:
         return None
     except Exception:
