@@ -35,9 +35,21 @@ def _format_listing(ch: dict, clickthroughs: int = 0) -> dict:
 def get_demo_listing(id: str) -> dict | None:
     """Return demo listing data for a given id, or None if not found."""
     ch = _CHANNEL_BY_ID.get(id)
-    if ch is None:
-        return None
-    return _format_listing(ch, ch.get("clicks", 0))
+    if ch is not None:
+        return _format_listing(ch, ch.get("clicks", 0))
+    
+    handles_to_try = [id]
+    if id.startswith('_'):
+        handles_to_try.append('@' + id[1:])
+        handles_to_try.append('@' + id.strip('_'))
+    elif not id.startswith('@'):
+        handles_to_try.append('@' + id)
+        
+    for ch in _ALL_CHANNELS:
+        if ch["handle"] in handles_to_try:
+            return _format_listing(ch, ch.get("clicks", 0))
+            
+    return None
 
 
 def get_demo_categories() -> list[dict]:
