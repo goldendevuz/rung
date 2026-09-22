@@ -72,7 +72,7 @@ async def telegram_miniapp_login(
         max_age=30 * 86400,
     )
     
-    return {"id": user.id, "telegram_id": user.telegram_id, "username": user.username, "first_name": user.first_name, "photo_url": user.photo_url}
+    return {"id": user.id, "telegram_id": user.telegram_id, "username": user.username, "first_name": user.first_name, "photo_url": user.photo_url, "balance": user.balance}
 
 
 @router.post("/telegram/start")
@@ -161,12 +161,12 @@ async def telegram_poll(
             samesite="lax",
             max_age=30 * 86400,
         )
-        return {"id": user.id, "telegram_id": user.telegram_id, "username": user.username, "first_name": user.first_name, "photo_url": user.photo_url}
+        return {"id": user.id, "telegram_id": user.telegram_id, "username": user.username, "first_name": user.first_name, "photo_url": user.photo_url, "balance": user.balance}
 
 
 @router.get("/me")
 async def get_me(user: User = Depends(get_current_user)):
-    return {"id": user.id, "telegram_id": user.telegram_id, "username": user.username, "first_name": user.first_name, "photo_url": user.photo_url}
+    return {"id": user.id, "telegram_id": user.telegram_id, "username": user.username, "first_name": user.first_name, "photo_url": user.photo_url, "balance": user.balance}
 
 
 @router.post("/logout")

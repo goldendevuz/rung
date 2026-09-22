@@ -68,3 +68,16 @@ export async function fetchMyListings() {
   if (!res.ok) throw new Error('Failed to fetch my listings');
   return res.json();
 }
+
+export async function createListing(data: any) {
+  const res = await fetch(`${API_BASE}/users/me/listings`, {
+    method: 'POST',
+    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to create listing');
+  }
+  return res.json();
+}

@@ -82,3 +82,51 @@ async def get_avatar(tg_id: int):
             
         from fastapi import Response
         return Response(content=r.content, media_type="image/jpeg")
+from pydantic import BaseModel
+
+class CreateListingRequest(BaseModel):
+    kind: str
+    handle: str
+    name: str
+    description: str | None = None
+    category_slug: str
+
+@router.post("/me/listings")
+async def create_listing(
+    req: CreateListingRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    from app.models.category import Category
+    from app.models.listing import Listing
+    import random
+    
+    # Check category
+    result = await db.execute(select(Category).where(Category.slug == req.category_slug))
+    cat = result.scalar_one_or_none()
+    if not cat:
+        raise HTTPException(status_code=400, detail="Category not found")
+        
+    # Generate random gradient for missing avatars
+    colors = ["#2563EB", "#1E3A8A", "#7C3AED", "#4C1D95", "#059669", "#064E3B", "#D97706", "#92400E"]
+    g_start = random.choice(colors)
+    g_end = random.choice(colors)
+    
+    listing = Listing(
+        kind=req.kind,
+        handle=req.handle,
+        name=req.name,
+        description=req.description,
+        category_id=cat.id,
+        owner_id=user.id,
+        status="active",
+        verified=False,
+        claimed=True,
+        gradient_start=g_start,
+        gradient_end=g_end
+    )
+    db.add(listing)
+    await db.commit()
+    await db.refresh(listing)
+    
+    return {"id": listing.id}

@@ -6,6 +6,7 @@ export interface User {
   username: string | null;
   first_name: string | null;
   photo_url: string | null;
+  balance: number;
 }
 
 interface AuthContextType {
