@@ -20,49 +20,45 @@ export function Wallet() {
   const [pollOrderId, setPollOrderId] = useState<string | null>(orderIdFromUrl);
   const [pollStatus, setPollStatus] = useState<'pending' | 'completed' | 'failed' | null>(null);
   const [pollData, setPollData] = useState<any>(null);
-  const [isPolling, setIsPolling] = useState<boolean>(false);
 
   // Handle URL order_id polling
   useEffect(() => {
     if (!pollOrderId) return;
 
-    let isMounted = true;
-    setIsPolling(true);
+    let isCancelled = false;
+    let timerId: number | undefined;
+
     setPollStatus('pending');
 
-    const checkStatus = async () => {
+    const poll = async () => {
       try {
         const data = await fetchTopupStatus(pollOrderId);
-        if (!isMounted) return;
+        if (isCancelled) return;
 
         setPollData(data);
         if (data.status === 'completed' || data.status === 'failed') {
           setPollStatus(data.status);
-          setIsPolling(false);
           if (data.status === 'completed') {
-            await refreshUser();
+            refreshUser();
           }
+          return;
         }
       } catch (err) {
         console.error('Error polling topup status:', err);
       }
+
+      if (!isCancelled) {
+        timerId = window.setTimeout(poll, 2000);
+      }
     };
 
-    // First check immediately
-    checkStatus();
-
-    // Poll every 2s while pending
-    const interval = setInterval(() => {
-      if (isMounted && isPolling) {
-        checkStatus();
-      }
-    }, 2000);
+    timerId = window.setTimeout(poll, 200);
 
     return () => {
-      isMounted = false;
-      clearInterval(interval);
+      isCancelled = true;
+      if (timerId) window.clearTimeout(timerId);
     };
-  }, [pollOrderId, isPolling, refreshUser]);
+  }, [pollOrderId]);
 
   const handleAmountSelect = (val: number) => {
     setBAmount(val);
@@ -111,7 +107,6 @@ export function Wallet() {
     setPollOrderId(null);
     setPollStatus(null);
     setPollData(null);
-    setIsPolling(false);
     // Remove query params without page reload
     setSearchParams({});
   };
