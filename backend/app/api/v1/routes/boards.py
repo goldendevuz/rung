@@ -16,6 +16,11 @@ from app.models.board import Board, BoardEntry
 from app.models.category import Category
 from app.models.listing import Listing
 from app.models.stats import ListingStatsDaily
+import uuid
+from pydantic import BaseModel
+
+from app.api.deps import get_current_user
+from app.models.user import User
 from app.schemas.public import (
     BoardEntryOut,
     BoardPage,
@@ -291,3 +296,103 @@ async def get_quote(
         min_cost_units=min_cost,
         resulting_rank=resulting_rank,
     )
+
+
+class ClaimRequest(BaseModel):
+    listing_id: uuid.UUID
+    period_type: str = "all_time"
+    target_rank: int = 1
+    paid_b: int = 1
+
+
+@router.post("/claim")
+async def claim_rank(
+    req: ClaimRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Claim a rank on the board with B coin."""
+    # 1. Verify listing belongs to current user
+    listing_result = await db.execute(
+        select(Listing).where(
+            Listing.id == req.listing_id,
+            Listing.owner_id == current_user.id,
+            Listing.deleted_at.is_(None),
+        )
+    )
+    listing = listing_result.scalar_one_or_none()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Kanal topilmadi yoki sizga tegishli emas")
+
+    # 2. Check balance
+    if current_user.balance < req.paid_b:
+        raise HTTPException(status_code=400, detail="Mablag' yetarli emas. Balansingizda kamida 1 B bo'lishi kerak")
+
+    # 3. Get or create active board
+    ref = now_tashkent()
+    starts_at, ends_at, period_key = get_period_bounds(req.period_type, ref)
+    board_result = await db.execute(
+        select(Board).where(
+            Board.period_type == req.period_type,
+            Board.period_key == period_key,
+            Board.status == "active",
+        )
+    )
+    board = board_result.scalar_one_or_none()
+    if not board:
+        board = Board(
+            period_type=req.period_type,
+            period_key=period_key,
+            starts_at=starts_at,
+            ends_at=ends_at,
+            status="active",
+        )
+        db.add(board)
+        await db.flush()
+
+    # 4. Check active entries on this board
+    entries_result = await db.execute(
+        select(BoardEntry)
+        .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
+        .order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
+    )
+    active_entries = list(entries_result.scalars())
+
+    paid_units = req.paid_b * 1000
+    if req.target_rank <= len(active_entries):
+        holder = active_entries[req.target_rank - 1]
+        min_cost = holder.paid_units + 1000
+    else:
+        min_cost = 1000
+
+    if paid_units < min_cost:
+        raise HTTPException(status_code=400, detail=f"Ushbu o'rin uchun kamida {min_cost // 1000} B to'lash kerak")
+
+    # 5. Soft-replace old active entry for this listing on this board
+    for e in active_entries:
+        if e.listing_id == listing.id:
+            e.status = "replaced"
+
+    # 6. Deduct user balance
+    current_user.balance -= req.paid_b
+
+    # 7. Create new BoardEntry
+    new_entry = BoardEntry(
+        board_id=board.id,
+        listing_id=listing.id,
+        paid_units=paid_units,
+        entered_at=now_tashkent(),
+        status="active",
+    )
+    db.add(new_entry)
+    await db.commit()
+    await db.refresh(new_entry)
+
+    return {
+        "success": True,
+        "entry_id": str(new_entry.id),
+        "paid_b": req.paid_b,
+        "new_balance": current_user.balance,
+        "message": f"Kanal muvaffaqiyatli #{req.target_rank}-o'ringa joylashtirildi!"
+    }
+

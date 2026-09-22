@@ -81,3 +81,17 @@ export async function createListing(data: any) {
   }
   return res.json();
 }
+
+export async function claimRank(data: { listing_id: string; period_type?: string; target_rank?: number; paid_b?: number }) {
+  const res = await fetch(`${API_BASE}/boards/claim`, {
+    method: 'POST',
+    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "O'rinni olishda xatolik yuz berdi");
+  }
+  return res.json();
+}
+
