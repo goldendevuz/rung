@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMyListings } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
@@ -81,7 +81,7 @@ export function Profile() {
               ) : listings && listings.length > 0 ? (
                 <div className="listings-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {listings.map((l: any) => (
-                    <ListingRow key={l.id} item={l} index={-1} />
+                    <ListingRow key={l.id} item={l} />
                   ))}
                 </div>
               ) : (

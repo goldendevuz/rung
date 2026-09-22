@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 export function Topbar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [theme, setTheme] = React.useState(() => localStorage.getItem('theme') || 'dark');
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
