@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     SHOW_DEMO_BUTTON: bool = False
     PAYMENT_PROVIDER_TEXT: str = "avtomatik to'lov: Click, Payme (inPAY)"
     SHOW_PAYMENT_DETAILS: bool = False
-    SHOW_LIVE_STATS: bool = False
+    SHOW_LIVE_STATS: bool = True
     ENABLED_LISTING_KINDS: str = 'channel'
 
     INPAY_MERCHANT_ID: str = ''

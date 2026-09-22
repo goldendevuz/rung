@@ -60,7 +60,7 @@ export function Topbar() {
     queryFn: fetchPublicStats
   });
 
-  const showLiveStats = import.meta.env.VITE_SHOW_LIVE_STATS === 'true' && stats?.online_now != null;
+  const showLiveStats = stats?.online_now != null;
   const { data: publicConfig } = useQuery({
     queryKey: ['public-config'],
     queryFn: fetchPublicConfig,
