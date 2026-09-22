@@ -24,6 +24,8 @@ const PERIOD_NOTES: Record<string, string> = {
   season: "Fasl boshida yangilanadi"
 };
 
+const LAUNCH_DATE = new Date('2026-09-21T00:00:00+05:00');
+
 export function Home() {
   const navigate = useNavigate();
   const { user, mutate: refreshUser } = useAuth();
@@ -339,7 +341,7 @@ export function Home() {
         </div>
 
         <section className="stats">
-          <h2>Rung statistikasi:</h2>
+          <h2>Rung <b>{Math.max(1, Math.floor((Date.now() - LAUNCH_DATE.getTime()) / (1000 * 60 * 60 * 24)))} kun</b> oldin ishga tushdi. O'shandan beri:</h2>
           <div className="stat-grid">
             <div className="stat"><div className="v num">{stats?.visits_today ?? 0}</div><div className="k">tashrif (tekshirilgan, botlarsiz)</div></div>
             <div className="stat accent"><div className="v num">{stats ? formatB(stats.total_paid_units) : '0'} B</div><div className="k">o'rinlar uchun to'langan</div></div>
