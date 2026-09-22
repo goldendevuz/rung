@@ -21,14 +21,17 @@ function Avatar({ ch, className = '' }: { ch: any, className?: string }) {
 }
 
 export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void }) {
-  const ch = item.ch;
-  const tinted = item.rank <= 9;
+  const ch = item?.ch || item || {};
+  const rank = typeof item?.rank === 'number' ? item.rank : undefined;
+  const tinted = rank != null && rank <= 9;
   
-  // Fake category data for now, you would look this up from a map or context in real implementation
-  // Fallback to item category info if it exists
-  const cat = ch.category || { n: ch.c || 'Kategoriya', c: 'var(--ink-2)' };
+  const cat = ch.category || { 
+    n: ch.category_slug || ch.c || 'Kategoriya', 
+    c: ch.category_color || 'var(--ink-2)',
+    i: ch.category_icon
+  };
 
-  const styles = tinted ? { '--a': ((10 - item.rank) / 9).toFixed(2) } as React.CSSProperties : {};
+  const styles = tinted && rank != null ? { '--a': ((10 - rank) / 9).toFixed(2) } as React.CSSProperties : {};
   const className = `row ${tinted ? '' : 'plain'}`;
 
   const hasHoverNone = window.matchMedia("(hover:none)").matches;

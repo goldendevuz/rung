@@ -1,9 +1,123 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { fetchMyListings } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { ListingRow } from '../components/ListingRow';
 import AddListingModal from '../components/AddListingModal';
+
+function ChannelCard({ listing }: { listing: any }) {
+  const gradient = listing.gradient_start && listing.gradient_end 
+    ? `linear-gradient(135deg, ${listing.gradient_start}, ${listing.gradient_end})`
+    : 'linear-gradient(135deg, #7C3AED, #2563EB)';
+
+  const initials = listing.name
+    ? listing.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
+    : 'CH';
+
+  const tgUrl = listing.handle?.startsWith('http') 
+    ? listing.handle 
+    : `https://t.me/${(listing.handle || '').replace(/^@/, '')}`;
+
+  return (
+    <div 
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '18px 22px',
+        background: 'var(--bg-elevated)',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        gap: '16px',
+        flexWrap: 'wrap',
+        transition: 'border-color 0.2s'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: '1 1 320px' }}>
+        <div 
+          style={{
+            width: '52px',
+            height: '52px',
+            borderRadius: '14px',
+            background: gradient,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: '800',
+            fontSize: '18px',
+            color: '#fff',
+            flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+          }}
+        >
+          {initials}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: 'var(--fg)' }}>
+              {listing.name}
+            </h3>
+            {listing.verified && (
+              <span title="Tasdiqlangan" style={{ color: 'var(--brand)', fontSize: '14px' }}>✓</span>
+            )}
+            <span 
+              style={{
+                fontSize: '11px',
+                padding: '2px 8px',
+                borderRadius: '10px',
+                background: 'rgba(184, 240, 60, 0.12)',
+                color: '#B8F03C',
+                fontWeight: '600',
+                border: '1px solid rgba(184, 240, 60, 0.25)'
+              }}
+            >
+              ● Faol
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '13px', color: 'var(--fg-dim)', flexWrap: 'wrap' }}>
+            <a 
+              href={tgUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ color: 'var(--brand)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
+            >
+              {listing.handle?.startsWith('@') || listing.handle?.startsWith('http') ? listing.handle : `@${listing.handle}`}
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            </a>
+            {listing.category_slug && (
+              <span>· Kategoriya: <strong style={{ color: 'var(--fg)' }}>{listing.category_slug}</strong></span>
+            )}
+          </div>
+          {listing.description && (
+            <p style={{ margin: '8px 0 0 0', fontSize: '13.5px', color: 'var(--fg-dim)', lineHeight: 1.4 }}>
+              {listing.description}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Link 
+          to="/"
+          className="btn-primary" 
+          style={{ 
+            padding: '10px 18px', 
+            fontSize: '13.5px', 
+            fontWeight: '700',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            borderRadius: '12px',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <span>🚀</span> Reytingda ko'tarish (1 B)
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export function Profile() {
   const { user, logout } = useAuth();
@@ -91,7 +205,7 @@ export function Profile() {
             onClick={() => setActiveTab('channels')}
             style={{ padding: '12px 16px', background: 'none', border: 'none', color: activeTab === 'channels' ? 'var(--brand)' : 'var(--fg)', borderBottom: activeTab === 'channels' ? '2px solid var(--brand)' : '2px solid transparent', cursor: 'pointer', fontWeight: '600' }}
           >
-            Mening kanallarim
+            Mening kanallarim {listings?.length ? `(${listings.length})` : ''}
           </button>
           <button 
             className={`tab-btn ${activeTab === 'payments' ? 'active' : ''}`} 
@@ -128,7 +242,7 @@ export function Profile() {
               ) : listings && listings.length > 0 ? (
                 <div className="listings-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {listings.map((l: any) => (
-                    <ListingRow key={l.id} item={l} />
+                    <ChannelCard key={l.id} listing={l} />
                   ))}
                 </div>
               ) : (

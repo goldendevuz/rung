@@ -36,6 +36,7 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
     mutationFn: createListing,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-listings'] });
+      alert("Kanal muvaffaqiyatli qo'shildi!");
       onClose();
     },
     onError: (err: Error) => {
