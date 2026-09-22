@@ -30,6 +30,7 @@ async def get_listing(
         handles_to_try = [identifier]
         if identifier.startswith('_'):
             handles_to_try.append('@' + identifier[1:])
+            handles_to_try.append('@' + identifier.strip('_'))
         elif not identifier.startswith('@'):
             handles_to_try.append('@' + identifier)
         stmt = select(Listing).where(Listing.handle.in_(handles_to_try), Listing.deleted_at.is_(None))
