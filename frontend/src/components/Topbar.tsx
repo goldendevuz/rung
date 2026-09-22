@@ -4,6 +4,41 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchPublicStats, fetchPublicConfig } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 
+function UserAvatar({ photoUrl, name }: { photoUrl?: string | null; name?: string | null }) {
+  const [error, setError] = React.useState(false);
+  const initial = (name || '?')[0].toUpperCase();
+
+  if (photoUrl && !error) {
+    return (
+      <img 
+        src={photoUrl} 
+        alt="Avatar" 
+        onError={() => setError(true)}
+        style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} 
+      />
+    );
+  }
+
+  return (
+    <div 
+      style={{ 
+        width: 32, 
+        height: 32, 
+        borderRadius: '50%', 
+        background: 'linear-gradient(135deg, #B8F03C, #059669)', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        fontSize: '13px', 
+        fontWeight: 'bold', 
+        color: '#0D0F11' 
+      }}
+    >
+      {initial}
+    </div>
+  );
+}
+
 export function Topbar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [theme, setTheme] = React.useState(() => localStorage.getItem('theme') || 'dark');
@@ -82,7 +117,7 @@ export function Topbar() {
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Link to="/profil" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'var(--fg)', fontWeight: '500' }} className="user-profile-link">
-                  {user.photo_url && <img src={user.photo_url} alt="Avatar" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />}
+                  <UserAvatar photoUrl={user.photo_url} name={user.first_name || user.username} />
                   <span className="hide-sm">{user.first_name || user.username}</span>
                 </Link>
               </div>

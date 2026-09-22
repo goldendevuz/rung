@@ -101,6 +101,9 @@ async def create_listing(
     from app.models.listing import Listing
     import random
     
+    if req.kind != "channel":
+        raise HTTPException(status_code=400, detail="Hozircha faqat Telegram kanallar qo'shish mumkin")
+        
     # Check category
     result = await db.execute(select(Category).where(Category.slug == req.category_slug))
     cat = result.scalar_one_or_none()
