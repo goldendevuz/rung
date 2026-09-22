@@ -4,8 +4,20 @@ import { Rail } from './Rail';
 import { Topbar } from './Topbar';
 
 export function Layout() {
+  const exitPhoneMode = () => {
+    document.body.classList.remove('phone-mode');
+  };
+
   return (
     <div className="app">
+      <button 
+        type="button" 
+        className="exit-phone-bar" 
+        onClick={exitPhoneMode}
+        title="Mobil ko'rinishdan chiqish"
+      >
+        📱 Mobil ko'rinish faol · Chiqish ✕
+      </button>
       <Rail />
       <div className="viewport">
         <Topbar />
@@ -18,8 +30,8 @@ export function Layout() {
             <div className="flinks">
               <Link to="/qoidalar">Qoidalar</Link><span>·</span>
               <Link to="/haqida">Savol-javob</Link><span>·</span>
-              <Link to="/qoidalar">Shartlar</Link><span>·</span>
-              <Link to="/qoidalar">Maxfiylik</Link><span>·</span>
+              <Link to="/qoidalar#shartlar">Shartlar</Link><span>·</span>
+              <Link to="/qoidalar#maxfiylik">Maxfiylik</Link><span>·</span>
               <Link to="/statistika" style={{ color: 'var(--lime-text)', fontWeight: 600 }}>Jonli statistika ↗</Link>
             </div>
             <div className="slogan">BIR POG'ONA YUQORIGA</div>

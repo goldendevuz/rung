@@ -32,6 +32,23 @@ export function Rules() {
 
         <h2>To'lovdan keyin</h2>
         <p>O'rin to'lov tasdiqlangan zahoti ochiladi. To'lov qaytarilmaydi — istisno: xizmat nosozligi. To'lovni beta davrida admin qo'lda qaytarishi mumkin, agar kirim qilingan B hali sarflanmagan bo'lsa.</p>
+
+        <h2 id="shartlar">Foydalanish shartlari (Oferta)</h2>
+        <p>Rung platformasidan foydalanish orqali siz quyidagi qoidalarga rozilik bildirasiz:</p>
+        <ul>
+          <li>Foydalanuvchi o'zi qo'shayotgan Telegram kanalining qonuniy egasi yoki ishonchli vakili ekanini kafolatlaydi.</li>
+          <li>O'zbekiston Respublikasi qonunlariga zid bo'lgan, firibgarlik yoki axloqsiz mazmundagi kanallar ma'muriyat tomonidan zudlik bilan chetlatiladi.</li>
+          <li>Rung platformasi kanallar tomonidan e'lon qilinadigan kontent uchun javobgar emas.</li>
+          <li>Taxtadagi o'rinlar ochiq kimoshdi (bidding) tamoyili asosida beriladi va belgilangan davr oxirigacha amal qiladi.</li>
+        </ul>
+
+        <h2 id="maxfiylik">Maxfiylik siyosati</h2>
+        <p>Platformada xavfsizlik va shaxsiy ma'lumotlar muhofazasi quyidagicha ta'minlanadi:</p>
+        <ul>
+          <li>Kirishda faqat ochiq Telegram ma'lumotlari (Telegram ID, ism, rasm) olinadi.</li>
+          <li>Bank kartasi rekvizitlari Rung tizimida saqlanmaydi — barcha to'lovlar litsenziyalangan to'lov tizimlari orqali amalga oshiriladi.</li>
+          <li>Kanallarning tashrif va klik ma'lumotlari xavfsiz va shaffof tahlil uchun yuritiladi.</li>
+        </ul>
       </div>
     </section>
   );

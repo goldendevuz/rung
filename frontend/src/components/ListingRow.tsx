@@ -82,8 +82,12 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
         <p className="rmeta">
           {cat.i ? <span style={{ marginRight: '4px' }}>{cat.i}</span> : <span className="sq" style={{ '--c': cat.c } as any} />}
           <b>{cat.n}</b>
-          <span className="sep">·</span>
-          {ch.t}
+          {ch.t ? (
+            <>
+              <span className="sep">·</span>
+              {ch.t}
+            </>
+          ) : null}
           <span className="sep">·</span>
           <span className="num">{subs(ch.s)}</span> obunachi
           <span className="sep">·</span>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchListing } from '../api/client';
-import { initials, subs, nf, getTelegramUrl, cleanTelegramHandle } from '../utils/formatters';
+import { initials, subs, nf } from '../utils/formatters';
 
 const ICON_V = (
   <span className="vbadge" title="Egasi tasdiqlangan" style={{ display: 'inline-flex', verticalAlign: 'middle', marginLeft: '6px' }}>
@@ -56,8 +56,6 @@ export const Listing = () => {
     );
   }
 
-  const tgUrl = getTelegramUrl(data.handle, data.url);
-  const displayHandle = cleanTelegramHandle(data.handle);
   const gradient = data.gradient_start && data.gradient_end
     ? `linear-gradient(135deg, ${data.gradient_start}, ${data.gradient_end})`
     : 'linear-gradient(135deg, #7C3AED, #2563EB)';
@@ -152,16 +150,10 @@ export const Listing = () => {
             </div>
 
             <div style={{ flex: 1, minWidth: '220px' }}>
-              <h1 style={{ fontSize: '22px', fontWeight: '800', margin: '0 0 4px', letterSpacing: '-0.02em', wordBreak: 'break-word' }}>
+              <h1 style={{ fontSize: '22px', fontWeight: '800', margin: '0 0 8px', letterSpacing: '-0.02em', wordBreak: 'break-word' }}>
                 {data.name}
                 {data.verified && ICON_V}
               </h1>
-
-              {displayHandle && (
-                <div style={{ fontSize: '14px', color: 'var(--lime-text)', fontFamily: 'var(--mono)', marginBottom: '8px' }}>
-                  {displayHandle}
-                </div>
-              )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span 
@@ -255,7 +247,7 @@ export const Listing = () => {
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <a
-              href={tgUrl}
+              href={`/go/${data.id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary"

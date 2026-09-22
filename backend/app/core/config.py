@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     PAYNET_ENABLED: bool = False
     GOOGLE_AUTH_ENABLED: bool = False
     SHOW_DEMO_BUTTON: bool = False
-    PAYMENT_PROVIDER_TEXT: str = "avtomatik to'lov: Click, Payme (inPAY)"
+    PAYMENT_PROVIDER_TEXT: str = "to'lov: Karta, Click, Payme, Paynet, Alif, AnorBank, Visa/MC"
     SHOW_PAYMENT_DETAILS: bool = False
     SHOW_LIVE_STATS: bool = True
     ENABLED_LISTING_KINDS: str = 'channel'

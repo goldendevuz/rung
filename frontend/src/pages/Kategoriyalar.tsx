@@ -25,15 +25,18 @@ export function Kategoriyalar() {
           <div className="catgrid" id="catGrid">
             {categories.map((c: any) => (
               <div className="catcard" key={c.slug}>
-                <h3><span className="sq" style={{ '--c': c.color } as any}></span>{c.name}</h3>
-                <p className="cnt">0 kanal</p>
-                {/* Normally we'd show the top 3 channels here, but API doesn't return that yet */}
-                <button 
+                <h3>
+                  {c.icon ? <span style={{ marginRight: '6px' }}>{c.icon}</span> : <span className="sq" style={{ '--c': c.color } as any} />}
+                  {c.name_uz || c.name}
+                </h3>
+                <p className="cnt">{c.listing_count || 0} kanal</p>
+                <a 
+                  href={`/?category=${c.slug}`}
                   className="btn-ghost" 
-                  style={{ width: '100%', fontSize: '13.5px', minHeight: '40px' }}
+                  style={{ width: '100%', fontSize: '13px', minHeight: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   1 B ga birinchi bo'ling
-                </button>
+                </a>
               </div>
             ))}
           </div>

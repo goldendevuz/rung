@@ -53,3 +53,11 @@ export function getTelegramUrl(handle?: string | null, url?: string | null): str
   }
   return `https://t.me/${clean.replace(/^@/, '')}`;
 }
+
+export function formatDateSafe(dateStr?: string | null): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('ru-RU');
+}
+

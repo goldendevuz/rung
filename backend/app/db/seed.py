@@ -57,6 +57,7 @@ CATEGORIES = [
     {"slug": "dizayn",       "name_uz": "Dizayn",              "color": "#DB2777", "icon": "🎨", "sort_order": 11},
     {"slug": "dasturlash",   "name_uz": "Dasturlash",          "color": "#2563EB", "icon": "💻", "sort_order": 12},
     {"slug": "texnologiya",  "name_uz": "Texnologiya",         "color": "#D97706", "icon": "⚙️", "sort_order": 13},
+    {"slug": "boshqa",       "name_uz": "Boshqa",              "color": "#64748B", "icon": "🌐", "sort_order": 14},
 ]
 
 # ── Channels ──────────────────────────────────────────────────────────────────

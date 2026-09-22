@@ -134,4 +134,7 @@ async def readyz() -> dict[str, str]:
     return {'status': 'ok'}
 
 
+from app.api.v1.routes.go import router as go_router
+
 app.include_router(api_v1_router, prefix='/api/v1')
+app.include_router(go_router)

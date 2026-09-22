@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchTabs, fetchBoard, fetchCategories, fetchQuote, fetchPublicStats, fetchPublicConfig, fetchMyListings, claimRank } from '../api/client';
-import { formatB } from '../utils/formatters';
+import { formatB, formatDateSafe } from '../utils/formatters';
 import { ListingRow, MiniListing } from '../components/ListingRow';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -198,7 +198,7 @@ export function Home() {
             >+</button>
             <span>ga oling</span>
           </h1>
-          <p className="uzs">≈ <span className="num">{new Intl.NumberFormat('ru-RU').format(displayPriceUnits).replace(',', ' ')}</span> so'm · {publicConfig?.payment_provider_text ?? "to'lov tez orada"}</p>
+          <p className="uzs">≈ <span className="num">{new Intl.NumberFormat('ru-RU').format(displayPriceUnits).replace(',', ' ')}</span> so'm · {publicConfig?.payment_provider_text || "to'lov: Karta, Click, Payme, Paynet, Alif, AnorBank, Visa/MC"}</p>
           
           <div className="claimbar">
             <label className="field">
@@ -245,7 +245,7 @@ export function Home() {
                     v: entry.listing.verified,
                     s: entry.listing.subscribers,
                     k: entry.listing.clickthroughs,
-                    t: new Date(entry.listing.created_at).toLocaleDateString('ru-RU'),
+                    t: formatDateSafe(entry.listing.created_at || entry.entered_at),
                     free: entry.listing.free_label,
                     logo_url: entry.listing.logo_url,
                     category: categoryMap[entry.listing.category_slug] || { name: entry.listing.category_slug, color: entry.listing.category_color }

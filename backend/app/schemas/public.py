@@ -5,7 +5,7 @@ from uuid import UUID
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, computed_field
 
 
 # ── Category ──────────────────────────────────────────────────────────────────
@@ -18,6 +18,11 @@ class CategoryOut(BaseModel):
     color: str
     icon: str | None
     listing_count: int = 0
+
+    @computed_field
+    @property
+    def name(self) -> str:
+        return self.name_uz
 
 
 # ── Listing (compact, for board rows) ─────────────────────────────────────────
@@ -49,7 +54,7 @@ class ListingResponse(ListingMini):
     created_at: datetime | None = None
 
 
-ListingCompact = ListingMini
+ListingCompact = ListingResponse
 
 
 class ListingDetail(ListingResponse):
