@@ -68,6 +68,8 @@ export const Login = () => {
       
       setLoadingMsg("Telegram'da tasdiqlashingiz kutilmoqda...");
       
+      if (pollTimer.current) clearInterval(pollTimer.current);
+      
       pollTimer.current = window.setInterval(async () => {
         try {
           const pollRes = await fetch(`/api/v1/auth/telegram/poll?token=${data.token}`);
