@@ -65,6 +65,16 @@ async def _sync_telegram_subscribers(listing: Listing, db: AsyncSession) -> bool
                             dirty = True
         except Exception as e:
             logger.warning("Failed to auto-sync Telegram subscribers for %s: %s", proper_handle, e)
+
+    if not listing.logo_url and settings.BOT_TOKEN:
+        from app.api.v1.routes.uploads import fetch_and_save_telegram_avatar
+        try:
+            fetched_logo = await fetch_and_save_telegram_avatar(proper_handle)
+            if fetched_logo:
+                listing.logo_url = fetched_logo
+                dirty = True
+        except Exception as e:
+            logger.warning("Failed to auto-fetch Telegram logo for %s: %s", proper_handle, e)
             
     if dirty:
         await db.commit()
@@ -97,7 +107,7 @@ async def get_listing(
         raise HTTPException(status_code=404, detail="Listing not found")
 
     # Auto-sync subscribers and normalize handle if subscribers == 0 or handle has URL
-    if (listing.subscribers == 0 or listing.handle.startswith("http") or not listing.url):
+    if (listing.subscribers == 0 or listing.handle.startswith("http") or not listing.url or not listing.logo_url):
         await _sync_telegram_subscribers(listing, db)
 
     # Total clickthroughs
@@ -122,6 +132,7 @@ async def get_listing(
         verified=listing.verified,
         claimed=listing.claimed,
         free_label=listing.free_label,
+        logo_url=listing.logo_url,
         gradient_start=listing.gradient_start,
         gradient_end=listing.gradient_end,
         clickthroughs=clickthroughs,

@@ -239,6 +239,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    volumes:
+    - uploads_data:/app/uploads
     mem_limit: 256m
     memswap_limit: 256m
   worker:
@@ -450,3 +452,4 @@ volumes:
   redis_data: null
   caddy_data: null
   caddy_config: null
+  uploads_data: null

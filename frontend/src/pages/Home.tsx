@@ -247,6 +247,7 @@ export function Home() {
                     k: entry.listing.clickthroughs,
                     t: new Date(entry.listing.created_at).toLocaleDateString('ru-RU'),
                     free: entry.listing.free_label,
+                    logo_url: entry.listing.logo_url,
                     category: categoryMap[entry.listing.category_slug] || { name: entry.listing.category_slug, color: entry.listing.category_color }
                   }
                 };
@@ -297,6 +298,7 @@ export function Home() {
                       id: entry.listing.id,
                       n: entry.listing.name,
                       g: [entry.listing.gradient_start, entry.listing.gradient_end],
+                      logo_url: entry.listing.logo_url,
                     }
                   };
                   return <MiniListing key={entry.listing.id} item={mappedItem} />;

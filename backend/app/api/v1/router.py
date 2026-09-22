@@ -11,6 +11,7 @@ from app.api.v1.routes.auth import router as auth_router
 from app.api.v1.routes.users import router as users_router
 from app.api.v1.routes.wallet import router as wallet_router
 from app.api.v1.routes.payments import router as payments_router
+from app.api.v1.routes.uploads import router as uploads_router
 
 router = APIRouter()
 router.include_router(ping_router)
@@ -23,3 +24,4 @@ router.include_router(auth_router)
 router.include_router(users_router)
 router.include_router(wallet_router)
 router.include_router(payments_router)
+router.include_router(uploads_router)

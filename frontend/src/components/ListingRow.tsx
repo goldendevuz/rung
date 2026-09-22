@@ -12,7 +12,23 @@ const ICON_V = (
 );
 
 function Avatar({ ch, className = '' }: { ch: any, className?: string }) {
+  const [imgError, setImgError] = React.useState(false);
+  const logoUrl = ch.logo_url || ch.logo;
   const gradient = ch.g ? `linear-gradient(140deg, ${ch.g[0]}, ${ch.g[1]})` : 'var(--surface-2)';
+
+  if (logoUrl && !imgError) {
+    return (
+      <div className={`${className} ava`} style={{ background: 'transparent', overflow: 'hidden' }}>
+        <img 
+          src={logoUrl} 
+          alt={ch.n || ''} 
+          onError={() => setImgError(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`${className} ava`} style={{ background: gradient }}>
       {initials(ch.n)}

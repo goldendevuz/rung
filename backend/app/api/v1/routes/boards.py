@@ -48,6 +48,7 @@ def _listing_to_compact(listing: Listing, clickthroughs: int = 0) -> ListingComp
         verified=listing.verified,
         claimed=listing.claimed,
         free_label=listing.free_label,
+        logo_url=listing.logo_url,
         gradient_start=listing.gradient_start,
         gradient_end=listing.gradient_end,
         clickthroughs=clickthroughs,

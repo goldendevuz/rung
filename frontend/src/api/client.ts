@@ -130,3 +130,32 @@ export async function claimRank(data: { listing_id: string; period_type?: string
   return res.json();
 }
 
+export async function uploadLogo(file: File): Promise<{ url: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${API_BASE}/uploads/logo`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Logotip yuklashda xatolik yuz berdi');
+  }
+  return res.json();
+}
+
+export async function updateListing(id: string, data: { name?: string; description?: string; logo_url?: string }) {
+  const res = await fetch(`${API_BASE}/users/me/listings/${id}`, {
+    method: 'PATCH',
+    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Kanal ma'lumotlarini yangilashda xatolik yuz berdi");
+  }
+  return res.json();
+}
+
+

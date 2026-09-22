@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchCategories, createListing } from '../api/client';
+import { fetchCategories, createListing, uploadLogo } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { cleanTelegramHandle } from '../utils/formatters';
 
@@ -15,6 +15,10 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [logoPreview, setLogoPreview] = useState('');
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -34,6 +38,44 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert("Faqat rasm fayllari (PNG, JPG, WebP) qabul qilinadi.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Rasm hajmi 5 MB dan oshmasligi kerak.");
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+    setLogoPreview(preview);
+    setIsUploadingLogo(true);
+
+    try {
+      const res = await uploadLogo(file);
+      setLogoUrl(res.url);
+    } catch (err: any) {
+      alert(err.message || "Logotip yuklashda xatolik yuz berdi");
+      setLogoPreview('');
+      setLogoUrl('');
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoUrl('');
+    setLogoPreview('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: createListing,
@@ -63,7 +105,8 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
       name: name.trim(),
       description: description.trim(),
       category_slug: category,
-      claim_now: true
+      claim_now: true,
+      logo_url: logoUrl || undefined
     });
   };
 
@@ -160,6 +203,75 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
               className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition-all focus:border-[#B8F03C] focus:bg-white/[0.07]"
               required
             />
+          </div>
+
+          {/* Kanal logotipi */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-white/60 mb-2">
+              Kanal logotipi <span className="text-white/40 lowercase font-normal">(ixtiyoriy)</span>
+            </label>
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleLogoChange}
+              accept="image/png, image/jpeg, image/webp, image/gif"
+              className="hidden"
+            />
+
+            {logoPreview ? (
+              <div className="flex items-center gap-3.5 p-3 bg-white/[0.04] border border-white/10 rounded-xl">
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex-shrink-0">
+                  <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
+                  {isUploadingLogo && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-[#B8F03C] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-white truncate">
+                    {isUploadingLogo ? "Logotip yuklanmoqda..." : "Logotip yuklandi ✓"}
+                  </p>
+                  <p className="text-[11px] text-white/50">PNG, JPG, WebP (512px WebP ga optimallanadi)</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs px-2.5 py-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+                  >
+                    O'zgartirish
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRemoveLogo}
+                    className="text-xs px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full flex items-center justify-center gap-3 p-3.5 bg-white/[0.03] border border-dashed border-white/20 hover:border-[#B8F03C]/50 hover:bg-white/[0.05] rounded-xl transition-all cursor-pointer group text-left"
+              >
+                <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/60 group-hover:text-[#B8F03C] group-hover:bg-[#B8F03C]/10 transition-colors flex-shrink-0">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white/80 group-hover:text-white transition-colors">
+                    Logotip yuklash uchun bosing
+                  </p>
+                  <p className="text-[11px] text-white/40">
+                    PNG, JPG, WebP (maks. 5 MB) · Agar yuklanmasa, Telegram rasmi olinadi
+                  </p>
+                </div>
+              </button>
+            )}
           </div>
 
           {/* Kategoriya - Custom Dropdown */}

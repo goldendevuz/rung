@@ -24,6 +24,7 @@ def _format_listing(ch: dict, clickthroughs: int = 0) -> dict:
         "verified": ch["verified"],
         "claimed": ch["claimed"],
         "free_label": ch.get("free_label"),
+        "logo_url": ch.get("logo_url"),
         "gradient_start": ch["g"][0],
         "gradient_end": ch["g"][1],
         "clickthroughs": clickthroughs,

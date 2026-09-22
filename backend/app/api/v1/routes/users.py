@@ -47,6 +47,7 @@ async def get_my_listings(
             verified=listing.verified,
             claimed=listing.claimed,
             free_label=listing.free_label,
+            logo_url=listing.logo_url,
             gradient_start=listing.gradient_start,
             gradient_end=listing.gradient_end,
             clickthroughs=0,
@@ -129,6 +130,12 @@ class CreateListingRequest(BaseModel):
     description: str | None = None
     category_slug: str
     claim_now: bool = True
+    logo_url: str | None = None
+
+class UpdateListingRequest(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    logo_url: str | None = None
 
 @router.post("/me/listings")
 async def create_listing(
@@ -176,8 +183,9 @@ async def create_listing(
     proper_handle = f"@{clean_handle}" if clean_handle else raw_handle
     proper_url = f"https://t.me/{clean_handle}" if clean_handle else f"https://t.me/{raw_handle}"
 
-    # Auto-fetch subscriber count from Telegram Bot API if public channel
+    # Auto-fetch subscriber count and channel photo from Telegram Bot API if public channel
     subscribers = 0
+    logo_url = req.logo_url
     if clean_handle and settings.BOT_TOKEN:
         try:
             async with httpx.AsyncClient(timeout=4.0) as client:
@@ -192,12 +200,20 @@ async def create_listing(
         except Exception:
             pass
 
+        if not logo_url:
+            from app.api.v1.routes.uploads import fetch_and_save_telegram_avatar
+            try:
+                logo_url = await fetch_and_save_telegram_avatar(proper_handle)
+            except Exception:
+                pass
+
     listing = Listing(
         kind=req.kind,
         handle=proper_handle,
         name=req.name,
         description=req.description,
         url=proper_url,
+        logo_url=logo_url,
         subscribers=subscribers,
         category_id=cat.id,
         owner_id=user.id,
@@ -247,6 +263,42 @@ async def create_listing(
     return {
         "id": listing.id,
         "claimed": req.claim_now,
-        "new_balance": user.balance
+        "new_balance": user.balance,
+        "logo_url": listing.logo_url,
     }
+
+
+@router.patch("/me/listings/{listing_id}")
+async def update_my_listing(
+    listing_id: str,
+    req: UpdateListingRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    from uuid import UUID
+    try:
+        lid = UUID(listing_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Yaroqsiz listing ID")
+
+    stmt = select(Listing).where(
+        Listing.id == lid,
+        Listing.owner_id == current_user.id,
+        Listing.deleted_at.is_(None),
+    )
+    result = await db.execute(stmt)
+    listing = result.scalar_one_or_none()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Kanal topilmadi yoki unga egalik huquqingiz yo'q")
+
+    if req.name is not None:
+        listing.name = req.name.strip()
+    if req.description is not None:
+        listing.description = req.description.strip()
+    if req.logo_url is not None:
+        listing.logo_url = req.logo_url.strip() or None
+
+    await db.commit()
+    await db.refresh(listing)
+    return {"status": "ok", "id": str(listing.id), "logo_url": listing.logo_url}
 

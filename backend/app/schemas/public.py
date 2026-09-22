@@ -36,6 +36,7 @@ class ListingMini(BaseModel):
     subscribers: int
     category_slug: str | None
     category_color: str | None
+    logo_url: str | None = None
 
 class ListingResponse(ListingMini):
     """Extended listing info for /listings/{public_id}."""

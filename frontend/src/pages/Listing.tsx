@@ -121,7 +121,7 @@ export const Listing = () => {
                 width: '68px',
                 height: '68px',
                 borderRadius: '18px',
-                background: gradient,
+                background: data.logo_url ? 'transparent' : gradient,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -129,10 +129,26 @@ export const Listing = () => {
                 fontSize: '24px',
                 color: '#fff',
                 flexShrink: 0,
-                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.35)'
+                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.35)',
+                overflow: 'hidden',
               }}
             >
-              {initials(data.name)}
+              {data.logo_url ? (
+                <img 
+                  src={data.logo_url} 
+                  alt={data.name} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    if (e.currentTarget.parentElement) {
+                      e.currentTarget.parentElement.style.background = gradient;
+                      e.currentTarget.parentElement.innerText = initials(data.name);
+                    }
+                  }}
+                />
+              ) : (
+                initials(data.name)
+              )}
             </div>
 
             <div style={{ flex: 1, minWidth: '220px' }}>

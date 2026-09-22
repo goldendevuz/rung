@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { fetchMyListings } from '../api/client';
+import { fetchMyListings, uploadLogo, updateListing } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import AddListingModal from '../components/AddListingModal';
 import { getTelegramUrl, cleanTelegramHandle } from '../utils/formatters';
 
-function ChannelCard({ listing }: { listing: any }) {
+function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?: () => void }) {
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const gradient = listing.gradient_start && listing.gradient_end 
     ? `linear-gradient(135deg, ${listing.gradient_start}, ${listing.gradient_end})`
     : 'linear-gradient(135deg, #7C3AED, #2563EB)';
@@ -17,6 +20,34 @@ function ChannelCard({ listing }: { listing: any }) {
 
   const tgUrl = getTelegramUrl(listing.handle, listing.url);
   const displayHandle = cleanTelegramHandle(listing.handle) || listing.handle;
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert("Faqat rasm fayllari (PNG, JPG, WebP) qabul qilinadi.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Rasm hajmi 5 MB dan oshmasligi kerak.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const res = await uploadLogo(file);
+      await updateListing(listing.id, { logo_url: res.url });
+      if (onLogoUpdated) onLogoUpdated();
+      alert("Logotip muvaffaqiyatli yangilandi!");
+    } catch (err: any) {
+      alert(err.message || "Logotip yuklashda xatolik yuz berdi");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <div 
@@ -35,11 +66,13 @@ function ChannelCard({ listing }: { listing: any }) {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: '1 1 320px' }}>
         <div 
+          onClick={() => fileInputRef.current?.click()}
+          title="Logotipni o'zgartirish uchun bosing"
           style={{
             width: '52px',
             height: '52px',
             borderRadius: '14px',
-            background: gradient,
+            background: listing.logo_url ? 'transparent' : gradient,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -47,11 +80,30 @@ function ChannelCard({ listing }: { listing: any }) {
             fontSize: '18px',
             color: '#fff',
             flexShrink: 0,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            overflow: 'hidden',
+            position: 'relative',
+            cursor: 'pointer',
           }}
         >
-          {initials}
+          {listing.logo_url ? (
+            <img src={listing.logo_url} alt={listing.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            initials
+          )}
+          {isUploading && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '16px', height: '16px', border: '2px solid #B8F03C', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+            </div>
+          )}
         </div>
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          onChange={handleFileChange} 
+          accept="image/png, image/jpeg, image/webp, image/gif" 
+          style={{ display: 'none' }} 
+        />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: 'var(--fg)' }}>
@@ -96,7 +148,28 @@ function ChannelCard({ listing }: { listing: any }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          style={{
+            padding: '10px 14px',
+            fontSize: '13px',
+            fontWeight: '600',
+            background: 'rgba(255,255,255,0.06)',
+            color: 'var(--fg)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <span>🖼️</span> {listing.logo_url ? "Logotipni yangilash" : "Logotip yuklash"}
+        </button>
         <Link 
           to="/"
           className="btn-primary" 
@@ -266,7 +339,7 @@ export function Profile() {
               ) : listings && listings.length > 0 ? (
                 <div className="listings-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {listings.map((l: any) => (
-                    <ChannelCard key={l.id} listing={l} />
+                    <ChannelCard key={l.id} listing={l} onLogoUpdated={refetch} />
                   ))}
                 </div>
               ) : (
