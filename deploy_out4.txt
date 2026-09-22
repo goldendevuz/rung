@@ -1,0 +1,217 @@
+STDOUT:
+ Updating 276e992..20a5d04
+Fast-forward
+ .../versions/451003a41085_use_public_id.py         | 38 ++++++++++++++--------
+ 1 file changed, 25 insertions(+), 13 deletions(-)
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.30kB done
+#1 DONE 0.0s
+
+#2 [bot_prod internal] load build definition from Dockerfile
+#2 transferring dockerfile: 382B done
+#2 DONE 0.0s
+
+#3 [worker_prod internal] load build definition from Dockerfile
+#3 transferring dockerfile: 644B done
+#3 DONE 0.0s
+
+#4 [caddy internal] load build definition from Dockerfile
+#4 transferring dockerfile: 425B done
+#4 DONE 0.0s
+
+#5 [caddy internal] load metadata for docker.io/library/caddy:2-alpine
+#5 DONE 0.0s
+
+#6 [migrate_prod] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#6 DONE 0.4s
+
+#7 [bot_prod] docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#7 CACHED
+
+#8 [caddy internal] load metadata for docker.io/library/node:20-alpine
+#8 DONE 0.4s
+
+#9 [caddy internal] load .dockerignore
+#9 transferring context: 2B done
+#9 DONE 0.0s
+
+#10 [caddy builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#10 DONE 0.0s
+
+#11 [caddy stage-1 1/3] FROM docker.io/library/caddy:2-alpine
+#11 DONE 0.0s
+
+#12 [caddy internal] load build context
+#12 transferring context: 736.16kB 0.3s done
+#12 DONE 0.3s
+
+#13 [caddy builder 3/6] COPY frontend/package*.json ./
+#13 CACHED
+
+#14 [caddy builder 4/6] RUN npm ci --legacy-peer-deps
+#14 CACHED
+
+#15 [caddy builder 5/6] COPY frontend/ ./
+#15 CACHED
+
+#16 [caddy stage-1 2/3] COPY deploy/caddy/prod/Caddyfile /etc/caddy/Caddyfile
+#16 CACHED
+
+#17 [caddy builder 2/6] WORKDIR /app
+#17 CACHED
+
+#18 [caddy builder 6/6] RUN npm run build
+#18 CACHED
+
+#19 [caddy stage-1 3/3] COPY --from=builder /app/dist /srv/www
+#19 CACHED
+
+#20 [caddy] exporting to image
+#20 exporting layers done
+#20 writing image sha256:0bb866b3c1f10bf6d8a5bf662aff84c3d0eb9cae2b508c5fac3d78333ae4ae53 done
+#20 naming to docker.io/library/rung-caddy done
+#20 DONE 0.0s
+
+#21 [backend_prod internal] load metadata for docker.io/library/python:3.12-slim
+#21 DONE 0.4s
+
+#22 [caddy] resolving provenance for metadata file
+#22 DONE 0.0s
+
+#23 [backend_prod internal] load .dockerignore
+#23 transferring context: 2B done
+#23 DONE 0.0s
+
+#24 [bot_prod internal] load .dockerignore
+#24 transferring context: 2B done
+#24 DONE 0.1s
+
+#25 [bot_prod 1/8] FROM docker.io/library/python:3.12-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
+#25 DONE 0.0s
+
+#26 [bot_prod internal] load build context
+#26 transferring context: 196B done
+#26 DONE 0.0s
+
+#27 [worker_prod internal] load build context
+#27 transferring context: 8.66kB 0.0s done
+#27 DONE 0.0s
+
+#28 [migrate_prod 5/8] COPY pyproject.toml ./
+#28 CACHED
+
+#29 [migrate_prod 4/8] RUN pip install --no-cache-dir uv
+#29 CACHED
+
+#30 [migrate_prod 3/8] RUN apt-get update && apt-get install -y --no-install-recommends     curl     && rm -rf /var/lib/apt/lists/*
+#30 CACHED
+
+#31 [migrate_prod 6/8] RUN uv pip install --system --no-cache -r pyproject.toml &&     uv pip install --system --no-cache pytest pytest-asyncio httpx mypy ruff
+#31 CACHED
+
+#32 [bot_prod 2/8] WORKDIR /app
+#32 CACHED
+
+#33 [bot_prod 6/7] COPY . .
+#33 CACHED
+
+#34 [bot_prod 5/7] RUN uv pip install --system --no-cache -r requirements.txt
+#34 CACHED
+
+#35 [bot_prod 3/7] RUN pip install --no-cache-dir uv
+#35 CACHED
+
+#36 [bot_prod 4/7] COPY requirements.txt ./
+#36 CACHED
+
+#37 [bot_prod 7/7] RUN useradd -m -u 1000 appuser && chown -R appuser /app
+#37 CACHED
+
+#38 [bot_prod] exporting to image
+#38 exporting layers done
+#38 writing image sha256:0bee77511729d1a39bc02075cf2650ba0bdb47b675bf2700b60f86d9cc68af14 done
+#38 naming to docker.io/library/rung-bot_prod done
+#38 DONE 0.0s
+
+#39 [migrate_prod 7/8] COPY . .
+#39 DONE 0.1s
+
+#40 [bot_prod] resolving provenance for metadata file
+#40 DONE 0.0s
+
+#41 [migrate_prod 8/8] RUN useradd -m -u 1000 appuser && chown -R appuser /app
+#41 DONE 0.3s
+
+#42 [worker_prod] exporting to image
+#42 exporting layers 0.1s done
+#42 writing image sha256:01f61a0c6331115aa3ca2e20f4a3cb60ecc8fdde24929b261280a72ec51d1077 done
+#42 naming to docker.io/library/rung-worker_prod done
+#42 DONE 0.1s
+
+#43 [backend_prod] exporting to image
+#43 exporting layers 0.0s done
+#43 writing image sha256:32c48b54f54009843b157332bfea3f561aa750d3363539adc4f37903fd9fcd7a done
+#43 naming to docker.io/library/rung-backend_prod 0.0s done
+#43 DONE 0.1s
+
+#44 [migrate_prod] exporting to image
+#44 exporting layers 0.1s done
+#44 writing image sha256:f709e1cc6b73a6b3432bc3a86ec90a28dd9f563ee93332cf1e8d74a9f143ec87 done
+#44 naming to docker.io/library/rung-migrate_prod done
+#44 DONE 0.1s
+
+#45 [worker_prod] resolving provenance for metadata file
+#45 DONE 0.0s
+
+#46 [migrate_prod] resolving provenance for metadata file
+#46 DONE 0.0s
+
+#47 [backend_prod] resolving provenance for metadata file
+#47 DONE 0.0s
+
+STDERR:
+ From github.com:goldendevuz/rung
+ * branch            main       -> FETCH_HEAD
+   276e992..20a5d04  main       -> origin/main
+ Image rung-worker_prod Building 
+ Image rung-bot_prod Building 
+ Image rung-backend_prod Building 
+ Image rung-caddy Building 
+ Image rung-migrate_prod Building 
+ Image rung-caddy Built 
+ Image rung-migrate_prod Built 
+ Image rung-worker_prod Built 
+ Image rung-backend_prod Built 
+ Image rung-bot_prod Built 
+ Container rung-redis_prod-1 Running 
+ Container rung-cloudflared-1 Running 
+ Container rung-postgres_prod-1 Running 
+ Container rung-migrate_prod-1 Recreate 
+ Container rung-migrate_prod-1 Recreated 
+ Container rung-backend_prod-1 Recreate 
+ Container rung-worker_prod-1 Recreate 
+ Container rung-worker_prod-1 Recreated 
+ Container rung-backend_prod-1 Recreated 
+ Container rung-bot_prod-1 Starting 
+ Container rung-postgres_prod-1 Waiting 
+ Container rung-bot_prod-1 Started 
+ Container rung-postgres_prod-1 Healthy 
+ Container rung-migrate_prod-1 Starting 
+ Container rung-migrate_prod-1 Started 
+ Container rung-migrate_prod-1 Waiting 
+ Container rung-redis_prod-1 Waiting 
+ Container rung-migrate_prod-1 Waiting 
+ Container rung-redis_prod-1 Waiting 
+ Container rung-redis_prod-1 Healthy 
+ Container rung-redis_prod-1 Healthy 
+ Container rung-migrate_prod-1 Exited 
+ Container rung-worker_prod-1 Starting 
+ Container rung-migrate_prod-1 Exited 
+ Container rung-backend_prod-1 Starting 
+ Container rung-worker_prod-1 Started 
+ Container rung-backend_prod-1 Started 
+ Container rung-backend_prod-1 Waiting 
+ Container rung-backend_prod-1 Healthy 
+ Container rung-caddy-1 Starting 
+ Container rung-caddy-1 Started 
+

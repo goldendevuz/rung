@@ -1,127 +1,210 @@
 STDOUT:
- #1 [internal] load local bake definitions
-#1 reading from stdin 1.39kB done
+ Already up to date.
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.30kB done
 #1 DONE 0.0s
 
-#2 [migrate_prod internal] load build definition from Dockerfile
+#2 [backend_prod internal] load build definition from Dockerfile
 #2 transferring dockerfile: 644B done
 #2 DONE 0.0s
 
-#3 [worker_prod] resolve image config for docker-image://docker.io/docker/dockerfile:1
-#3 ...
+#3 [caddy internal] load build definition from Dockerfile
+#3 transferring dockerfile: 425B done
+#3 DONE 0.0s
 
-#4 [backend_prod] docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#4 [bot_prod internal] load build definition from Dockerfile
+#4 transferring dockerfile: 382B done
 #4 DONE 0.0s
 
-#3 [backend_prod] resolve image config for docker-image://docker.io/docker/dockerfile:1
-#3 DONE 0.4s
+#5 [caddy internal] load metadata for docker.io/library/caddy:2-alpine
+#5 DONE 0.0s
 
-#4 [backend_prod] docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
-#4 CACHED
+#6 [bot_prod] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#6 ...
 
-#5 [backend_prod internal] load metadata for docker.io/library/python:3.12-slim
-#5 DONE 0.3s
-
-#6 [worker_prod internal] load .dockerignore
-#6 transferring context: 2B done
-#6 DONE 0.0s
-
-#7 [worker_prod 1/8] FROM docker.io/library/python:3.12-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
+#7 [migrate_prod] docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 #7 DONE 0.0s
 
-#8 [worker_prod internal] load build context
-#8 transferring context: 2.35kB done
-#8 DONE 0.0s
+#6 [migrate_prod] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#6 DONE 0.7s
 
-#9 [worker_prod 4/8] RUN pip install --no-cache-dir uv
-#9 CACHED
+#8 [caddy internal] load metadata for docker.io/library/node:20-alpine
+#8 DONE 0.6s
 
-#10 [worker_prod 5/8] COPY pyproject.toml ./
-#10 CACHED
+#7 [worker_prod] docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#7 CACHED
 
-#11 [worker_prod 3/8] RUN apt-get update && apt-get install -y --no-install-recommends     curl     && rm -rf /var/lib/apt/lists/*
-#11 CACHED
+#9 [caddy internal] load .dockerignore
+#9 transferring context: 2B done
+#9 DONE 0.0s
 
-#12 [worker_prod 7/8] COPY . .
-#12 CACHED
+#10 [caddy builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#10 DONE 0.0s
 
-#13 [worker_prod 2/8] WORKDIR /app
+#11 [caddy stage-1 1/3] FROM docker.io/library/caddy:2-alpine
+#11 DONE 0.0s
+
+#12 [caddy internal] load build context
+#12 transferring context: 736.16kB 0.4s done
+#12 DONE 0.4s
+
+#13 [caddy builder 2/6] WORKDIR /app
 #13 CACHED
 
-#14 [worker_prod 6/8] RUN uv pip install --system --no-cache -r pyproject.toml &&     uv pip install --system --no-cache pytest pytest-asyncio httpx mypy ruff
+#14 [caddy builder 3/6] COPY frontend/package*.json ./
 #14 CACHED
 
-#15 [worker_prod 8/8] RUN useradd -m -u 1000 appuser && chown -R appuser /app
+#15 [caddy builder 4/6] RUN npm ci --legacy-peer-deps
 #15 CACHED
 
-#16 [worker_prod] exporting to image
-#16 exporting layers done
-#16 writing image sha256:01126b8cae0b024235f8bd7b6a1c0f168053106ed0a94c39ffb4e21659db7a09 done
-#16 naming to docker.io/library/rung-worker_prod 0.0s done
-#16 DONE 0.0s
+#16 [caddy builder 5/6] COPY frontend/ ./
+#16 CACHED
 
-#17 [migrate_prod] exporting to image
-#17 exporting layers done
-#17 writing image sha256:4daa1674531158126b6ca98f7c3a10d33f252f2ebfe7a2000010a4b808a007a5 done
-#17 naming to docker.io/library/rung-migrate_prod 0.0s done
-#17 DONE 0.0s
+#17 [caddy builder 6/6] RUN npm run build
+#17 CACHED
 
-#18 [backend_prod] exporting to image
-#18 exporting layers done
-#18 writing image sha256:83994aa537223180eb3fcf13a7eeebaff44b35ea1e4e5ffe082f3b845d27dc99 done
-#18 naming to docker.io/library/rung-backend_prod 0.0s done
-#18 DONE 0.0s
+#18 [caddy stage-1 2/3] COPY deploy/caddy/prod/Caddyfile /etc/caddy/Caddyfile
+#18 CACHED
 
-#19 [worker_prod] resolving provenance for metadata file
-#19 DONE 0.0s
+#19 [caddy stage-1 3/3] COPY --from=builder /app/dist /srv/www
+#19 CACHED
 
-#20 [migrate_prod] resolving provenance for metadata file
+#20 [caddy] exporting to image
+#20 exporting layers done
+#20 writing image sha256:b0a59552add98dd3641f33b556bcf6ec2f6faa5b5e723eee6a862a4ed35a2872 done
+#20 naming to docker.io/library/rung-caddy done
 #20 DONE 0.0s
 
-#21 [backend_prod] resolving provenance for metadata file
+#21 [caddy] resolving provenance for metadata file
 #21 DONE 0.0s
-NAME                   IMAGE                           COMMAND                  SERVICE         CREATED          STATUS                                     PORTS
-rung-backend-1         rung-backend                    "uvicorn app.main:ap…"   backend         30 minutes ago   Up 30 minutes (healthy)                    127.0.0.1:8000->8000/tcp
-rung-backend_prod-1    rung-backend_prod               "uvicorn app.main:ap…"   backend_prod    5 seconds ago    Up Less than a second (health: starting)   
-rung-bot_prod-1        rung-bot_prod                   "python -m main"         bot_prod        44 minutes ago   Restarting (1) 8 seconds ago               
-rung-caddy-1           rung-caddy                      "caddy run --config …"   caddy           44 minutes ago   Up 44 minutes (healthy)                    80/tcp, 443/tcp, 2019/tcp, 443/udp
-rung-cloudflared-1     cloudflare/cloudflared:latest   "cloudflared --no-au…"   cloudflared     44 minutes ago   Up 44 minutes                              
-rung-postgres-1        postgres:16-alpine              "docker-entrypoint.s…"   postgres        30 minutes ago   Up 30 minutes (healthy)                    127.0.0.1:5432->5432/tcp
-rung-postgres_prod-1   postgres:16-alpine              "docker-entrypoint.s…"   postgres_prod   12 hours ago     Up 12 hours (healthy)                      5432/tcp
-rung-redis-1           redis:7-alpine                  "docker-entrypoint.s…"   redis           30 minutes ago   Up 30 minutes (healthy)                    127.0.0.1:6379->6379/tcp
-rung-redis_prod-1      redis:7-alpine                  "docker-entrypoint.s…"   redis_prod      12 hours ago     Up 12 hours (healthy)                      6379/tcp
-rung-worker-1          rung-worker                     "python -m app.worke…"   worker          30 minutes ago   Up 30 minutes (healthy)                    
-rung-worker_prod-1     rung-worker_prod                "python -m app.worke…"   worker_prod     5 seconds ago    Up Less than a second (health: starting)   
+
+#22 [backend_prod internal] load metadata for docker.io/library/python:3.12-slim
+#22 DONE 0.6s
+
+#23 [bot_prod internal] load .dockerignore
+#23 transferring context: 2B done
+#23 DONE 0.0s
+
+#24 [backend_prod internal] load .dockerignore
+#24 transferring context: 2B done
+#24 DONE 0.0s
+
+#25 [backend_prod 1/7] FROM docker.io/library/python:3.12-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
+#25 DONE 0.0s
+
+#26 [bot_prod internal] load build context
+#26 transferring context: 196B done
+#26 DONE 0.0s
+
+#27 [worker_prod internal] load build context
+#27 transferring context: 2.35kB done
+#27 DONE 0.0s
+
+#28 [bot_prod 5/7] RUN uv pip install --system --no-cache -r requirements.txt
+#28 CACHED
+
+#29 [bot_prod 6/7] COPY . .
+#29 CACHED
+
+#30 [bot_prod 3/7] RUN pip install --no-cache-dir uv
+#30 CACHED
+
+#31 [bot_prod 4/7] COPY requirements.txt ./
+#31 CACHED
+
+#32 [bot_prod 7/7] RUN useradd -m -u 1000 appuser && chown -R appuser /app
+#32 CACHED
+
+#33 [backend_prod 6/8] RUN uv pip install --system --no-cache -r pyproject.toml &&     uv pip install --system --no-cache pytest pytest-asyncio httpx mypy ruff
+#33 CACHED
+
+#34 [backend_prod 7/8] COPY . .
+#34 CACHED
+
+#35 [backend_prod 5/8] COPY pyproject.toml ./
+#35 CACHED
+
+#36 [backend_prod 4/8] RUN pip install --no-cache-dir uv
+#36 CACHED
+
+#37 [backend_prod 3/8] RUN apt-get update && apt-get install -y --no-install-recommends     curl     && rm -rf /var/lib/apt/lists/*
+#37 CACHED
+
+#38 [backend_prod 2/7] WORKDIR /app
+#38 CACHED
+
+#39 [backend_prod 8/8] RUN useradd -m -u 1000 appuser && chown -R appuser /app
+#39 CACHED
+
+#40 [bot_prod] exporting to image
+#40 exporting layers done
+#40 writing image sha256:0bee77511729d1a39bc02075cf2650ba0bdb47b675bf2700b60f86d9cc68af14 done
+#40 naming to docker.io/library/rung-bot_prod 0.0s done
+#40 DONE 0.0s
+
+#41 [backend_prod] exporting to image
+#41 exporting layers done
+#41 writing image sha256:4e21e1b3117801e7f0073357d040bad887746a4ef845e5ea90654d7c82ec3aa7 done
+#41 naming to docker.io/library/rung-backend_prod 0.0s done
+#41 DONE 0.0s
+
+#42 [worker_prod] exporting to image
+#42 exporting layers done
+#42 writing image sha256:c984456ccfd733143bfc924669cf5cefecace78da11bb8ab130fe94ad6aa0b77 done
+#42 naming to docker.io/library/rung-worker_prod done
+#42 DONE 0.0s
+
+#43 [migrate_prod] exporting to image
+#43 exporting layers done
+#43 writing image sha256:ed70e7bea7500a3dc927138af6500f89b2ffab6266cbdddece57e27cc83d3a6d 0.0s done
+#43 naming to docker.io/library/rung-migrate_prod done
+#43 DONE 0.0s
+
+#44 [bot_prod] resolving provenance for metadata file
+#44 DONE 0.0s
+
+#45 [backend_prod] resolving provenance for metadata file
+#45 DONE 0.0s
+
+#46 [worker_prod] resolving provenance for metadata file
+#46 DONE 0.0s
+
+#47 [migrate_prod] resolving provenance for metadata file
+#47 DONE 0.0s
 
 STDERR:
-  Image rung-worker_prod Building 
- Image rung-backend_prod Building 
+ From github.com:goldendevuz/rung
+ * branch            main       -> FETCH_HEAD
  Image rung-migrate_prod Building 
+ Image rung-backend_prod Building 
+ Image rung-caddy Building 
+ Image rung-bot_prod Building 
+ Image rung-worker_prod Building 
+ Image rung-backend_prod Built 
+ Image rung-bot_prod Built 
+ Image rung-caddy Built 
  Image rung-migrate_prod Built 
  Image rung-worker_prod Built 
- Image rung-backend_prod Built 
  Container rung-postgres_prod-1 Running 
+ Container rung-caddy-1 Running 
  Container rung-redis_prod-1 Running 
- Container rung-migrate_prod-1 Recreate 
- Container rung-migrate_prod-1 Recreated 
- Container rung-backend_prod-1 Recreate 
- Container rung-worker_prod-1 Recreate 
- Container rung-worker_prod-1 Recreated 
- Container rung-backend_prod-1 Recreated 
+ Container rung-cloudflared-1 Running 
+ Container rung-backend_prod-1 Running 
+ Container rung-worker_prod-1 Running 
+ Container rung-bot_prod-1 Starting 
  Container rung-postgres_prod-1 Waiting 
+ Container rung-bot_prod-1 Started 
  Container rung-postgres_prod-1 Healthy 
  Container rung-migrate_prod-1 Starting 
  Container rung-migrate_prod-1 Started 
- Container rung-redis_prod-1 Waiting 
- Container rung-migrate_prod-1 Waiting 
  Container rung-migrate_prod-1 Waiting 
  Container rung-redis_prod-1 Waiting 
+ Container rung-redis_prod-1 Waiting 
+ Container rung-migrate_prod-1 Waiting 
  Container rung-redis_prod-1 Healthy 
  Container rung-redis_prod-1 Healthy 
  Container rung-migrate_prod-1 Exited 
- Container rung-backend_prod-1 Starting 
+ Container rung-backend_prod-1 Waiting 
  Container rung-migrate_prod-1 Exited 
- Container rung-worker_prod-1 Starting 
- Container rung-worker_prod-1 Started 
- Container rung-backend_prod-1 Started 
+ Container rung-backend_prod-1 Healthy 
 

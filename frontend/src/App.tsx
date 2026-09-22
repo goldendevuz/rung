@@ -7,6 +7,7 @@ import { About } from './pages/About';
 import { Rules } from './pages/Rules';
 import { Kategoriyalar } from './pages/Kategoriyalar';
 import { Login } from './pages/Login';
+import { Profile } from './pages/Profile';
 import { AddChannel } from './pages/AddChannel';
 import { Listing } from './pages/Listing';
 import { AuthProvider } from './contexts/AuthContext';
@@ -52,6 +53,7 @@ export default function App() {
               <Route path="/qoidalar" element={<Rules />} />
               <Route path="/kirish" element={<Login />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/profil" element={<Profile />} />
               <Route path="/p/:id" element={<Listing />} />
               <Route path="*" element={<NotFound />} />
             </Route>

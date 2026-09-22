@@ -1,0 +1,419 @@
+STDOUT:
+ Updating bd433c6..276e992
+Fast-forward
+ audit_output.txt                                   |  62 ++++++++++
+ auth_test.sh                                       |  18 +++
+ backend/app/api/v1/routes/auth.py                  |   6 +-
+ backend/app/api/v1/routes/boards.py                |   7 +-
+ backend/app/db/base.py                             |  13 ++-
+ .../versions/1ac49fab3453_add_public_id.py         |  50 --------
+ .../versions/451003a41085_use_public_id.py         |  80 +++++++++++++
+ backend/app/demo/fixtures.py                       |   4 +-
+ backend/app/models/listing.py                      |   7 --
+ backend/drop.sql                                   |   2 +
+ backend/fix.py                                     |  30 +++++
+ backend/fix_f9.py                                  |  38 ++++++
+ backend/run_migrate.sh                             |   3 +
+ backend/run_migrate_prod.sh                        |   3 +
+ check_alembic_v.py                                 |   7 ++
+ check_base.py                                      |   7 ++
+ check_board_entries.py                             |   7 ++
+ check_boards.py                                    |   7 ++
+ check_db.py                                        |  12 ++
+ check_listings.py                                  |   7 ++
+ check_logs.py                                      |   7 ++
+ check_migrate_logs.py                              |   7 ++
+ check_prod.py                                      |   5 +
+ check_remote_db.sh                                 |   2 +
+ check_remote_migrations.py                         |   7 ++
+ check_users.py                                     |   7 ++
+ clean_and_deploy.py                                |   7 ++
+ cookie.txt                                         |   5 +
+ cookie2.txt                                        |   4 +
+ deploy_out.txt                                     | 127 +++++++++++++++++++++
+ deploy_prod.py                                     |   7 ++
+ deploy_prod_final.py                               |   7 ++
+ drop_col_deploy.py                                 |   7 ++
+ find_dir.py                                        |   5 +
+ find_rung.py                                       |   9 ++
+ find_scroll.js                                     |  15 +++
+ fix.py                                             |  16 +++
+ fix2.py                                            |  31 +++++
+ fix_audit2.py                                      |  29 +++++
+ flush_redis.py                                     |   7 ++
+ frontend/src/utils/formatters.ts                   |  12 +-
+ patch_audit.py                                     |  15 +++
+ prod_state.txt                                     |  38 ++++++
+ remote.py                                          |   6 +
+ run_find.sh                                        |   2 +
+ run_grep.sh                                        |   2 +
+ truncate_db.py                                     |  11 ++
+ update_docs.py                                     |  10 ++
+ 48 files changed, 704 insertions(+), 73 deletions(-)
+ create mode 100644 audit_output.txt
+ create mode 100644 auth_test.sh
+ delete mode 100644 backend/app/db/migrations/versions/1ac49fab3453_add_public_id.py
+ create mode 100644 backend/app/db/migrations/versions/451003a41085_use_public_id.py
+ create mode 100644 backend/drop.sql
+ create mode 100644 backend/fix.py
+ create mode 100644 backend/fix_f9.py
+ create mode 100755 backend/run_migrate.sh
+ create mode 100755 backend/run_migrate_prod.sh
+ create mode 100644 check_alembic_v.py
+ create mode 100644 check_base.py
+ create mode 100644 check_board_entries.py
+ create mode 100644 check_boards.py
+ create mode 100644 check_db.py
+ create mode 100644 check_listings.py
+ create mode 100644 check_logs.py
+ create mode 100644 check_migrate_logs.py
+ create mode 100644 check_prod.py
+ create mode 100644 check_remote_db.sh
+ create mode 100644 check_remote_migrations.py
+ create mode 100644 check_users.py
+ create mode 100644 clean_and_deploy.py
+ create mode 100644 cookie.txt
+ create mode 100644 cookie2.txt
+ create mode 100644 deploy_out.txt
+ create mode 100644 deploy_prod.py
+ create mode 100644 deploy_prod_final.py
+ create mode 100644 drop_col_deploy.py
+ create mode 100644 find_dir.py
+ create mode 100644 find_rung.py
+ create mode 100644 find_scroll.js
+ create mode 100644 fix.py
+ create mode 100644 fix2.py
+ create mode 100644 fix_audit2.py
+ create mode 100644 flush_redis.py
+ create mode 100644 patch_audit.py
+ create mode 100644 prod_state.txt
+ create mode 100644 remote.py
+ create mode 100644 run_find.sh
+ create mode 100644 run_grep.sh
+ create mode 100644 truncate_db.py
+ create mode 100644 update_docs.py
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.30kB done
+#1 DONE 0.0s
+
+#2 [migrate_prod internal] load build definition from Dockerfile
+#2 transferring dockerfile: 644B done
+#2 DONE 0.0s
+
+#3 [bot_prod internal] load build definition from Dockerfile
+#3 transferring dockerfile: 382B done
+#3 DONE 0.0s
+
+#4 [caddy internal] load build definition from Dockerfile
+#4 transferring dockerfile: 425B done
+#4 DONE 0.0s
+
+#5 [caddy internal] load metadata for docker.io/library/caddy:2-alpine
+#5 DONE 0.0s
+
+#6 [bot_prod] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#6 ...
+
+#7 [worker_prod] docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#7 DONE 0.0s
+
+#6 [worker_prod] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#6 DONE 0.4s
+
+#7 [bot_prod] docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#7 CACHED
+
+#8 [caddy internal] load metadata for docker.io/library/node:20-alpine
+#8 DONE 0.4s
+
+#9 [caddy internal] load .dockerignore
+#9 transferring context: 2B done
+#9 DONE 0.0s
+
+#10 [caddy builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#10 DONE 0.0s
+
+#11 [caddy stage-1 1/3] FROM docker.io/library/caddy:2-alpine
+#11 DONE 0.0s
+
+#12 [worker_prod internal] load metadata for docker.io/library/python:3.12-slim
+#12 DONE 0.4s
+
+#13 [bot_prod internal] load .dockerignore
+#13 transferring context: 2B done
+#13 DONE 0.0s
+
+#14 [worker_prod internal] load .dockerignore
+#14 transferring context: 2B 0.0s done
+#14 DONE 0.0s
+
+#15 [caddy internal] load build context
+#15 transferring context: 737.01kB 0.6s done
+#15 ...
+
+#16 [bot_prod 1/8] FROM docker.io/library/python:3.12-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
+#16 DONE 0.0s
+
+#17 [worker_prod internal] load build context
+#17 transferring context: 34.89kB 0.0s done
+#17 DONE 0.0s
+
+#18 [worker_prod 3/8] RUN apt-get update && apt-get install -y --no-install-recommends     curl     && rm -rf /var/lib/apt/lists/*
+#18 CACHED
+
+#19 [worker_prod 4/8] RUN pip install --no-cache-dir uv
+#19 CACHED
+
+#20 [worker_prod 5/8] COPY pyproject.toml ./
+#20 CACHED
+
+#21 [worker_prod 2/8] WORKDIR /app
+#21 CACHED
+
+#16 [backend_prod 1/8] FROM docker.io/library/python:3.12-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
+#16 DONE 0.0s
+
+#17 [backend_prod internal] load build context
+#17 transferring context: 34.89kB 0.0s done
+#17 DONE 0.0s
+
+#15 [caddy internal] load build context
+#15 DONE 0.7s
+
+#18 [backend_prod 3/8] RUN apt-get update && apt-get install -y --no-install-recommends     curl     && rm -rf /var/lib/apt/lists/*
+#18 CACHED
+
+#20 [backend_prod 5/8] COPY pyproject.toml ./
+#20 CACHED
+
+#19 [backend_prod 4/8] RUN pip install --no-cache-dir uv
+#19 CACHED
+
+#22 [worker_prod 6/8] RUN uv pip install --system --no-cache -r pyproject.toml &&     uv pip install --system --no-cache pytest pytest-asyncio httpx mypy ruff
+#22 CACHED
+
+#23 [caddy builder 3/6] COPY frontend/package*.json ./
+#23 CACHED
+
+#24 [caddy builder 2/6] WORKDIR /app
+#24 CACHED
+
+#25 [caddy builder 4/6] RUN npm ci --legacy-peer-deps
+#25 CACHED
+
+#26 [bot_prod internal] load build context
+#26 transferring context: 196B 0.0s done
+#26 DONE 0.1s
+
+#27 [bot_prod 5/7] RUN uv pip install --system --no-cache -r requirements.txt
+#27 CACHED
+
+#21 [bot_prod 2/8] WORKDIR /app
+#21 CACHED
+
+#28 [bot_prod 4/7] COPY requirements.txt ./
+#28 CACHED
+
+#29 [bot_prod 3/7] RUN pip install --no-cache-dir uv
+#29 CACHED
+
+#30 [bot_prod 6/7] COPY . .
+#30 CACHED
+
+#31 [bot_prod 7/7] RUN useradd -m -u 1000 appuser && chown -R appuser /app
+#31 CACHED
+
+#32 [bot_prod] exporting to image
+#32 exporting layers done
+#32 writing image sha256:0bee77511729d1a39bc02075cf2650ba0bdb47b675bf2700b60f86d9cc68af14 done
+#32 naming to docker.io/library/rung-bot_prod done
+#32 DONE 0.0s
+
+#33 [backend_prod 7/8] COPY . .
+#33 DONE 0.1s
+
+#34 [bot_prod] resolving provenance for metadata file
+#34 DONE 0.0s
+
+#35 [worker_prod 8/8] RUN useradd -m -u 1000 appuser && chown -R appuser /app
+#35 DONE 0.4s
+
+#36 [worker_prod] exporting to image
+#36 exporting layers 0.0s done
+#36 writing image sha256:bbdd6cd7642f856bfd9892aa682ec87b76cb03bd72d1d15317e3b4031cbcae9b done
+#36 naming to docker.io/library/rung-worker_prod done
+#36 DONE 0.1s
+
+#37 [migrate_prod] exporting to image
+#37 exporting layers 0.0s done
+#37 writing image sha256:b087aa70b7a9201c47b69b50af9995327a25358d7d2a74c2503b684e8b904e67 done
+#37 naming to docker.io/library/rung-migrate_prod done
+#37 DONE 0.1s
+
+#38 [backend_prod] exporting to image
+#38 exporting layers 0.0s done
+#38 writing image sha256:9f1435413f1cfc53e77bda692b84e54d88f61296d66f98bfd09636aa35cc1b82 done
+#38 naming to docker.io/library/rung-backend_prod done
+#38 DONE 0.1s
+
+#39 [worker_prod] resolving provenance for metadata file
+#39 DONE 0.0s
+
+#40 [migrate_prod] resolving provenance for metadata file
+#40 DONE 0.0s
+
+#41 [backend_prod] resolving provenance for metadata file
+#41 DONE 0.0s
+
+#42 [caddy builder 5/6] COPY frontend/ ./
+#42 DONE 2.1s
+
+#43 [caddy builder 6/6] RUN npm run build
+#43 0.447 
+#43 0.447 > rung-frontend@0.1.0 build
+#43 0.447 > tsc && vite build
+#43 0.447 
+#43 4.913 vite v5.4.21 building for production...
+#43 4.978 transforming...
+#43 7.782 ✓ 101 modules transformed.
+#43 8.058 rendering chunks...
+#43 8.085 computing gzip size...
+#43 8.134 dist/index.html                                                   1.22 kB │ gzip:  0.51 kB
+#43 8.134 dist/assets/manrope-vietnamese-800-normal-ClPWri-A.woff2          4.16 kB
+#43 8.135 dist/assets/jetbrains-mono-greek-400-normal-C190GLew.woff2        4.23 kB
+#43 8.135 dist/assets/jetbrains-mono-greek-500-normal-JpySY46c.woff2        4.28 kB
+#43 8.135 dist/assets/jetbrains-mono-greek-700-normal-C6CZE3T8.woff2        4.30 kB
+#43 8.136 dist/assets/manrope-vietnamese-500-normal-DCXiE_xi.woff2          4.32 kB
+#43 8.136 dist/assets/manrope-vietnamese-400-normal-DHb3EETF.woff2          4.46 kB
+#43 8.136 dist/assets/manrope-vietnamese-600-normal-C1J5PCl_.woff2          4.47 kB
+#43 8.136 dist/assets/manrope-vietnamese-700-normal-CUqMx5-1.woff2          4.55 kB
+#43 8.136 dist/assets/manrope-greek-800-normal-CDvU698_.woff2               5.18 kB
+#43 8.136 dist/assets/manrope-greek-600-normal-BoRV6lzK.woff2               5.23 kB
+#43 8.136 dist/assets/manrope-greek-700-normal-CHUG9PD8.woff2               5.24 kB
+#43 8.137 dist/assets/manrope-greek-500-normal-GeMIHyWm.woff2               5.25 kB
+#43 8.137 dist/assets/manrope-greek-400-normal-CM4qok81.woff2               5.28 kB
+#43 8.137 dist/assets/jetbrains-mono-cyrillic-400-normal-BEIGL1Tu.woff2     5.33 kB
+#43 8.137 dist/assets/jetbrains-mono-cyrillic-700-normal-BWTpRfYl.woff2     5.34 kB
+#43 8.137 dist/assets/jetbrains-mono-cyrillic-500-normal-DmUKJPL_.woff2     5.36 kB
+#43 8.137 dist/assets/jetbrains-mono-vietnamese-400-normal-CqNFfHCs.woff    5.37 kB
+#43 8.137 dist/assets/jetbrains-mono-vietnamese-700-normal-BDLVIk2r.woff    5.45 kB
+#43 8.137 dist/assets/jetbrains-mono-vietnamese-500-normal-DNRqzVM1.woff    5.48 kB
+#43 8.137 dist/assets/jetbrains-mono-greek-400-normal-B9oWc5Lo.woff         5.66 kB
+#43 8.137 dist/assets/jetbrains-mono-greek-700-normal-DEigVDxa.woff         5.70 kB
+#43 8.138 dist/assets/jetbrains-mono-greek-500-normal-D7SFKleX.woff         5.72 kB
+#43 8.138 dist/assets/manrope-vietnamese-500-normal-DaZ8i3XM.woff           6.06 kB
+#43 8.138 dist/assets/manrope-vietnamese-400-normal-D7E_mLGF.woff           6.11 kB
+#43 8.139 dist/assets/manrope-vietnamese-800-normal-bvg7iBCV.woff           6.13 kB
+#43 8.139 dist/assets/manrope-vietnamese-600-normal-lA7a_7Ok.woff           6.14 kB
+#43 8.140 dist/assets/manrope-vietnamese-700-normal-pt65Fn2Z.woff           6.36 kB
+#43 8.140 dist/assets/manrope-greek-800-normal-Bw-67qu9.woff                6.63 kB
+#43 8.140 dist/assets/manrope-greek-600-normal-CF2i9ZRY.woff                6.74 kB
+#43 8.140 dist/assets/manrope-greek-700-normal-DyfsrCpP.woff                6.74 kB
+#43 8.140 dist/assets/manrope-greek-500-normal-DyxYGEtJ.woff                6.76 kB
+#43 8.140 dist/assets/manrope-greek-400-normal-DuX9RsAR.woff                6.77 kB
+#43 8.140 dist/assets/jetbrains-mono-cyrillic-400-normal-ugxPyKxw.woff      6.98 kB
+#43 8.140 dist/assets/jetbrains-mono-cyrillic-700-normal-CEoEElIJ.woff      7.02 kB
+#43 8.140 dist/assets/jetbrains-mono-cyrillic-500-normal-DJqRU3vO.woff      7.02 kB
+#43 8.140 dist/assets/jetbrains-mono-latin-ext-400-normal-Bc8Ftmh3.woff2    7.34 kB
+#43 8.140 dist/assets/jetbrains-mono-latin-ext-700-normal-CZipNAKV.woff2    7.47 kB
+#43 8.140 dist/assets/jetbrains-mono-latin-ext-500-normal-Cut-4mMH.woff2    7.53 kB
+#43 8.140 dist/assets/manrope-cyrillic-800-normal-AvdZ5mAV.woff2            7.59 kB
+#43 8.140 dist/assets/manrope-cyrillic-400-normal-BMzJvInZ.woff2            7.84 kB
+#43 8.140 dist/assets/manrope-cyrillic-700-normal-Dw_fZAg2.woff2            7.85 kB
+#43 8.140 dist/assets/manrope-cyrillic-500-normal-B1OEZity.woff2            7.87 kB
+#43 8.140 dist/assets/manrope-cyrillic-600-normal-DvRl3Mj-.woff2            7.87 kB
+#43 8.140 dist/assets/manrope-latin-ext-800-normal-DdFx7KEb.woff2           8.03 kB
+#43 8.140 dist/assets/manrope-latin-ext-500-normal-dm74KBQw.woff2           8.19 kB
+#43 8.140 dist/assets/manrope-latin-ext-700-normal-DYOwVNan.woff2           8.28 kB
+#43 8.140 dist/assets/manrope-latin-ext-400-normal-CMDvPJRp.woff2           8.29 kB
+#43 8.140 dist/assets/manrope-latin-ext-600-normal-_gBojHdJ.woff2           8.30 kB
+#43 8.140 dist/assets/manrope-cyrillic-800-normal-BuEMjQU-.woff             9.78 kB
+#43 8.140 dist/assets/manrope-cyrillic-700-normal-7JNVKxyl.woff            10.00 kB
+#43 8.140 dist/assets/manrope-cyrillic-500-normal-CNwnNrRC.woff            10.01 kB
+#43 8.140 dist/assets/manrope-cyrillic-400-normal-Dvx59UGC.woff            10.03 kB
+#43 8.140 dist/assets/manrope-cyrillic-600-normal-It4mZcQk.woff            10.06 kB
+#43 8.140 dist/assets/jetbrains-mono-latin-ext-400-normal-fXTG6kC5.woff    10.13 kB
+#43 8.140 dist/assets/jetbrains-mono-latin-ext-700-normal-CxPITLHs.woff    10.30 kB
+#43 8.140 dist/assets/jetbrains-mono-latin-ext-500-normal-ckzbgY84.woff    10.34 kB
+#43 8.140 dist/assets/manrope-latin-ext-800-normal-BQAQsuQc.woff           11.11 kB
+#43 8.140 dist/assets/manrope-latin-ext-500-normal-EtoS1VaI.woff           11.25 kB
+#43 8.140 dist/assets/manrope-latin-ext-600-normal-u5Pl7hTU.woff           11.25 kB
+#43 8.140 dist/assets/manrope-latin-ext-400-normal-C-X6QNXX.woff           11.32 kB
+#43 8.140 dist/assets/manrope-latin-ext-700-normal-eVCcYqtJ.woff           11.35 kB
+#43 8.140 dist/assets/manrope-latin-800-normal-BfWYOv1c.woff2              13.65 kB
+#43 8.140 dist/assets/manrope-latin-500-normal-BYYD-dBL.woff2              14.04 kB
+#43 8.140 dist/assets/manrope-latin-400-normal-PaqtzbVb.woff2              14.11 kB
+#43 8.140 dist/assets/manrope-latin-600-normal-4f0koTD-.woff2              14.17 kB
+#43 8.140 dist/assets/manrope-latin-700-normal-BZp_XxE4.woff2              14.21 kB
+#43 8.140 dist/assets/manrope-latin-800-normal-uHUdIJgA.woff               17.91 kB
+#43 8.140 dist/assets/manrope-latin-500-normal-DMZssgOp.woff               18.24 kB
+#43 8.140 dist/assets/manrope-latin-400-normal-8tf8FM3T.woff               18.29 kB
+#43 8.141 dist/assets/manrope-latin-600-normal-BqgrALkZ.woff               18.38 kB
+#43 8.141 dist/assets/manrope-latin-700-normal-DGRFkw-m.woff               18.41 kB
+#43 8.141 dist/assets/jetbrains-mono-latin-400-normal-V6pRDFza.woff2       21.17 kB
+#43 8.141 dist/assets/jetbrains-mono-latin-500-normal-BWZEU5yA.woff2       21.83 kB
+#43 8.141 dist/assets/jetbrains-mono-latin-700-normal-BYuf6tUa.woff2       21.91 kB
+#43 8.141 dist/assets/jetbrains-mono-latin-400-normal-6-qcROiO.woff        27.50 kB
+#43 8.141 dist/assets/jetbrains-mono-latin-500-normal-CJOVTJB7.woff        28.21 kB
+#43 8.141 dist/assets/jetbrains-mono-latin-700-normal-D3wTyLJW.woff        28.21 kB
+#43 8.141 dist/assets/index-Cqe0R1wX.css                                   98.88 kB │ gzip: 45.26 kB
+#43 8.141 dist/assets/index-Hs3bXTUf.js                                   237.86 kB │ gzip: 74.60 kB
+#43 8.142 ✓ built in 3.20s
+#43 DONE 8.3s
+
+#44 [caddy stage-1 2/3] COPY deploy/caddy/prod/Caddyfile /etc/caddy/Caddyfile
+#44 CACHED
+
+#45 [caddy stage-1 3/3] COPY --from=builder /app/dist /srv/www
+#45 DONE 0.0s
+
+#46 [caddy] exporting to image
+#46 exporting layers 0.0s done
+#46 writing image sha256:0bb866b3c1f10bf6d8a5bf662aff84c3d0eb9cae2b508c5fac3d78333ae4ae53 done
+#46 naming to docker.io/library/rung-caddy done
+#46 DONE 0.0s
+
+#47 [caddy] resolving provenance for metadata file
+#47 DONE 0.1s
+
+STDERR:
+ From github.com:goldendevuz/rung
+ * branch            main       -> FETCH_HEAD
+   bd433c6..276e992  main       -> origin/main
+ Image rung-bot_prod Building 
+ Image rung-backend_prod Building 
+ Image rung-worker_prod Building 
+ Image rung-caddy Building 
+ Image rung-migrate_prod Building 
+ Image rung-migrate_prod Built 
+ Image rung-worker_prod Built 
+ Image rung-backend_prod Built 
+ Image rung-bot_prod Built 
+ Image rung-caddy Built 
+ Container rung-postgres_prod-1 Running 
+ Container rung-cloudflared-1 Running 
+ Container rung-redis_prod-1 Running 
+ Container rung-migrate_prod-1 Recreate 
+ Container rung-migrate_prod-1 Recreated 
+ Container rung-backend_prod-1 Recreate 
+ Container rung-worker_prod-1 Recreate 
+ Container rung-worker_prod-1 Recreated 
+ Container rung-backend_prod-1 Recreated 
+ Container rung-caddy-1 Recreate 
+ Container rung-caddy-1 Recreated 
+ Container rung-bot_prod-1 Starting 
+ Container rung-postgres_prod-1 Waiting 
+ Container rung-bot_prod-1 Started 
+ Container rung-postgres_prod-1 Healthy 
+ Container rung-migrate_prod-1 Starting 
+ Container rung-migrate_prod-1 Started 
+ Container rung-redis_prod-1 Waiting 
+ Container rung-migrate_prod-1 Waiting 
+ Container rung-migrate_prod-1 Waiting 
+ Container rung-redis_prod-1 Waiting 
+ Container rung-redis_prod-1 Healthy 
+ Container rung-redis_prod-1 Healthy 
+ Container rung-migrate_prod-1 Error service "migrate_prod" didn't complete successfully: exit 1
+ Container rung-migrate_prod-1 Error service "migrate_prod" didn't complete successfully: exit 1
+service "migrate_prod" didn't complete successfully: exit 1
+

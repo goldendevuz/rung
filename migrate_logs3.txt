@@ -1,0 +1,296 @@
+STDOUT:
+ migrate_prod-1  | INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+migrate_prod-1  | INFO  [alembic.runtime.migration] Will assume transactional DDL.
+migrate_prod-1  | INFO  [alembic.runtime.migration] Running upgrade f9180753eccb -> 451003a41085, use_public_id
+migrate_prod-1  | Traceback (most recent call last):
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 550, in _prepare_and_execute
+migrate_prod-1  |     self._rows = deque(await prepared_stmt.fetch(*parameters))
+migrate_prod-1  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 177, in fetch
+migrate_prod-1  |     data = await self.__bind_execute(args, 0, timeout)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 268, in __bind_execute
+migrate_prod-1  |     data, status, _ = await self.__do_execute(
+migrate_prod-1  |                       ^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 257, in __do_execute
+migrate_prod-1  |     return await executor(protocol)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "asyncpg/protocol/protocol.pyx", line 205, in bind_execute
+migrate_prod-1  | asyncpg.exceptions.NotNullViolationError: column "public_id" of relation "categories" contains null values
+migrate_prod-1  | 
+migrate_prod-1  | The above exception was the direct cause of the following exception:
+migrate_prod-1  | 
+migrate_prod-1  | Traceback (most recent call last):
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+migrate_prod-1  |     self.dialect.do_execute(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+migrate_prod-1  |     cursor.execute(statement, parameters)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+migrate_prod-1  |     self._adapt_connection.await_(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+migrate_prod-1  |     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+migrate_prod-1  |     value = await result
+migrate_prod-1  |             ^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+migrate_prod-1  |     self._handle_exception(error)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+migrate_prod-1  |     self._adapt_connection._handle_exception(error)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+migrate_prod-1  |     raise translated_error from error
+migrate_prod-1  | sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.IntegrityError: <class 'asyncpg.exceptions.NotNullViolationError'>: column "public_id" of relation "categories" contains null values
+migrate_prod-1  | 
+migrate_prod-1  | The above exception was the direct cause of the following exception:
+migrate_prod-1  | 
+migrate_prod-1  | Traceback (most recent call last):
+migrate_prod-1  |   File "/usr/local/bin/alembic", line 10, in <module>
+migrate_prod-1  |     sys.exit(main())
+migrate_prod-1  |              ^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/config.py", line 1039, in main
+migrate_prod-1  |     CommandLine(prog=prog).main(argv=argv)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/config.py", line 1029, in main
+migrate_prod-1  |     self.run_cmd(cfg, options)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/config.py", line 963, in run_cmd
+migrate_prod-1  |     fn(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/command.py", line 487, in upgrade
+migrate_prod-1  |     script.run_env()
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/script/base.py", line 550, in run_env
+migrate_prod-1  |     util.load_python_file(self.dir, "env.py")
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/util/pyfiles.py", line 114, in load_python_file
+migrate_prod-1  |     module = load_module_py(module_id, path)
+migrate_prod-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/util/pyfiles.py", line 132, in load_module_py
+migrate_prod-1  |     spec.loader.exec_module(module)  # type: ignore
+migrate_prod-1  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+migrate_prod-1  |   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+migrate_prod-1  |   File "/app/app/db/migrations/env.py", line 52, in <module>
+migrate_prod-1  |     asyncio.run(run_migrations_online())
+migrate_prod-1  |   File "/usr/local/lib/python3.12/asyncio/runners.py", line 195, in run
+migrate_prod-1  |     return runner.run(main)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/asyncio/runners.py", line 118, in run
+migrate_prod-1  |     return self._loop.run_until_complete(task)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+migrate_prod-1  |     return future.result()
+migrate_prod-1  |            ^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/app/app/db/migrations/env.py", line 45, in run_migrations_online
+migrate_prod-1  |     await conn.run_sync(lambda _: context.run_migrations())
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py", line 888, in run_sync
+migrate_prod-1  |     return await greenlet_spawn(
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+migrate_prod-1  |     result = context.throw(*sys.exc_info())
+migrate_prod-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/app/app/db/migrations/env.py", line 45, in <lambda>
+migrate_prod-1  |     await conn.run_sync(lambda _: context.run_migrations())
+migrate_prod-1  |                                   ^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "<string>", line 8, in run_migrations
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/runtime/environment.py", line 970, in run_migrations
+migrate_prod-1  |     self.get_context().run_migrations(**kw)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/runtime/migration.py", line 616, in run_migrations
+migrate_prod-1  |     step.migration_fn(**kw)
+migrate_prod-1  |   File "/app/app/db/migrations/versions/451003a41085_use_public_id.py", line 31, in upgrade
+migrate_prod-1  |     op.add_column('categories', sa.Column('public_id', sa.String(length=12), nullable=False))
+migrate_prod-1  |   File "<string>", line 8, in add_column
+migrate_prod-1  |   File "<string>", line 3, in add_column
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/operations/ops.py", line 2236, in add_column
+migrate_prod-1  |     return operations.invoke(op)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/operations/base.py", line 448, in invoke
+migrate_prod-1  |     return fn(self, operation)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/operations/toimpl.py", line 181, in add_column
+migrate_prod-1  |     operations.impl.add_column(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/ddl/impl.py", line 384, in add_column
+migrate_prod-1  |     self._exec(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/ddl/impl.py", line 252, in _exec
+migrate_prod-1  |     return conn.execute(construct, params)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+migrate_prod-1  |     return meth(
+migrate_prod-1  |            ^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/ddl.py", line 188, in _execute_on_connection
+migrate_prod-1  |     return connection._execute_ddl(
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1532, in _execute_ddl
+migrate_prod-1  |     ret = self._execute_context(
+migrate_prod-1  |           ^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+migrate_prod-1  |     return self._exec_single_context(
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+migrate_prod-1  |     self._handle_dbapi_exception(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+migrate_prod-1  |     raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+migrate_prod-1  |     self.dialect.do_execute(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+migrate_prod-1  |     cursor.execute(statement, parameters)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+migrate_prod-1  |     self._adapt_connection.await_(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+migrate_prod-1  |     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+migrate_prod-1  |     value = await result
+migrate_prod-1  |             ^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+migrate_prod-1  |     self._handle_exception(error)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+migrate_prod-1  |     self._adapt_connection._handle_exception(error)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+migrate_prod-1  |     raise translated_error from error
+migrate_prod-1  | sqlalchemy.exc.IntegrityError: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: column "public_id" of relation "categories" contains null values
+migrate_prod-1  | [SQL: ALTER TABLE categories ADD COLUMN public_id VARCHAR(12) NOT NULL]
+migrate_prod-1  | (Background on this error at: https://sqlalche.me/e/20/gkpj)
+migrate_prod-1  | INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+migrate_prod-1  | INFO  [alembic.runtime.migration] Will assume transactional DDL.
+migrate_prod-1  | INFO  [alembic.runtime.migration] Running upgrade f9180753eccb -> 451003a41085, use_public_id
+migrate_prod-1  | Traceback (most recent call last):
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 550, in _prepare_and_execute
+migrate_prod-1  |     self._rows = deque(await prepared_stmt.fetch(*parameters))
+migrate_prod-1  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 177, in fetch
+migrate_prod-1  |     data = await self.__bind_execute(args, 0, timeout)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 268, in __bind_execute
+migrate_prod-1  |     data, status, _ = await self.__do_execute(
+migrate_prod-1  |                       ^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/asyncpg/prepared_stmt.py", line 257, in __do_execute
+migrate_prod-1  |     return await executor(protocol)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "asyncpg/protocol/protocol.pyx", line 205, in bind_execute
+migrate_prod-1  | asyncpg.exceptions.NotNullViolationError: column "public_id" of relation "categories" contains null values
+migrate_prod-1  | 
+migrate_prod-1  | The above exception was the direct cause of the following exception:
+migrate_prod-1  | 
+migrate_prod-1  | Traceback (most recent call last):
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+migrate_prod-1  |     self.dialect.do_execute(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+migrate_prod-1  |     cursor.execute(statement, parameters)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+migrate_prod-1  |     self._adapt_connection.await_(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+migrate_prod-1  |     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+migrate_prod-1  |     value = await result
+migrate_prod-1  |             ^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+migrate_prod-1  |     self._handle_exception(error)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+migrate_prod-1  |     self._adapt_connection._handle_exception(error)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+migrate_prod-1  |     raise translated_error from error
+migrate_prod-1  | sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.IntegrityError: <class 'asyncpg.exceptions.NotNullViolationError'>: column "public_id" of relation "categories" contains null values
+migrate_prod-1  | 
+migrate_prod-1  | The above exception was the direct cause of the following exception:
+migrate_prod-1  | 
+migrate_prod-1  | Traceback (most recent call last):
+migrate_prod-1  |   File "/usr/local/bin/alembic", line 10, in <module>
+migrate_prod-1  |     sys.exit(main())
+migrate_prod-1  |              ^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/config.py", line 1039, in main
+migrate_prod-1  |     CommandLine(prog=prog).main(argv=argv)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/config.py", line 1029, in main
+migrate_prod-1  |     self.run_cmd(cfg, options)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/config.py", line 963, in run_cmd
+migrate_prod-1  |     fn(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/command.py", line 487, in upgrade
+migrate_prod-1  |     script.run_env()
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/script/base.py", line 550, in run_env
+migrate_prod-1  |     util.load_python_file(self.dir, "env.py")
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/util/pyfiles.py", line 114, in load_python_file
+migrate_prod-1  |     module = load_module_py(module_id, path)
+migrate_prod-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/util/pyfiles.py", line 132, in load_module_py
+migrate_prod-1  |     spec.loader.exec_module(module)  # type: ignore
+migrate_prod-1  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+migrate_prod-1  |   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+migrate_prod-1  |   File "/app/app/db/migrations/env.py", line 52, in <module>
+migrate_prod-1  |     asyncio.run(run_migrations_online())
+migrate_prod-1  |   File "/usr/local/lib/python3.12/asyncio/runners.py", line 195, in run
+migrate_prod-1  |     return runner.run(main)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/asyncio/runners.py", line 118, in run
+migrate_prod-1  |     return self._loop.run_until_complete(task)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+migrate_prod-1  |     return future.result()
+migrate_prod-1  |            ^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/app/app/db/migrations/env.py", line 45, in run_migrations_online
+migrate_prod-1  |     await conn.run_sync(lambda _: context.run_migrations())
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py", line 888, in run_sync
+migrate_prod-1  |     return await greenlet_spawn(
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+migrate_prod-1  |     result = context.throw(*sys.exc_info())
+migrate_prod-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/app/app/db/migrations/env.py", line 45, in <lambda>
+migrate_prod-1  |     await conn.run_sync(lambda _: context.run_migrations())
+migrate_prod-1  |                                   ^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "<string>", line 8, in run_migrations
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/runtime/environment.py", line 970, in run_migrations
+migrate_prod-1  |     self.get_context().run_migrations(**kw)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/runtime/migration.py", line 616, in run_migrations
+migrate_prod-1  |     step.migration_fn(**kw)
+migrate_prod-1  |   File "/app/app/db/migrations/versions/451003a41085_use_public_id.py", line 31, in upgrade
+migrate_prod-1  |     op.add_column('categories', sa.Column('public_id', sa.String(length=12), nullable=False))
+migrate_prod-1  |   File "<string>", line 8, in add_column
+migrate_prod-1  |   File "<string>", line 3, in add_column
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/operations/ops.py", line 2236, in add_column
+migrate_prod-1  |     return operations.invoke(op)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/operations/base.py", line 448, in invoke
+migrate_prod-1  |     return fn(self, operation)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/operations/toimpl.py", line 181, in add_column
+migrate_prod-1  |     operations.impl.add_column(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/ddl/impl.py", line 384, in add_column
+migrate_prod-1  |     self._exec(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/alembic/ddl/impl.py", line 252, in _exec
+migrate_prod-1  |     return conn.execute(construct, params)
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+migrate_prod-1  |     return meth(
+migrate_prod-1  |            ^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/ddl.py", line 188, in _execute_on_connection
+migrate_prod-1  |     return connection._execute_ddl(
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1532, in _execute_ddl
+migrate_prod-1  |     ret = self._execute_context(
+migrate_prod-1  |           ^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+migrate_prod-1  |     return self._exec_single_context(
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+migrate_prod-1  |     self._handle_dbapi_exception(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+migrate_prod-1  |     raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+migrate_prod-1  |     self.dialect.do_execute(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+migrate_prod-1  |     cursor.execute(statement, parameters)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+migrate_prod-1  |     self._adapt_connection.await_(
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+migrate_prod-1  |     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+migrate_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+migrate_prod-1  |     value = await result
+migrate_prod-1  |             ^^^^^^^^^^^^
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+migrate_prod-1  |     self._handle_exception(error)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+migrate_prod-1  |     self._adapt_connection._handle_exception(error)
+migrate_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+migrate_prod-1  |     raise translated_error from error
+migrate_prod-1  | sqlalchemy.exc.IntegrityError: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: column "public_id" of relation "categories" contains null values
+migrate_prod-1  | [SQL: ALTER TABLE categories ADD COLUMN public_id VARCHAR(12) NOT NULL]
+migrate_prod-1  | (Background on this error at: https://sqlalche.me/e/20/gkpj)
+

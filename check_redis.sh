@@ -1,0 +1,1 @@
+ssh -i /home/kai/.ssh/hetzner_key -o StrictHostKeyChecking=no root@188.245.70.100 'cd /root/projects/rung && docker compose --profile prod exec -T redis_prod redis-cli keys "*"'

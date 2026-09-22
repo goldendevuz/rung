@@ -1,0 +1,1 @@
+cd /root/projects/rung && git pull origin main && docker compose --profile prod exec -T postgres_prod psql -U rung -d rung -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" && docker compose --profile prod up -d --build

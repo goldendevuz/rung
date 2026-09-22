@@ -1,0 +1,1 @@
+ssh -i /home/kai/.ssh/hetzner_key -o StrictHostKeyChecking=no root@188.245.70.100 'docker compose --profile prod exec -T redis_prod redis-cli set "auth:tg:2imxnc0G3XIabHVkSGKjYRWS-IP_u-QyyK9CTxGg6cQ" "confirmed:12345"'

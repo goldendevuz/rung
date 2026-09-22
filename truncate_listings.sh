@@ -1,0 +1,1 @@
+ssh -i /home/kai/.ssh/hetzner_key -o StrictHostKeyChecking=no root@188.245.70.100 'cd /root/projects/rung && docker compose --profile prod exec -T postgres_prod psql -U rung -d rung -c "TRUNCATE listings CASCADE;"'

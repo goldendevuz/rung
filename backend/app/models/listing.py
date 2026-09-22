@@ -27,6 +27,12 @@ class Listing(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     )
     category: Mapped["Category"] = relationship("Category", back_populates="listings")  # noqa: F821
 
+    # Ownership
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    owner: Mapped["User"] = relationship("User")  # noqa: F821
+
     # Channel-specific
     subscribers: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

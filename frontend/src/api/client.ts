@@ -62,3 +62,9 @@ export async function fetchListing(id: string) {
   if (!res.ok) throw new Error('Not found');
   return res.json();
 }
+
+export async function fetchMyListings() {
+  const res = await fetch(`${API_BASE}/users/me/listings`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch my listings');
+  return res.json();
+}

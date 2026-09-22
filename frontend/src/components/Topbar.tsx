@@ -80,10 +80,11 @@ export function Topbar() {
               <button onClick={enableDemo} style={{ padding: '4px 12px', background: '#f59e0b', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Demo</button>
             )}
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {user.photo_url && <img src={user.photo_url} alt="Avatar" style={{ width: 28, height: 28, borderRadius: '50%' }} />}
-                <span className="hide-sm" style={{ fontWeight: '500' }}>{user.first_name || user.username}</span>
-                <button className="btn-login" onClick={logout} style={{ marginLeft: 8 }}>Chiqish</button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Link to="/profil" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'var(--fg)', fontWeight: '500' }} className="user-profile-link">
+                  {user.photo_url && <img src={user.photo_url} alt="Avatar" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />}
+                  <span className="hide-sm">{user.first_name || user.username}</span>
+                </Link>
               </div>
             ) : (
               <Link to="/kirish"><button className="btn-login">Kirish</button></Link>

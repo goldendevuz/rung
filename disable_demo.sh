@@ -1,0 +1,1 @@
+ssh -i /home/kai/.ssh/hetzner_key -o StrictHostKeyChecking=no root@188.245.70.100 'sed -i "s/SEED_DEMO=true/SEED_DEMO=false/" /root/projects/rung/.env'

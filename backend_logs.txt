@@ -1,0 +1,52 @@
+STDOUT:
+ backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+backend_prod-1  |     result: Result[Any] = compile_state_cls.orm_execute_statement(
+backend_prod-1  |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+backend_prod-1  |     result = conn.execute(
+backend_prod-1  |              ^^^^^^^^^^^^^
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+backend_prod-1  |     return meth(
+backend_prod-1  |            ^^^^^
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+backend_prod-1  |     return connection._execute_clauseelement(
+backend_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+backend_prod-1  |     ret = self._execute_context(
+backend_prod-1  |           ^^^^^^^^^^^^^^^^^^^^^^
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+backend_prod-1  |     return self._exec_single_context(
+backend_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+backend_prod-1  |     self._handle_dbapi_exception(
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+backend_prod-1  |     raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+backend_prod-1  |     self.dialect.do_execute(
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+backend_prod-1  |     cursor.execute(statement, parameters)
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+backend_prod-1  |     self._adapt_connection.await_(
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+backend_prod-1  |     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+backend_prod-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+backend_prod-1  |     value = await result
+backend_prod-1  |             ^^^^^^^^^^^^
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+backend_prod-1  |     self._handle_exception(error)
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+backend_prod-1  |     self._adapt_connection._handle_exception(error)
+backend_prod-1  |   File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+backend_prod-1  |     raise translated_error from error
+backend_prod-1  | sqlalchemy.exc.DBAPIError: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $1: '0' ('str' object cannot be interpreted as an integer)
+backend_prod-1  | [SQL: SELECT boards.period_type AS boards_period_type, boards.period_key AS boards_period_key, boards.starts_at AS boards_starts_at, boards.ends_at AS boards_ends_at, boards.status AS boards_status, boards.id AS boards_id, boards.uuid AS boards_uuid, boards.created_at AS boards_created_at, boards.updated_at AS boards_updated_at 
+backend_prod-1  | FROM boards 
+backend_prod-1  | WHERE boards.id = $1::BIGINT]
+backend_prod-1  | [parameters: ('0',)]
+backend_prod-1  | (Background on this error at: https://sqlalche.me/e/20/dbapi)
+backend_prod-1  | INFO:     127.0.0.1:34874 - "GET /healthz HTTP/1.1" 200 OK
+backend_prod-1  | INFO:     10.0.14.7:38716 - "GET /healthz HTTP/1.1" 200 OK
+backend_prod-1  | INFO:     127.0.0.1:59470 - "GET /healthz HTTP/1.1" 200 OK
+backend_prod-1  | INFO:     10.0.14.7:44396 - "GET /healthz HTTP/1.1" 200 OK
+
