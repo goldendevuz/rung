@@ -151,6 +151,13 @@ services:
       GOOGLE_AUTH_ENABLED: ${GOOGLE_AUTH_ENABLED:-false}
       SHOW_DEMO_BUTTON: ${SHOW_DEMO_BUTTON:-false}
       PAYMENT_PROVIDER_TEXT: ${PAYMENT_PROVIDER_TEXT:-to'lov tez orada}
+      INPAY_MERCHANT_ID: ${INPAY_MERCHANT_ID:-}
+      INPAY_MERCHANT_TOKEN: ${INPAY_MERCHANT_TOKEN:-}
+      INPAY_CALLBACK_URL: ${INPAY_CALLBACK_URL:-https://rung.shats.uz/api/v1/payments/inpay/callback}
+      INPAY_RETURN_URL: ${INPAY_RETURN_URL:-https://rung.shats.uz/hamyon}
+      INPAY_BASE_URL: ${INPAY_BASE_URL:-https://inpay.uz/api/v1}
+    env_file:
+    - .env
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -208,6 +215,13 @@ services:
       GOOGLE_AUTH_ENABLED: ${GOOGLE_AUTH_ENABLED:-false}
       SHOW_DEMO_BUTTON: ${SHOW_DEMO_BUTTON:-false}
       PAYMENT_PROVIDER_TEXT: ${PAYMENT_PROVIDER_TEXT:-to'lov tez orada}
+      INPAY_MERCHANT_ID: ${INPAY_MERCHANT_ID:-}
+      INPAY_MERCHANT_TOKEN: ${INPAY_MERCHANT_TOKEN:-}
+      INPAY_CALLBACK_URL: ${INPAY_CALLBACK_URL:-https://rung.shats.uz/api/v1/payments/inpay/callback}
+      INPAY_RETURN_URL: ${INPAY_RETURN_URL:-https://rung.shats.uz/hamyon}
+      INPAY_BASE_URL: ${INPAY_BASE_URL:-https://inpay.uz/api/v1}
+    env_file:
+    - .env
     depends_on:
       migrate_prod:
         condition: service_completed_successfully
@@ -257,6 +271,13 @@ services:
       SHOW_DEMO_BUTTON: ${SHOW_DEMO_BUTTON:-false}
       PAYMENT_PROVIDER_TEXT: ${PAYMENT_PROVIDER_TEXT:-to'lov tez orada}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      INPAY_MERCHANT_ID: ${INPAY_MERCHANT_ID:-}
+      INPAY_MERCHANT_TOKEN: ${INPAY_MERCHANT_TOKEN:-}
+      INPAY_CALLBACK_URL: ${INPAY_CALLBACK_URL:-https://rung.shats.uz/api/v1/payments/inpay/callback}
+      INPAY_RETURN_URL: ${INPAY_RETURN_URL:-https://rung.shats.uz/hamyon}
+      INPAY_BASE_URL: ${INPAY_BASE_URL:-https://inpay.uz/api/v1}
+    env_file:
+    - .env
     depends_on:
       migrate:
         condition: service_completed_successfully

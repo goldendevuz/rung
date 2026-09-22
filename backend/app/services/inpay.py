@@ -4,7 +4,7 @@ from typing import Any, Tuple
 import httpx
 
 from app.core.config import get_settings
-from app.core.redis import get_redis
+from app.core.redis import redis_client
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ async def get_inpay_bearer_token(force_refresh: bool = False) -> str:
     if not settings.INPAY_MERCHANT_ID or not settings.INPAY_MERCHANT_TOKEN:
         raise InPayError("inPAY merchant credentials are not configured")
 
-    redis = await get_redis()
+    redis = redis_client
     if redis and not force_refresh:
         try:
             cached = await redis.get(REDIS_TOKEN_KEY)
