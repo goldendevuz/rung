@@ -125,7 +125,7 @@ export function Profile() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
 
-  const { data: listings, isLoading } = useQuery({
+  const { data: listings, isLoading, isError, refetch } = useQuery({
     queryKey: ['my-listings'],
     queryFn: fetchMyListings,
     enabled: !!user,
@@ -239,6 +239,16 @@ export function Profile() {
 
               {isLoading ? (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--fg-dim)' }}>Yuklanmoqda...</div>
+              ) : isError ? (
+                <div className="empty-state" style={{ padding: '40px 20px', textAlign: 'center', background: 'var(--bg-elevated)', borderRadius: '16px', border: '1px solid rgba(255, 100, 100, 0.2)' }}>
+                  <p style={{ margin: '0 0 16px 0', color: '#ff6b6b' }}>Kanallarni yuklashda xatolik yuz berdi.</p>
+                  <button 
+                    className="btn-primary" 
+                    onClick={() => refetch()}
+                  >
+                    Qayta urinish
+                  </button>
+                </div>
               ) : listings && listings.length > 0 ? (
                 <div className="listings-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {listings.map((l: any) => (

@@ -39,13 +39,13 @@ class ListingMini(BaseModel):
 
 class ListingResponse(ListingMini):
     """Extended listing info for /listings/{public_id}."""
-    description: str | None
-    url: str | None
-    claimed: bool
-    free_label: str | None
+    description: str | None = None
+    url: str | None = None
+    claimed: bool = False
+    free_label: str | None = None
     stats_daily: list[dict] = []
     clickthroughs: int = 0
-    created_at: datetime
+    created_at: datetime | None = None
 
 
 ListingCompact = ListingMini

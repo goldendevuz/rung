@@ -40,6 +40,7 @@ async def get_my_listings(
             handle=listing.handle,
             name=listing.name,
             description=listing.description,
+            url=listing.url or f"https://t.me/{listing.handle.lstrip('@')}",
             category_slug=listing.category.slug if listing.category else None,
             category_color=listing.category.color if listing.category else None,
             subscribers=listing.subscribers,
@@ -57,31 +58,68 @@ async def get_my_listings(
 
 @router.get("/avatar/{tg_id}")
 async def get_avatar(tg_id: int):
-    """Proxy Telegram user profile photo."""
-    async with httpx.AsyncClient() as client:
-        res = await client.get(f"https://api.telegram.org/bot{settings.BOT_TOKEN}/getUserProfilePhotos?user_id={tg_id}&limit=1")
-        if not res.is_success:
-            raise HTTPException(status_code=404, detail="Not found")
+    """Proxy Telegram user profile photo with caching."""
+    from fastapi import Response
+    from app.core.redis import get_redis
+
+    cache_key = f"tg_avatar:{tg_id}"
+    redis = await get_redis()
+    if redis:
+        try:
+            cached = await redis.get(cache_key)
+            if cached:
+                return Response(
+                    content=cached,
+                    media_type="image/jpeg",
+                    headers={"Cache-Control": "public, max-age=86400"}
+                )
+        except Exception:
+            pass
+
+    if not settings.BOT_TOKEN:
+        raise HTTPException(status_code=404, detail="No bot token")
+
+    try:
+        async with httpx.AsyncClient(timeout=4.0) as client:
+            res = await client.get(f"https://api.telegram.org/bot{settings.BOT_TOKEN}/getUserProfilePhotos?user_id={tg_id}&limit=1")
+            if not res.is_success:
+                raise HTTPException(status_code=404, detail="Not found")
+                
+            data = res.json()
+            if not data.get("ok") or not data.get("result", {}).get("photos") or not data["result"]["photos"][0]:
+                raise HTTPException(status_code=404, detail="No photo")
+                
+            file_id = data["result"]["photos"][0][-1]["file_id"]
+            res = await client.get(f"https://api.telegram.org/bot{settings.BOT_TOKEN}/getFile?file_id={file_id}")
+            if not res.is_success:
+                raise HTTPException(status_code=404, detail="Not found")
+                
+            data = res.json()
+            file_path = data.get("result", {}).get("file_path")
+            if not file_path:
+                raise HTTPException(status_code=404, detail="No file path")
             
-        data = res.json()
-        if not data.get("ok") or not data.get("result", {}).get("photos"):
-            raise HTTPException(status_code=404, detail="No photo")
-            
-        file_id = data["result"]["photos"][0][-1]["file_id"]
-        res = await client.get(f"https://api.telegram.org/bot{settings.BOT_TOKEN}/getFile?file_id={file_id}")
-        if not res.is_success:
-            raise HTTPException(status_code=404, detail="Not found")
-            
-        data = res.json()
-        file_path = data["result"]["file_path"]
-        
-        file_url = f"https://api.telegram.org/file/bot{settings.BOT_TOKEN}/{file_path}"
-        r = await client.get(file_url)
-        if not r.is_success:
-            raise HTTPException(status_code=404, detail="Not found")
-            
-        from fastapi import Response
-        return Response(content=r.content, media_type="image/jpeg")
+            file_url = f"https://api.telegram.org/file/bot{settings.BOT_TOKEN}/{file_path}"
+            r = await client.get(file_url)
+            if not r.is_success:
+                raise HTTPException(status_code=404, detail="Not found")
+                
+            content = r.content
+            if redis and content:
+                try:
+                    await redis.setex(cache_key, 86400, content)
+                except Exception:
+                    pass
+
+            return Response(
+                content=content,
+                media_type="image/jpeg",
+                headers={"Cache-Control": "public, max-age=86400"}
+            )
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=404, detail="Could not fetch avatar")
 from pydantic import BaseModel
 
 class CreateListingRequest(BaseModel):
