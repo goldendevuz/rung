@@ -67,7 +67,7 @@ CHANNELS = [
         "verified": True, "claimed": True,
         "g": ["#2563EB", "#1E3A8A"],
         "paid": {"a": 25, "d": 5, "w": 12, "m": 20, "y": 22},
-        "desc": "O'zbekistondagi eng yirik dasturlash kanali.",
+        "desc": "O'zbekistondagi eng yirik dasturlash kanali. Har kuni dasturlash, veb-ishlanma, mobil ilovalar va sun'iy intellekt sohalari boyicha qiziqarli maqolalar va darslar chop etiladi. Python, JavaScript, TypeScript, Go va boshqa zamonaviy texnologiyalar boyicha bilimlaringizni oshiring. 84 000 dan ortiq obunachilar hamjamiyatida tajribali mutaxassislar va yangi boshlovchilar birga suhbatlashadi va bilim ulashadi. Rung platformasida birinchi orinni egallagan, O'zbekiston IT ekotizimining yetakchi kanali.",
         "age_days": 120,
     },
     {
