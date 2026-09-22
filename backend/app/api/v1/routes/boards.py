@@ -140,7 +140,7 @@ async def get_board_current(
         return BoardPage(
             period_type=period_type,
             period_key=period_key,
-            board_id="0",
+            board_id="00000000-0000-0000-0000-000000000000",
             entries=[],
             total=0,
             page=page,
