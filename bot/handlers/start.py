@@ -20,7 +20,13 @@ async def cmd_start(message: Message, command: CommandObject) -> None:
             await message.answer("Ushbu havola yaroqsiz yoki muddati o'tgan.")
             return
             
-        await redis_client.set(key, f"confirmed:{message.from_user.id}", ex=300)
+        import json
+        user_data = {
+            "tg_id": message.from_user.id,
+            "first_name": message.from_user.first_name,
+            "username": message.from_user.username
+        }
+        await redis_client.set(key, f"confirmed:{json.dumps(user_data)}", ex=300)
         
         from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
         webapp_url = os.getenv('WEBAPP_URL', 'https://rung.uz')

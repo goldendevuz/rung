@@ -1,6 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -10,6 +12,9 @@ from app.db.session import get_db
 from app.models.listing import Listing
 from app.models.user import User
 from app.schemas.public import ListingDetail
+from app.core.config import get_settings
+
+settings = get_settings()
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -49,3 +54,28 @@ async def get_my_listings(
         )
         for listing in listings
     ]
+
+@router.get("/avatar/{tg_id}")
+async def get_avatar(tg_id: int):
+    """Proxy Telegram user profile photo."""
+    async with httpx.AsyncClient() as client:
+        res = await client.get(f"https://api.telegram.org/bot{settings.BOT_TOKEN}/getUserProfilePhotos?user_id={tg_id}&limit=1")
+        if not res.is_success:
+            raise HTTPException(status_code=404, detail="Not found")
+            
+        data = res.json()
+        if not data.get("ok") or not data.get("result", {}).get("photos"):
+            raise HTTPException(status_code=404, detail="No photo")
+            
+        file_id = data["result"]["photos"][0][-1]["file_id"]
+        res = await client.get(f"https://api.telegram.org/bot{settings.BOT_TOKEN}/getFile?file_id={file_id}")
+        if not res.is_success:
+            raise HTTPException(status_code=404, detail="Not found")
+            
+        data = res.json()
+        file_path = data["result"]["file_path"]
+        
+        file_url = f"https://api.telegram.org/file/bot{settings.BOT_TOKEN}/{file_path}"
+        req = client.build_request("GET", file_url)
+        r = await client.send(req, stream=True)
+        return StreamingResponse(r.aiter_raw(), media_type="image/jpeg")

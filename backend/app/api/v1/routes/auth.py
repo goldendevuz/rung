@@ -119,22 +119,38 @@ async def telegram_poll(
         raise HTTPException(status_code=410, detail="Token already used")
         
     if status_val.startswith("confirmed:"):
-        tg_id = int(status_val.split(":")[1])
-        
+        payload = status_val.split(":", 1)[1]
+        try:
+            tg_id = int(payload)
+            first_name = None
+            username = None
+        except ValueError:
+            data = json.loads(payload)
+            tg_id = data["tg_id"]
+            first_name = data.get("first_name")
+            username = data.get("username")
+            
         # Mark as used so it can't be reused
         await redis.set(key, "used", ex=60)
         
         result = await db.execute(select(User).where(User.telegram_id == tg_id))
         user = result.scalar_one_or_none()
         
-        # If user wasn't found, this means they used the bot but somehow weren't upserted yet?
-        # Let's upsert them here, though we only have their ID unless the bot saved more info.
-        # But for now, bot will just provide ID.
         if not user:
             user = User(telegram_id=tg_id)
             db.add(user)
-            await db.commit()
-            await db.refresh(user)
+            
+        if first_name:
+            user.first_name = first_name
+        if username:
+            user.username = username
+            
+        # Give them a proxy avatar if they don't have a real one yet
+        if not user.photo_url or user.photo_url.startswith("/api/v1"):
+            user.photo_url = f"/api/v1/users/avatar/{tg_id}"
+            
+        await db.commit()
+        await db.refresh(user)
             
         session_token = create_session_token(user.id)
         response.set_cookie(
