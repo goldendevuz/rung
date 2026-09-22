@@ -1,11 +1,12 @@
-"""SQLAlchemy declarative base and shared mixins."""
 from __future__ import annotations
+import uuid
+"""SQLAlchemy declarative base and shared mixins."""
 
 import secrets
 import string
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, String, func
+from sqlalchemy import Uuid, BigInteger, DateTime, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -13,17 +14,10 @@ class Base(DeclarativeBase):
     pass
 
 
-def generate_public_id() -> str:
-    alphabet = string.ascii_letters + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(12))
-
 class IDMixin:
     """Integer PK + public ID."""
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    public_id: Mapped[str] = mapped_column(
-        String(12), unique=True, nullable=False, index=True, default=generate_public_id
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
 
 
 class TimestampMixin:
@@ -44,5 +38,5 @@ class SoftDeleteMixin:
     """Soft-delete fields — no hard deletes in application code."""
 
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    deleted_by: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    deleted_by: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True)
     delete_reason: Mapped[str | None] = mapped_column(String(512), nullable=True)

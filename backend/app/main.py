@@ -108,13 +108,13 @@ async def demo_mode_middleware(request: Request, call_next):
             })
 
         elif path.startswith("/api/v1/listings/"):
-            # Extract public_id from path: /api/v1/listings/<public_id>
+            # Extract id from path: /api/v1/listings/<id>
             parts = path.split("/")
             if len(parts) >= 5:
-                public_id = parts[4]
-                if public_id == "yoq-bunday-kanal":
+                id = parts[4]
+                if id == "yoq-bunday-kanal":
                     return JSONResponse(status_code=404, content={"detail": "Not Found"})
-                listing = get_demo_listing(public_id)
+                listing = get_demo_listing(id)
                 if listing is not None:
                     return JSONResponse(content=listing)
                 # Unknown demo listing → 404

@@ -57,8 +57,8 @@ export async function fetchPublicConfig() {
   }>;
 }
 
-export async function fetchListing(public_id: string) {
-  const res = await fetch(`${API_BASE}/listings/${public_id}`, { headers: getHeaders() });
+export async function fetchListing(id: string) {
+  const res = await fetch(`${API_BASE}/listings/${id}`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Not found');
   return res.json();
 }

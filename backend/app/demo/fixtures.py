@@ -6,14 +6,14 @@ from app.db.seed import CATEGORIES, CHANNELS, FREE_CHANNELS, PERIOD_KEY_MAP
 from app.core.periods import get_period_bounds, now_tashkent, seconds_until_period_end
 from app.core.money import units_to_b_display
 
-# Build a lookup dict: public_id -> channel dict
+# Build a lookup dict: id -> channel dict
 _ALL_CHANNELS = CHANNELS + FREE_CHANNELS
-_CHANNEL_BY_PID: dict = {ch["public_id"]: ch for ch in _ALL_CHANNELS}
+_CHANNEL_BY_ID: dict = {ch["id"]: ch for ch in _ALL_CHANNELS}
 
 
 def _format_listing(ch: dict, clickthroughs: int = 0) -> dict:
     return {
-        "public_id": ch["public_id"],
+        "id": ch["id"],
         "kind": ch.get("kind", "channel"),
         "handle": ch["handle"],
         "name": ch["name"],
@@ -32,9 +32,9 @@ def _format_listing(ch: dict, clickthroughs: int = 0) -> dict:
     }
 
 
-def get_demo_listing(public_id: str) -> dict | None:
-    """Return demo listing data for a given public_id, or None if not found."""
-    ch = _CHANNEL_BY_PID.get(public_id)
+def get_demo_listing(id: str) -> dict | None:
+    """Return demo listing data for a given id, or None if not found."""
+    ch = _CHANNEL_BY_ID.get(id)
     if ch is None:
         return None
     return _format_listing(ch, ch.get("clicks", 0))

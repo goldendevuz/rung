@@ -1,5 +1,6 @@
-"""Listings API endpoints."""
 from __future__ import annotations
+from uuid import UUID
+"""Listings API endpoints."""
 
 from typing import Annotated
 
@@ -16,15 +17,15 @@ from app.schemas.public import ListingDetail
 router = APIRouter(prefix="/listings", tags=["listings"])
 
 
-@router.get("/{public_id}", response_model=ListingDetail)
+@router.get("/{id}", response_model=ListingDetail)
 async def get_listing(
-    public_id: str,
+    id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ListingDetail:
-    """Get a single listing by public_id."""
+    """Get a single listing by id."""
     result = await db.execute(
         select(Listing)
-        .where(Listing.public_id == public_id, Listing.deleted_at.is_(None))
+        .where(Listing.id == id, Listing.deleted_at.is_(None))
         .options(selectinload(Listing.category))
     )
     listing = result.scalar_one_or_none()
@@ -40,7 +41,7 @@ async def get_listing(
     clickthroughs = int(clicks_result.scalar_one() or 0)
 
     return ListingDetail(
-        public_id=listing.public_id,
+        id=listing.id,
         kind=listing.kind,
         handle=listing.handle,
         name=listing.name,

@@ -52,7 +52,7 @@ export default function App() {
               <Route path="/qoidalar" element={<Rules />} />
               <Route path="/kirish" element={<Login />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/p/:public_id" element={<Listing />} />
+              <Route path="/p/:id" element={<Listing />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

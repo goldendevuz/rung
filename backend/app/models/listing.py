@@ -1,7 +1,8 @@
-"""Listing model."""
 from __future__ import annotations
+import uuid
+"""Listing model."""
 
-from sqlalchemy import ARRAY, BigInteger, Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import Uuid, ARRAY, BigInteger, Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, IDMixin, SoftDeleteMixin, TimestampMixin
@@ -21,8 +22,8 @@ class Listing(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     url: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     # Category FK
-    category_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True, index=True
+    category_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True, index=True
     )
     category: Mapped["Category"] = relationship("Category", back_populates="listings")  # noqa: F821
 

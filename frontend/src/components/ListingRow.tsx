@@ -49,7 +49,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
       
       <div className="mid">
         <p className="rtitle">
-          <Link to={`/p/${ch.public_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+          <Link to={`/p/${ch.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
             {ch.n}
           </Link>
           {ch.v && ICON_V}

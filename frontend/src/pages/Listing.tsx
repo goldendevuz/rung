@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchListing } from '../api/client';
 
 export const Listing = () => {
-  const { public_id } = useParams<{ public_id: string }>();
+  const { id } = useParams<{ id: string }>();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['listing', public_id],
-    queryFn: () => fetchListing(public_id!),
+    queryKey: ['listing', id],
+    queryFn: () => fetchListing(id!),
     retry: false,
   });
 

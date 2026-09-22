@@ -32,7 +32,7 @@ PAGE_SIZE = 12
 
 def _listing_to_compact(listing: Listing, clickthroughs: int = 0) -> ListingCompact:
     return ListingCompact(
-        public_id=listing.public_id,
+        id=listing.id,
         kind=listing.kind,
         handle=listing.handle,
         name=listing.name,
@@ -195,7 +195,7 @@ async def get_board_current(
     return BoardPage(
         period_type=period_type,
         period_key=period_key,
-        board_id=board.public_id,
+        board_id=board.id,
         entries=entry_outs,
         total=total,
         page=page,
@@ -256,7 +256,7 @@ async def get_quote(
     target_rank: int = Query(..., ge=1),
 ) -> QuoteOut:
     """Read-only quote: cost to claim target_rank on a board."""
-    result = await db.execute(select(Board).where(Board.public_id == board_id))
+    result = await db.execute(select(Board).where(Board.id == board_id))
     board = result.scalar_one_or_none()
     if board is None or board.status != "active":
         raise HTTPException(status_code=404, detail="Board not found or not active")

@@ -1,5 +1,6 @@
-"""Pydantic schemas for public API v1 responses."""
 from __future__ import annotations
+from uuid import UUID
+"""Pydantic schemas for public API v1 responses."""
 
 from datetime import datetime
 from typing import Any
@@ -25,7 +26,7 @@ class ListingMini(BaseModel):
     """Minimal listing info for board cards/lists."""
     model_config = ConfigDict(from_attributes=True)
 
-    public_id: str
+    id: UUID
     kind: str
     name: str
     handle: str
@@ -77,7 +78,7 @@ class BoardEntryOut(BaseModel):
 class BoardPage(BaseModel):
     period_type: str
     period_key: str
-    board_id: str
+    board_id: UUID
     entries: list[BoardEntryOut]
     total: int
     page: int
@@ -96,7 +97,7 @@ class DailyHistoryBoard(BaseModel):
 # ── Quote ─────────────────────────────────────────────────────────────────────
 
 class QuoteOut(BaseModel):
-    board_id: str
+    board_id: UUID
     target_rank: int
     holder_paid_b: str
     holder_paid_units: int

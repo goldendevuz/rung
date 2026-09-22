@@ -1,9 +1,10 @@
-"""Board and BoardEntry models."""
 from __future__ import annotations
+import uuid
+"""Board and BoardEntry models."""
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint
+from sqlalchemy import Uuid, BigInteger, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, IDMixin, SoftDeleteMixin, TimestampMixin
@@ -35,11 +36,11 @@ class Board(Base, IDMixin, TimestampMixin):
 class BoardEntry(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "board_entries"
 
-    board_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey("boards.id", ondelete="CASCADE"), nullable=False, index=True
+    board_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("boards.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    listing_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, index=True
+    listing_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
     # paid_units: whole B * 1000; 0 for free catalog entries
