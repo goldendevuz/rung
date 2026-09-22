@@ -148,3 +148,38 @@ export function MiniListing({ item }: { item: any }) {
     </div>
   );
 }
+
+export function EmptyRankSlot({ rank, onClaim }: { rank: number; onClaim?: () => void }) {
+  return (
+    <div className="row plain empty-slot" data-empty-rank={rank}>
+      <div className="rank num" style={{ color: 'var(--ink-3)', opacity: 0.7 }}>
+        #{rank}
+      </div>
+      <div className="ava empty-ava">
+        <span>+</span>
+      </div>
+      <div className="mid">
+        <p className="rtitle" style={{ color: 'var(--ink-3)', fontWeight: 600 }}>
+          Bo'sh o'rin #{rank}
+        </p>
+        <p className="rdesc" style={{ color: 'var(--ink-3)', opacity: 0.8 }}>
+          Kanalni qo'shib, reytingdagi ushbu pog'onani egallang
+        </p>
+      </div>
+      <div className="rprice-wrap">
+        <Link
+          to="/qoshish"
+          className="claim-empty-btn"
+          onClick={(e) => {
+            if (onClaim) {
+              e.preventDefault();
+              onClaim();
+            }
+          }}
+        >
+          Bu yerni egallang →
+        </Link>
+      </div>
+    </div>
+  );
+}

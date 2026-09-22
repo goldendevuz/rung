@@ -41,6 +41,7 @@ function UserAvatar({ photoUrl, name }: { photoUrl?: string | null; name?: strin
 
 export function Topbar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [theme, setTheme] = React.useState(() => localStorage.getItem('theme') || 'dark');
   const { user } = useAuth();
 
@@ -125,6 +126,20 @@ export function Topbar() {
             ) : (
               <Link to="/kirish"><button className="btn-login">Kirish</button></Link>
             )}
+            <button 
+              className="icon-btn mobile-menu-btn" 
+              onClick={() => setMobileNavOpen(!mobileNavOpen)} 
+              aria-label="Menyu"
+              aria-expanded={mobileNavOpen}
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round">
+                {mobileNavOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </nav>
         </div>
         {searchOpen && (
@@ -135,8 +150,69 @@ export function Topbar() {
             </label>
           </div>
         )}
-        {/* Category bar will be rendered conditionally in the Category page or Search */}
       </div>
+
+      {mobileNavOpen && (
+        <div className="mobile-drawer-backdrop" onClick={() => setMobileNavOpen(false)}>
+          <div className="mobile-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-drawer-head">
+              <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '18px' }}>
+                <span className="brand-mark"><i /><i /><i /></span>
+                rung
+              </div>
+              <button 
+                className="icon-btn" 
+                onClick={() => setMobileNavOpen(false)} 
+                aria-label="Yopish"
+                style={{ fontSize: '18px', width: '36px', height: '36px' }}
+              >
+                ✕
+              </button>
+            </div>
+            <nav className="mobile-drawer-nav">
+              <Link to="/" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link">
+                <span>🏆</span> Top reyting
+              </Link>
+              <Link to="/kunlik" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link">
+                <span>⚡</span> Kunlik
+              </Link>
+              <Link to="/kategoriyalar" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link">
+                <span>🏷️</span> Kategoriyalar
+              </Link>
+              <Link to="/qoshish" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link" style={{ color: 'var(--lime-text)', fontWeight: 700 }}>
+                <span>➕</span> Kanal qo'shish
+              </Link>
+              <Link to="/haqida" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link">
+                <span>💡</span> Haqida
+              </Link>
+              <Link to="/qoidalar" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link">
+                <span>📜</span> Qoidalar
+              </Link>
+              <Link to="/statistika" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link">
+                <span>📊</span> Jonli statistika
+              </Link>
+              {user ? (
+                <>
+                  <div style={{ height: '1px', background: 'var(--line)', margin: '8px 0' }} />
+                  <Link to="/hamyon" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link">
+                    <span>💳</span> Hamyon: <strong style={{ color: 'var(--brand)', marginLeft: '4px' }}>{user.balance?.toLocaleString()} B</strong>
+                  </Link>
+                  <Link to="/profil" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link">
+                    <span>👤</span> Profil: <strong style={{ marginLeft: '4px' }}>{user.first_name || user.username}</strong>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <div style={{ height: '1px', background: 'var(--line)', margin: '8px 0' }} />
+                  <Link to="/kirish" onClick={() => setMobileNavOpen(false)} className="mobile-nav-link btn-primary" style={{ textAlign: 'center', justifyContent: 'center', padding: '10px 16px', borderRadius: '12px' }}>
+                    Kirish
+                  </Link>
+                </>
+              )}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

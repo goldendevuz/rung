@@ -28,10 +28,13 @@ export function Layout() {
           <div className="wrap">
             <div>Rung — o'zbek Telegram kanallari uchun ochiq reyting · <a href="https://t.me/rung_uz_bot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--lime-text)' }}>@rung_uz_bot</a></div>
             <div className="flinks">
+              <Link to="/">Top reyting</Link><span>·</span>
+              <Link to="/kunlik">Kunlik</Link><span>·</span>
+              <Link to="/kategoriyalar">Kategoriyalar</Link><span>·</span>
+              <Link to="/qoshish">+Kanal qo'shish</Link><span>·</span>
+              <Link to="/hamyon">Hamyon</Link><span>·</span>
+              <Link to="/haqida">Haqida</Link><span>·</span>
               <Link to="/qoidalar">Qoidalar</Link><span>·</span>
-              <Link to="/haqida">Savol-javob</Link><span>·</span>
-              <Link to="/qoidalar#shartlar">Shartlar</Link><span>·</span>
-              <Link to="/qoidalar#maxfiylik">Maxfiylik</Link><span>·</span>
               <Link to="/statistika" style={{ color: 'var(--lime-text)', fontWeight: 600 }}>Jonli statistika ↗</Link>
             </div>
             <div className="slogan">BIR POG'ONA YUQORIGA</div>

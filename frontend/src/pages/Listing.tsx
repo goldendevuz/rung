@@ -247,7 +247,7 @@ export const Listing = () => {
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <a
-              href={`/go/${data.id}`}
+              href={`/api/v1/go/${data.id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary"

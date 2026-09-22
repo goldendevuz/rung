@@ -1,4 +1,25 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import { fetchCategories } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
+import AddListingModal from '../components/AddListingModal';
+
 export const AddChannel = () => {
+  const { user } = useAuth();
+  const [handle, setHandle] = useState('');
+  const [name, setName] = useState('');
+  const [desc, setDesc] = useState('');
+  const [selectedCat, setSelectedCat] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const { data: categories = [], isLoading: isCatLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+  });
+
+  const selectedCategoryObj = categories.find((c: any) => c.slug === selectedCat);
+
   return (
     <section id="page-qoshish">
       <div className="wrap">
@@ -18,6 +39,8 @@ export const AddChannel = () => {
                   className="inp"
                   id="aHandle"
                   placeholder="@kanal yoki https://t.me/kanal"
+                  value={handle}
+                  onChange={(e) => setHandle(e.target.value)}
                 />
               </div>
               <div>
@@ -26,6 +49,8 @@ export const AddChannel = () => {
                   className="inp"
                   id="aName"
                   placeholder="Masalan: Kodlash.uz"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
               <div>
@@ -35,11 +60,30 @@ export const AddChannel = () => {
                   id="aDesc"
                   maxLength={90}
                   placeholder="Reklama beruvchi nimani ko'radi (90 belgigacha)"
+                  value={desc}
+                  onChange={(e) => setDesc(e.target.value)}
                 />
               </div>
               <div>
                 <p className="lbl">Kategoriya</p>
-                <select className="inp" id="aCat" style={{ cursor: 'pointer' }}></select>
+                <select 
+                  className="inp" 
+                  id="aCat" 
+                  style={{ cursor: 'pointer' }}
+                  value={selectedCat}
+                  onChange={(e) => setSelectedCat(e.target.value)}
+                >
+                  <option value="">Kategoriyani tanlang...</option>
+                  {isCatLoading ? (
+                    <option value="" disabled>Yuklanmoqda...</option>
+                  ) : (
+                    categories.map((c: any) => (
+                      <option key={c.slug} value={c.slug}>
+                        {c.icon ? `${c.icon} ` : ''}{c.name_uz || c.name}
+                      </option>
+                    ))
+                  )}
+                </select>
               </div>
               <div>
                 <p className="lbl">Egalikni tasdiqlash</p>
@@ -66,14 +110,26 @@ export const AddChannel = () => {
                   <b>Har bir pulli o'rin "Reklama" deb belgilanadi.</b>
                 </span>
               </div>
-              <button
-                className="btn-primary"
-                id="aGo"
-                style={{ width: '100%', opacity: 0.5, cursor: 'not-allowed' }}
-                disabled
-              >
-                Kirish talab etiladi (Tez orada)
-              </button>
+              {user ? (
+                <button
+                  className="btn-primary"
+                  id="aGo"
+                  style={{ width: '100%', cursor: 'pointer' }}
+                  onClick={() => setIsAddModalOpen(true)}
+                >
+                  + Kanalni tasdiqlash va qo'shish
+                </button>
+              ) : (
+                <Link to="/kirish" style={{ textDecoration: 'none' }}>
+                  <button
+                    className="btn-primary"
+                    id="aGo"
+                    style={{ width: '100%', cursor: 'pointer' }}
+                  >
+                    Kirish va kanal qo'shish
+                  </button>
+                </Link>
+              )}
               <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--ink-3)' }}>
                 Yuborish pul talab qilmaydi. O'rin sotib olish tasdiqdan keyin
                 ochiladi.
@@ -87,16 +143,18 @@ export const AddChannel = () => {
                 <div className="row plain" style={{ marginTop: '0', pointerEvents: 'none' }}>
                   <div className="rank">?</div>
                   <div className="ava" style={{ background: 'var(--surface-2)', color: 'var(--ink-3)' }}>
-                    ?
+                    {name ? name.slice(0, 2).toUpperCase() : '?'}
                   </div>
                   <div style={{ minWidth: 0 }}>
-                    <h3 className="rtitle" style={{ color: 'var(--ink-3)' }}>
-                      Kanal nomi
+                    <h3 className="rtitle" style={{ color: name ? 'var(--fg)' : 'var(--ink-3)' }}>
+                      {name || "Kanal nomi"}
                     </h3>
-                    <p className="rdesc">Bir qatorli tavsif</p>
+                    <p className="rdesc">{desc || "Bir qatorli tavsif"}</p>
                     <div className="rmeta">
-                      <span className="sq" style={{ background: 'var(--ink-3)' }}></span>
-                      <b style={{ color: 'var(--ink-3)' }}>Kategoriya</b>
+                      <span className="sq" style={{ background: selectedCategoryObj?.color || 'var(--ink-3)' }}></span>
+                      <b style={{ color: selectedCategoryObj ? 'var(--fg)' : 'var(--ink-3)' }}>
+                        {selectedCategoryObj ? selectedCategoryObj.name_uz : 'Kategoriya'}
+                      </b>
                       <span className="sep">·</span>0 obunachi
                     </div>
                   </div>
@@ -117,6 +175,10 @@ export const AddChannel = () => {
           </aside>
         </div>
       </div>
+
+      {isAddModalOpen && (
+        <AddListingModal onClose={() => setIsAddModalOpen(false)} />
+      )}
     </section>
   );
 };

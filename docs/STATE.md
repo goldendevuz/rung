@@ -29,6 +29,16 @@
   - Topbar `.live` badge dynamically rendered with pulsing green indicator, active visitor counts, daily visit metrics, and direct link to public DataFast dashboard (`https://datafa.st/share/6ab279beba28fc830cd8714b`).
   - `/statistika` route added with live metric summary cards and embedded DataFast analytics dashboard.
   - Prototype footer integrated in `Layout.tsx` with links to Qoidalar, Savol-javob, Shartlar, Maxfiylik, and Jonli statistika.
-
-
-
+- Batch Fixes, UX Compacting & DataFast Payment API:
+  - Item 1: Empty-slot placeholders (#3 through #10) added to ranked list with "Bu yerni egallang ->" CTA linking to `/qoshish`.
+  - Item 2: "Boshqa" category restored in `/qoshish` with dynamic category fetching and live card preview.
+  - Item 3: "Invalid Date" safe formatting guard applied across all date displays.
+  - Item 4: Click count tracking via `/api/v1/go/{id}` and `/go/{id}` fully operational with daily metrics.
+  - Item 5: Sensitive channel usernames and direct URLs hidden on hover, routed through redirect endpoints.
+  - Item 6: Wallet balance verified (500 B - 1 B channel deduction = 499 B) with complete ledger audit.
+  - Item 7: Wallet checkout description updated with complete payment options: Karta, Click, Payme, Paynet, Alif, AnorBank, Visa/MC.
+  - Item 8: Responsive mobile navigation drawer implemented with hamburger button.
+  - Item 9: Footer updated with verified active platform links.
+  - Item 10: Site density compacted by ~10% (container max-width 960px, refined padding and font scales).
+  - Item 11: Demo button removed from production topbar.
+  - Item 12: DataFast payment revenue tracking implemented via `POST https://datafa.st/api/v1/payments` with server-side cookie capture (`datafast_visitor_id`), UZS->USD attribution conversion, post-verification triggers in webhook and worker, and fault-tolerant fail-safe error handling.

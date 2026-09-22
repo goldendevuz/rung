@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchTabs, fetchBoard, fetchCategories, fetchQuote, fetchPublicStats, fetchPublicConfig, fetchMyListings, claimRank } from '../api/client';
 import { formatB, formatDateSafe } from '../utils/formatters';
-import { ListingRow, MiniListing } from '../components/ListingRow';
+import { ListingRow, MiniListing, EmptyRankSlot } from '../components/ListingRow';
 import { useAuth } from '../contexts/AuthContext';
 
 const PERIOD_NAMES: Record<string, string> = {
@@ -230,7 +230,7 @@ export function Home() {
                   <button className="btn-primary" onClick={() => handleOpenClaim(1)}>1-o'rinni 1 B ga olish</button>
                 </div>
               )}
-              {!isLoading && entries.length > 0 && entries.map((entry: any, i: number) => {
+              {!isLoading && entries.length > 0 && entries.map((entry: any) => {
                 const mappedItem = {
                   rank: entry.rank,
                   price: entry.paid_b,
@@ -255,12 +255,28 @@ export function Home() {
                 return (
                   <React.Fragment key={entry.listing.id}>
                     <ListingRow item={mappedItem} onClaim={() => handleOpenClaim(entry.rank)} />
-                    {entry.rank === 10 && i < entries.length - 1 && (
+                    {entry.rank === 10 && (
                       <div className="divider"><span>TOP 10</span></div>
                     )}
                   </React.Fragment>
                 );
               })}
+              {page === 1 && cat === 'all' && !search && entries.length > 0 && entries.length < 10 && (
+                Array.from({ length: 10 - entries.length }, (_, idx) => {
+                  const emptyRank = entries.length + idx + 1;
+                  return (
+                    <React.Fragment key={`empty-slot-${emptyRank}`}>
+                      <EmptyRankSlot 
+                        rank={emptyRank} 
+                        onClaim={() => handleOpenClaim(emptyRank)} 
+                      />
+                      {emptyRank === 10 && (
+                        <div className="divider"><span>TOP 10</span></div>
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              )}
             </div>
             {boardPage && boardPage.total > 0 && boardPage.total_pages > 1 && (
               <div className="pager" id="pager">

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { fetchMyListings, uploadLogo, updateListing } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import AddListingModal from '../components/AddListingModal';
-import { getTelegramUrl, cleanTelegramHandle } from '../utils/formatters';
+import { cleanTelegramHandle } from '../utils/formatters';
 
 function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?: () => void }) {
   const [isUploading, setIsUploading] = useState(false);
@@ -18,7 +18,6 @@ function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?:
     ? listing.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
     : 'CH';
 
-  const tgUrl = getTelegramUrl(listing.handle, listing.url);
   const displayHandle = cleanTelegramHandle(listing.handle) || listing.handle;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +127,7 @@ function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?:
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '13px', color: 'var(--fg-dim)', flexWrap: 'wrap' }}>
             <a 
-              href={tgUrl} 
+              href={`/api/v1/go/${listing.id}`} 
               target="_blank" 
               rel="noopener noreferrer"
               style={{ color: 'var(--brand)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}

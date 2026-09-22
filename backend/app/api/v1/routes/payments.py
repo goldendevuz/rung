@@ -11,6 +11,7 @@ from app.models.ledger import LedgerEntry
 from app.models.topup import TopupOrder
 from app.models.user import User
 from app.services.inpay import verify_inpay_transaction, InPayError
+from app.services.datafast import track_datafast_payment
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 logger = logging.getLogger(__name__)
@@ -119,6 +120,13 @@ async def inpay_webhook_callback(
             user.id,
             order_id,
             user.balance,
+        )
+
+        # Fire DataFast revenue tracking event (server-side, post-verification)
+        await track_datafast_payment(
+            amount_uzs=order.amount_uzs,
+            order_id=order_id,
+            datafast_visitor_id=order.datafast_visitor_id,
         )
     elif v_status in ["failed", "canceled", "cancelled", "rejected"]:
         order.status = "failed"

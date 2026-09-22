@@ -51,6 +51,8 @@ class Settings(BaseSettings):
     INPAY_RETURN_URL: str = 'https://rung.shats.uz/hamyon'
     INPAY_BASE_URL: str = 'https://inpay.uz/api/v1'
 
+    DATAFAST_API_KEY: str = ''
+
     B_UNIT_UZS: int = 1000
     STARS_UNITS_PER_STAR: int = 200
     FLOOR_B: int = 1

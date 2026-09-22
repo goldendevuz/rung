@@ -14,6 +14,7 @@ from app.models.topup import TopupOrder
 from app.models.user import User
 from app.models.ledger import LedgerEntry
 from app.services.inpay import verify_inpay_transaction, InPayError
+from app.services.datafast import track_datafast_payment
 
 logger = logging.getLogger(__name__)
 HEARTBEAT = Path('/tmp/worker_heartbeat')
@@ -84,6 +85,13 @@ async def reconcile_inpay_topups(ctx: dict) -> int:  # type: ignore[type-arg]
                 await db.commit()
                 reconciled_count += 1
                 logger.info("Reconciliation credited %s B for order %s", order.b_amount, order.order_id)
+
+                # Fire DataFast revenue tracking event (server-side, post-verification)
+                await track_datafast_payment(
+                    amount_uzs=order.amount_uzs,
+                    order_id=order.order_id,
+                    datafast_visitor_id=order.datafast_visitor_id,
+                )
 
             elif v_status in ["failed", "canceled", "cancelled", "rejected"]:
                 order.status = "failed"

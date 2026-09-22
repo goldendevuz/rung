@@ -19,5 +19,6 @@ class TopupOrder(Base, IDMixin, TimestampMixin):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending", index=True)
     transaction_id: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     pay_url: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    datafast_visitor_id: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
 
     user: Mapped["User"] = relationship("User")  # noqa: F821

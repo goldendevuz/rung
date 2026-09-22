@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Annotated
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,11 +38,13 @@ async def create_topup(
     req: TopupRequest,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
+    request: Request,
 ) -> TopupResponse:
     """
     Initiate an automatic UZS wallet top-up via inPAY.uz.
     Converts whole B to UZS, requests inPAY hosted checkout,
     and returns pay_url and order_id.
+    Captures datafast_visitor_id cookie for server-side attribution.
     """
     if req.b_amount < 1:
         raise HTTPException(
@@ -64,6 +66,9 @@ async def create_topup(
             detail=f"To'lov tizimiga ulanishda xatolik: {str(e)}",
         )
 
+    # Capture datafast_visitor_id cookie
+    datafast_visitor_id = request.cookies.get("datafast_visitor_id")
+
     # Store pending top-up row keyed by inPAY order_id
     topup_order = TopupOrder(
         user_id=current_user.id,
@@ -72,6 +77,7 @@ async def create_topup(
         amount_uzs=amount_uzs,
         status="pending",
         pay_url=pay_url,
+        datafast_visitor_id=datafast_visitor_id,
     )
     db.add(topup_order)
     await db.commit()

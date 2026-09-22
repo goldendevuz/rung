@@ -379,7 +379,7 @@ export function Wallet() {
               </span>
             </div>
             <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--fg-muted)', textAlign: 'right' }}>
-              Click, Payme orqali (inPAY.uz xavfsiz to'lov)
+              to'lov: Karta, Click, Payme, Paynet, Alif, AnorBank, Visa/MC (inPAY.uz xavfsiz to'lov)
             </div>
           </div>
 
