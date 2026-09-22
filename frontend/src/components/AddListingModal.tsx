@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchCategories, createListing } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 
 interface AddListingModalProps {
   onClose: () => void;
 }
 
 export default function AddListingModal({ onClose }: AddListingModalProps) {
+  const { user, mutate: refreshUser } = useAuth();
   const [kind] = useState('channel'); // Hozircha faqat kanal
   const [handle, setHandle] = useState('');
   const [name, setName] = useState('');
@@ -36,7 +38,11 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
     mutationFn: createListing,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-listings'] });
-      alert("Kanal muvaffaqiyatli qo'shildi!");
+      queryClient.invalidateQueries({ queryKey: ['board'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
+      queryClient.invalidateQueries({ queryKey: ['tabs'] });
+      refreshUser();
+      alert("Kanal muvaffaqiyatli qo'shildi va 1 B to'lov bilan reytingga joylashtirildi!");
       onClose();
     },
     onError: (err: Error) => {
@@ -55,7 +61,8 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
       handle: handle.trim(),
       name: name.trim(),
       description: description.trim(),
-      category_slug: category
+      category_slug: category,
+      claim_now: true
     });
   };
 
@@ -246,6 +253,25 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
               className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition-all focus:border-[#B8F03C] focus:bg-white/[0.07] resize-none"
             />
           </div>
+
+          {/* To'lov va faollashtirish kartasi */}
+          <div className="p-4 rounded-xl bg-white/[0.04] border border-white/10 space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-white/70">Reytingga chiqarish to'lovi:</span>
+              <span className="font-bold text-[#B8F03C]">1 B</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-white/70">Joriy balansingiz:</span>
+              <span className="font-medium text-white">{user?.balance?.toLocaleString()} B</span>
+            </div>
+            <div className="flex justify-between items-center text-sm pt-2 border-t border-white/10">
+              <span className="text-white/70">To'lovdan so'ng:</span>
+              <span className="font-bold text-white">{((user?.balance ?? 0) - 1).toLocaleString()} B</span>
+            </div>
+            <p className="text-xs text-white/50 pt-1">
+              Kanal chernovik bo'lib qolmasligi va darhol 1-o'ringa chiqishi uchun balansingizdan 1 B yechiladi.
+            </p>
+          </div>
           
           {/* Submit Button */}
           <div className="pt-2 flex items-center gap-3">
@@ -258,10 +284,10 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
             </button>
             <button 
               type="submit"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || (user?.balance ?? 0) < 1}
               className="flex-1 py-3 px-4 rounded-xl bg-[#B8F03C] hover:bg-[#c6fa4d] active:scale-[0.98] text-[#0D0F11] font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#B8F03C]/20"
             >
-              {mutation.isPending ? 'Qo\'shilmoqda...' : 'Kanalni qo\'shish'}
+              {mutation.isPending ? 'To\'lanmoqda va qo\'shilmoqda...' : '1 B to\'lash va kanalni qo\'shish'}
             </button>
           </div>
         </form>

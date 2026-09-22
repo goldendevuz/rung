@@ -90,6 +90,7 @@ class CreateListingRequest(BaseModel):
     name: str
     description: str | None = None
     category_slug: str
+    claim_now: bool = True
 
 @router.post("/me/listings")
 async def create_listing(
@@ -99,6 +100,8 @@ async def create_listing(
 ):
     from app.models.category import Category
     from app.models.listing import Listing
+    from app.models.board import Board, BoardEntry
+    from app.core.periods import get_period_bounds, now_tashkent
     import random
     
     if req.kind != "channel":
@@ -110,6 +113,12 @@ async def create_listing(
     if not cat:
         raise HTTPException(status_code=400, detail="Category not found")
         
+    # If claim_now is True, check user balance
+    if req.claim_now:
+        if user.balance < 1:
+            raise HTTPException(status_code=400, detail="Mablag' yetarli emas. Balansingizda kamida 1 B bo'lishi kerak")
+        user.balance -= 1
+
     # Generate random gradient for missing avatars
     colors = ["#2563EB", "#1E3A8A", "#7C3AED", "#4C1D95", "#059669", "#064E3B", "#D97706", "#92400E"]
     g_start = random.choice(colors)
@@ -129,7 +138,45 @@ async def create_listing(
         gradient_end=g_end
     )
     db.add(listing)
+    await db.flush()
+
+    if req.claim_now:
+        ref = now_tashkent()
+        starts_at, ends_at, period_key = get_period_bounds("all_time", ref)
+        board_result = await db.execute(
+            select(Board).where(
+                Board.period_type == "all_time",
+                Board.period_key == period_key,
+                Board.status == "active",
+            )
+        )
+        board = board_result.scalar_one_or_none()
+        if not board:
+            board = Board(
+                period_type="all_time",
+                period_key=period_key,
+                starts_at=starts_at,
+                ends_at=ends_at,
+                status="active",
+            )
+            db.add(board)
+            await db.flush()
+
+        board_entry = BoardEntry(
+            board_id=board.id,
+            listing_id=listing.id,
+            paid_units=1000,
+            entered_at=now_tashkent(),
+            status="active"
+        )
+        db.add(board_entry)
+
     await db.commit()
     await db.refresh(listing)
     
-    return {"id": listing.id}
+    return {
+        "id": listing.id,
+        "claimed": req.claim_now,
+        "new_balance": user.balance
+    }
+
