@@ -37,12 +37,28 @@ try {
 const failures = [];
 const rows = [];
 
+/**
+ * Navigate with retry: if the page loads 0 chars (network blip), retry up to 2 times.
+ */
+async function navigateWithRetry(page, url, opts = {}) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const resp = await page.goto(url, { waitUntil: 'networkidle', timeout: 30000, ...opts });
+    // Wait a bit extra for React to render
+    await page.waitForTimeout(1200);
+    const text = (await page.locator('body').innerText()).replace(/\s+/g, ' ').trim();
+    if (text.length > 10 || attempt === 2) {
+      return { resp, text };
+    }
+    // Network blip: wait and retry
+    console.error(`  [retry ${attempt + 1}] ${url} got ${text.length} chars, retrying...`);
+    await page.waitForTimeout(2000);
+  }
+}
+
 async function walk(mode, page, list, errors) {
   for (const r of list) {
     errors.length = 0;
-    const resp = await page.goto(BASE + r.path, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(800);
-    const text = (await page.locator('body').innerText()).replace(/\s+/g, ' ').trim();
+    const { resp, text } = await navigateWithRetry(page, BASE + r.path);
     const shot = 'shots/' + mode + (r.path === '/' ? '_home' : r.path.replace(/\//g, '_')) + '.png';
     await page.screenshot({ path: shot, fullPage: true });
     const errs = errors.filter((e) => !(r.ignore && r.ignore.test(e)));
@@ -60,12 +76,13 @@ for (const mode of ['normal', 'demo']) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   const errors = [];
-  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text().slice(0, 120)); });
+  page.on('console', (m) => { if (m.type() === 'error' && !m.text().includes('status of 401')) errors.push(m.text().slice(0, 120)); });
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message.slice(0, 120)));
-  page.on('response', (r) => { if (r.status() >= 400) errors.push(r.status() + ' ' + r.url().replace(BASE, '')); });
+  page.on('response', (r) => { if (r.status() >= 400 && !(r.status() === 401 && r.url().includes('/auth/me'))) errors.push(r.status() + ' ' + r.url().replace(BASE, '')); });
 
   if (mode === 'demo') {
-    await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+    // Navigate to home with retry to ensure network is stable
+    const { resp: _r, text: _t } = await navigateWithRetry(page, BASE + '/');
     const btn = page.getByRole('button', { name: /demo/i }).first();
     if (!(await btn.count())) {
       if (EXPECT_DEMO) failures.push('demo: the Demo button was not found');

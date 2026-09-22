@@ -31,7 +31,7 @@ export function Topbar() {
     queryFn: fetchPublicConfig,
     staleTime: 5 * 60 * 1000,
   });
-  const showDemoBtn = publicConfig?.show_demo_button ?? false;
+  const showDemoBtn = publicConfig ? publicConfig.show_demo_button : true;
   const isDemo = typeof window !== 'undefined' && localStorage.getItem('rung_demo') === '1';
 
   const enableDemo = () => {
