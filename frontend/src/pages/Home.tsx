@@ -484,15 +484,19 @@ export function Home() {
           <div className="stat-grid">
             <div className="stat">
               <div className="v num">
+                {visitorsStats?.configured && visitorsStats.visitors_today != null
+                  ? visitorsStats.visitors_today
+                  : (stats?.visits_today ?? 0)}
+              </div>
+              <div className="k">bugungi tashriflar</div>
+            </div>
+            <div className="stat">
+              <div className="v num">
                 {visitorsStats?.configured && visitorsStats.visitors_30d != null
                   ? visitorsStats.visitors_30d
                   : (stats?.visits_today ?? 0)}
               </div>
-              <div className="k">
-                {visitorsStats?.configured && visitorsStats.visitors_30d != null
-                  ? 'tashriflar (30 kun)'
-                  : 'bugungi tashriflar'}
-              </div>
+              <div className="k">jami tashriflar (30 kun)</div>
             </div>
             <div className="stat accent">
               <div className="v num">{stats ? formatB(stats.total_paid_units) : '0'} B</div>

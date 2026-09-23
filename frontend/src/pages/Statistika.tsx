@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchPublicStats } from '../api/client';
+import { fetchPublicStats, fetchVisitorsStats } from '../api/client';
 import { nf } from '../utils/formatters';
 
 export function Statistika() {
@@ -7,6 +7,12 @@ export function Statistika() {
     queryKey: ['stats'],
     queryFn: fetchPublicStats,
     refetchInterval: 30000,
+  });
+
+  const { data: visitorsStats } = useQuery({
+    queryKey: ['visitors-stats'],
+    queryFn: fetchVisitorsStats,
+    refetchInterval: 60000,
   });
 
   return (
@@ -48,8 +54,20 @@ export function Statistika() {
             <div className="k">hozir onlayn</div>
           </div>
           <div className="stat">
-            <div className="v num">{stats ? nf(stats.visits_today || 1) : 1}</div>
+            <div className="v num">
+              {visitorsStats?.configured && visitorsStats.visitors_today != null
+                ? nf(visitorsStats.visitors_today)
+                : (stats ? nf(stats.visits_today || 1) : 1)}
+            </div>
             <div className="k">bugungi tashriflar</div>
+          </div>
+          <div className="stat">
+            <div className="v num">
+              {visitorsStats?.configured && visitorsStats.visitors_30d != null
+                ? nf(visitorsStats.visitors_30d)
+                : (stats ? nf(stats.visits_today || 1) : 1)}
+            </div>
+            <div className="k">jami tashriflar (30 kun)</div>
           </div>
           <div className="stat">
             <div className="v num">{stats ? nf(stats.total_listings || 0) : 0}</div>

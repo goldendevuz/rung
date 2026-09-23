@@ -71,12 +71,11 @@ export function Topbar() {
   });
 
   const showLiveStats = stats?.online_now != null;
-  const visitorsCount = (visitorsStats?.configured && visitorsStats.visitors_30d != null)
-    ? visitorsStats.visitors_30d
+  const visitorsCount = (visitorsStats?.configured && visitorsStats.visitors_today != null)
+    ? visitorsStats.visitors_today
     : (stats?.visits_today || 1);
-  const visitorsLabel = (visitorsStats?.configured && visitorsStats.visitors_30d != null)
-    ? '30 kunda'
-    : 'bugun';
+  const visitorsLabel = 'bugun';
+
 
   return (
     <header className="topbar">

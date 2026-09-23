@@ -95,6 +95,18 @@ async def get_public_stats(
     )
 
 
+def _extract_visitors(payload: dict) -> int:
+    """Safely extract visitor count from DataFast analytics JSON payload."""
+    if "visitors" in payload and isinstance(payload["visitors"], (int, float)):
+        return int(payload["visitors"])
+    data_field = payload.get("data")
+    if isinstance(data_field, list) and len(data_field) > 0 and isinstance(data_field[0], dict):
+        return int(data_field[0].get("visitors", 0) or 0)
+    if isinstance(data_field, dict):
+        return int(data_field.get("visitors", 0) or 0)
+    return 0
+
+
 @router.get("/visitors", response_model=VisitorsStatsOut)
 async def get_visitors_stats() -> VisitorsStatsOut:
     """Return DataFast unique visitor stats with 60s Redis caching."""
@@ -132,10 +144,7 @@ async def get_visitors_stats() -> VisitorsStatsOut:
             )
             v_30d = 0
             if resp_30d.status_code == 200:
-                data_30d = resp_30d.json()
-                v_30d = data_30d.get("visitors")
-                if v_30d is None and isinstance(data_30d.get("data"), dict):
-                    v_30d = data_30d["data"].get("visitors", 0)
+                v_30d = _extract_visitors(resp_30d.json())
 
             resp_today = await client.get(
                 f"https://datafa.st/api/v1/analytics/overview?startAt={today_str}&endAt={today_str}",
@@ -143,10 +152,7 @@ async def get_visitors_stats() -> VisitorsStatsOut:
             )
             v_today = 0
             if resp_today.status_code == 200:
-                data_today = resp_today.json()
-                v_today = data_today.get("visitors")
-                if v_today is None and isinstance(data_today.get("data"), dict):
-                    v_today = data_today["data"].get("visitors", 0)
+                v_today = _extract_visitors(resp_today.json())
 
             result = VisitorsStatsOut(
                 configured=True,
