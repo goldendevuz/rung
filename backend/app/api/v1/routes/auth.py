@@ -13,12 +13,17 @@ from pydantic import BaseModel
 from app.core.config import get_settings
 from app.core.security import verify_telegram_init_data, create_session_token
 from app.core.redis import get_redis
+from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.user import User
 from app.api.deps import get_current_user
 
 settings = get_settings()
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(
+    prefix="/auth",
+    tags=["auth"],
+    dependencies=[Depends(rate_limit("auth", limit=10, window_seconds=60))]
+)
 
 class InitDataRequest(BaseModel):
     initData: str

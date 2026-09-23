@@ -13,6 +13,7 @@ import { Listing } from './pages/Listing';
 import { Wallet } from './pages/Wallet';
 import { Statistika } from './pages/Statistika';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
 
 // Dummy components for other pages until we implement them
 const Kunlik = () => (
@@ -44,26 +45,28 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/kunlik" element={<Kunlik />} />
-              <Route path="/kategoriyalar" element={<Kategoriyalar />} />
-              <Route path="/qoshish" element={<AddChannel />} />
-              <Route path="/haqida" element={<About />} />
-              <Route path="/qoidalar" element={<Rules />} />
-              <Route path="/kirish" element={<Login />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/profil" element={<Profile />} />
-              <Route path="/hamyon" element={<Wallet />} />
-              <Route path="/wallet" element={<Wallet />} />
-              <Route path="/statistika" element={<Statistika />} />
-              <Route path="/p/:id" element={<Listing />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <ToastProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/kunlik" element={<Kunlik />} />
+                <Route path="/kategoriyalar" element={<Kategoriyalar />} />
+                <Route path="/qoshish" element={<AddChannel />} />
+                <Route path="/haqida" element={<About />} />
+                <Route path="/qoidalar" element={<Rules />} />
+                <Route path="/kirish" element={<Login />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/profil" element={<Profile />} />
+                <Route path="/hamyon" element={<Wallet />} />
+                <Route path="/wallet" element={<Wallet />} />
+                <Route path="/statistika" element={<Statistika />} />
+                <Route path="/p/:id" element={<Listing />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </ToastProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

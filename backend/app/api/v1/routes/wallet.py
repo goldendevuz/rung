@@ -11,6 +11,7 @@ from app.db.session import get_db
 from app.models.topup import TopupOrder
 from app.models.user import User
 from app.services.inpay import create_inpay_order, InPayError
+from app.core.rate_limit import rate_limit
 
 router = APIRouter(prefix="/wallet", tags=["wallet"])
 settings = get_settings()
@@ -33,7 +34,11 @@ class TopupStatusResponse(BaseModel):
     created_at: str
 
 
-@router.post("/topup", response_model=TopupResponse)
+@router.post(
+    "/topup",
+    response_model=TopupResponse,
+    dependencies=[Depends(rate_limit("wallet_topup", limit=5, window_seconds=60))]
+)
 async def create_topup(
     req: TopupRequest,
     current_user: Annotated[User, Depends(get_current_user)],

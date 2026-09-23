@@ -39,10 +39,31 @@ export async function fetchPublicStats() {
   return res.json();
 }
 
-export async function fetchQuote(boardId: number, targetRank: number) {
+export async function fetchQuote(boardId: string | number, targetRank: number) {
   const res = await fetch(`${API_BASE}/boards/${boardId}/quote?target_rank=${targetRank}`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch quote');
-  return res.json();
+  return res.json() as Promise<{
+    board_id: string;
+    target_rank: number;
+    holder_paid_b: string;
+    holder_paid_units: number;
+    min_cost_b: string;
+    min_cost_units: number;
+    resulting_rank: number;
+  }>;
+}
+
+export async function fetchCandidates(boardId: string | number, limit: number = 10) {
+  const res = await fetch(`${API_BASE}/boards/${boardId}/candidates?limit=${limit}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch candidate ranks');
+  return res.json() as Promise<Array<{
+    rank: number;
+    is_occupied: boolean;
+    holder_name: string | null;
+    holder_handle: string | null;
+    holder_paid_b: number;
+    price_b: number;
+  }>>;
 }
 
 export async function fetchPublicConfig() {

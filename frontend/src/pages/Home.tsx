@@ -5,6 +5,7 @@ import { fetchTabs, fetchBoard, fetchCategories, fetchQuote, fetchPublicStats, f
 import { formatB, formatDateSafe } from '../utils/formatters';
 import { ListingRow, MiniListing, EmptyRankSlot } from '../components/ListingRow';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 const PERIOD_NAMES: Record<string, string> = {
   all_time: "Barcha vaqt",
@@ -29,6 +30,7 @@ const LAUNCH_DATE = new Date('2026-09-21T00:00:00+05:00');
 export function Home() {
   const navigate = useNavigate();
   const { user, mutate: refreshUser } = useAuth();
+  const toast = useToast();
   const queryClient = useQueryClient();
 
   const [period, setPeriod] = useState<string>('all_time');
@@ -122,11 +124,11 @@ export function Home() {
       queryClient.invalidateQueries({ queryKey: ['stats'] });
       queryClient.invalidateQueries({ queryKey: ['tabs'] });
       refreshUser();
-      alert(data.message || "Muvaffaqiyatli! Kanalingiz reytingda joylashtirildi!");
+      toast.success(data.message || "Muvaffaqiyatli! Kanalingiz reytingda joylashtirildi!");
       setClaimModalOpen(false);
     },
     onError: (err: Error) => {
-      alert(err.message || "Xatolik yuz berdi");
+      toast.error(err.message || "Xatolik yuz berdi");
     }
   });
 
@@ -135,8 +137,9 @@ export function Home() {
       navigate('/kirish');
       return;
     }
+    refreshUser();
     if (!myListings || myListings.length === 0) {
-      alert("Reytingda o'rin olish uchun avval profilingizda kanal qo'shishingiz kerak.");
+      toast.info("Reytingda o'rin olish uchun avval profilingizda kanal qo'shishingiz kerak.");
       navigate('/profil');
       return;
     }
@@ -370,94 +373,166 @@ export function Home() {
 
       {/* Claim Modal */}
       {claimModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
-          onClick={(e) => { if (e.target === e.currentTarget) setClaimModalOpen(false); }}
-        >
-          <div className="w-full max-w-md bg-[#12151A] border border-white/10 rounded-2xl p-6 sm:p-7 shadow-2xl relative">
-            <button 
-              onClick={() => setClaimModalOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              ✕
-            </button>
-
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">🚀</span>
-              <h2 className="text-xl font-bold text-white">#{claimTargetRank}-o'rinni olish</h2>
-            </div>
-            <p className="text-sm text-white/60 mb-5">
-              Kanalingizni ushbu davrda #{claimTargetRank}-o'ringa chiqarish uchun tasdiqlang.
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-white/60 mb-2">
-                  Kanalni tanlang
-                </label>
-                <select 
-                  value={selectedListingId || myListings[0]?.id}
-                  onChange={(e) => setSelectedListingId(e.target.value)}
-                  className="w-full bg-[#181B20] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#B8F03C]"
-                  style={{ color: '#fff', backgroundColor: '#181B20' }}
-                >
-                  {myListings.map((l: any) => (
-                    <option key={l.id} value={l.id} style={{ color: '#fff', backgroundColor: '#181B20' }}>
-                      {l.name} ({l.handle})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 space-y-2.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Tanlangan o'rin:</span>
-                  <span className="font-bold text-white">#{claimTargetRank}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Narxi:</span>
-                  <span className="font-bold text-[#B8F03C]">1 B</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Joriy balansingiz:</span>
-                  <span className="font-medium text-white">{user?.balance?.toLocaleString()} B</span>
-                </div>
-                <div className="flex justify-between text-sm pt-2.5 border-t border-white/10">
-                  <span className="text-white/60">To'lovdan keyin:</span>
-                  <span className="font-bold text-white">{((user?.balance ?? 0) - 1).toLocaleString()} B</span>
-                </div>
-              </div>
-
-              <div className="pt-2 flex gap-3">
-                <button 
-                  type="button"
-                  onClick={() => setClaimModalOpen(false)}
-                  className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-white/80 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
-                >
-                  Bekor qilish
-                </button>
-                <button 
-                  type="button"
-                  disabled={claimMutation.isPending || (user?.balance ?? 0) < 1}
-                  onClick={() => {
-                    const listingId = selectedListingId || myListings[0]?.id;
-                    if (!listingId) return;
-                    claimMutation.mutate({
-                      listing_id: listingId,
-                      period_type: period,
-                      target_rank: claimTargetRank,
-                      paid_b: 1
-                    });
-                  }}
-                  className="flex-1 py-3 px-4 rounded-xl bg-[#B8F03C] hover:bg-[#c6fa4d] text-[#0D0F11] font-bold text-sm transition-all disabled:opacity-50"
-                >
-                  {claimMutation.isPending ? 'To\'lanmoqda...' : '1 B to\'lash'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ClaimModalInner 
+          period={period}
+          claimTargetRank={claimTargetRank}
+          myListings={myListings}
+          selectedListingId={selectedListingId}
+          setSelectedListingId={setSelectedListingId}
+          user={user}
+          claimMutation={claimMutation}
+          onClose={() => setClaimModalOpen(false)}
+        />
       )}
     </section>
+  );
+}
+
+function ClaimModalInner({
+  period,
+  claimTargetRank,
+  myListings,
+  selectedListingId,
+  setSelectedListingId,
+  user,
+  claimMutation,
+  onClose,
+}: {
+  period: string;
+  claimTargetRank: number;
+  myListings: any[];
+  selectedListingId: string;
+  setSelectedListingId: (id: string) => void;
+  user: any;
+  claimMutation: any;
+  onClose: () => void;
+}) {
+  const { data: quote, isLoading: isQuoteLoading } = useQuery({
+    queryKey: ['quote', period, claimTargetRank],
+    queryFn: () => fetchQuote(period, claimTargetRank),
+  });
+
+  const quoteCost = quote ? Math.round(quote.min_cost_units / 1000) : 1;
+  const currentBalance = user?.balance ?? 0;
+  const isInsufficient = currentBalance < quoteCost;
+  const deficit = Math.max(0, quoteCost - currentBalance);
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="w-full max-w-md bg-[#12151A] border border-white/10 rounded-2xl p-6 sm:p-7 shadow-2xl relative">
+        <button 
+          onClick={onClose}
+          type="button"
+          aria-label="Yopish"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          ✕
+        </button>
+
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xl">🚀</span>
+          <h2 className="text-xl font-bold text-white">#{claimTargetRank}-o'rinni olish</h2>
+        </div>
+        <p className="text-sm text-white/60 mb-5">
+          Kanalingizni ushbu davrda #{claimTargetRank}-o'ringa chiqarish uchun tasdiqlang.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-white/60 mb-2">
+              Kanalni tanlang
+            </label>
+            <select 
+              value={selectedListingId || myListings[0]?.id}
+              onChange={(e) => setSelectedListingId(e.target.value)}
+              className="w-full bg-[#181B20] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#B8F03C]"
+              style={{ color: '#fff', backgroundColor: '#181B20' }}
+            >
+              {myListings.map((l: any) => (
+                <option key={l.id} value={l.id} style={{ color: '#fff', backgroundColor: '#181B20' }}>
+                  {l.name} ({l.handle})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 space-y-2.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-white/60">Tanlangan o'rin:</span>
+              <span className="font-bold text-white">#{claimTargetRank}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-white/60">Narxi:</span>
+              <span className="font-bold text-[#B8F03C]">
+                {isQuoteLoading ? 'Yuklanmoqda...' : `${quoteCost} B`}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-white/60">Joriy balansingiz:</span>
+              <span className="font-medium text-white">{currentBalance.toLocaleString()} B</span>
+            </div>
+            <div className="flex justify-between text-sm pt-2.5 border-t border-white/10">
+              <span className="text-white/60">To'lovdan keyin:</span>
+              <span className="font-bold text-white">
+                {isInsufficient ? '-' : `${(currentBalance - quoteCost).toLocaleString()} B`}
+              </span>
+            </div>
+          </div>
+
+          {isInsufficient && (
+            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex flex-col gap-1.5">
+              <div className="font-bold flex items-center gap-1.5 text-amber-300">
+                <span>⚠️</span> Mablag' yetarli emas
+              </div>
+              <p className="leading-relaxed">
+                Ushbu o'rinni olish uchun kamida <b>{quoteCost} B</b> kerak. Balansingizda <b>{currentBalance} B</b> mavjud (yetishmayotgan summa: <b>{deficit} B</b>).
+              </p>
+            </div>
+          )}
+
+          <div className="pt-2 flex gap-3">
+            <button 
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-white/80 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
+            >
+              Bekor qilish
+            </button>
+            {isInsufficient ? (
+              <a
+                href={`/hamyon?amount=${deficit}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-3 px-4 rounded-xl bg-[#B8F03C] hover:bg-[#c6fa4d] text-[#0D0F11] font-bold text-sm text-center flex items-center justify-center gap-2 shadow-lg shadow-[#B8F03C]/20 transition-all"
+                style={{ textDecoration: 'none' }}
+              >
+                <span>💳</span> {deficit} B to'ldirish →
+              </a>
+            ) : (
+              <button 
+                type="button"
+                disabled={claimMutation.isPending || isQuoteLoading}
+                onClick={() => {
+                  const listingId = selectedListingId || myListings[0]?.id;
+                  if (!listingId) return;
+                  claimMutation.mutate({
+                    listing_id: listingId,
+                    period_type: period,
+                    target_rank: claimTargetRank,
+                    paid_b: quoteCost
+                  });
+                }}
+                className="flex-1 py-3 px-4 rounded-xl bg-[#B8F03C] hover:bg-[#c6fa4d] text-[#0D0F11] font-bold text-sm transition-all disabled:opacity-50"
+              >
+                {claimMutation.isPending ? 'To\'lanmoqda...' : `${quoteCost} B to'lash`}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -3,12 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { fetchMyListings, uploadLogo, updateListing } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import AddListingModal from '../components/AddListingModal';
 import { cleanTelegramHandle } from '../utils/formatters';
 
 function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?: () => void }) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
 
   const gradient = listing.gradient_start && listing.gradient_end 
     ? `linear-gradient(135deg, ${listing.gradient_start}, ${listing.gradient_end})`
@@ -25,12 +27,12 @@ function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?:
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert("Faqat rasm fayllari (PNG, JPG, WebP) qabul qilinadi.");
+      toast.error("Faqat rasm fayllari (PNG, JPG, WebP) qabul qilinadi.");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("Rasm hajmi 5 MB dan oshmasligi kerak.");
+      toast.error("Rasm hajmi 5 MB dan oshmasligi kerak.");
       return;
     }
 
@@ -39,9 +41,9 @@ function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?:
       const res = await uploadLogo(file);
       await updateListing(listing.id, { logo_url: res.url });
       if (onLogoUpdated) onLogoUpdated();
-      alert("Logotip muvaffaqiyatli yangilandi!");
+      toast.success("Logotip muvaffaqiyatli yangilandi!");
     } catch (err: any) {
-      alert(err.message || "Logotip yuklashda xatolik yuz berdi");
+      toast.error(err.message || "Logotip yuklashda xatolik yuz berdi");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

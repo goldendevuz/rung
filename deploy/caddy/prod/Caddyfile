@@ -9,6 +9,12 @@
     handle /healthz {
         reverse_proxy backend_prod:8000
     }
+    @blocked_docs {
+        path /docs* /redoc* /openapi* /api/v1/docs* /api/v1/redoc* /api/v1/openapi*
+    }
+    handle @blocked_docs {
+        respond "Not Found" 404
+    }
     @api {
         path /api/* /readyz /go/*
     }

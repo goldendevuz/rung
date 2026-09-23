@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPublicStats } from '../api/client';
@@ -127,6 +128,7 @@ export function Topbar() {
               <Link to="/kirish"><button className="btn-login">Kirish</button></Link>
             )}
             <button 
+              id="mobile-menu-btn"
               className="icon-btn mobile-menu-btn" 
               onClick={() => setMobileNavOpen(!mobileNavOpen)} 
               aria-label="Menyu"
@@ -152,7 +154,7 @@ export function Topbar() {
         )}
       </div>
 
-      {mobileNavOpen && (
+      {mobileNavOpen && typeof document !== 'undefined' && createPortal(
         <div className="mobile-drawer-backdrop" onClick={() => setMobileNavOpen(false)}>
           <div className="mobile-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-drawer-head">
@@ -211,7 +213,8 @@ export function Topbar() {
               )}
             </nav>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );

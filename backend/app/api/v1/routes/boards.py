@@ -16,6 +16,7 @@ from app.models.board import Board, BoardEntry
 from app.models.category import Category
 from app.models.listing import Listing
 from app.models.stats import ListingStatsDaily
+from app.models.ledger import LedgerEntry
 import uuid
 from pydantic import BaseModel
 
@@ -255,17 +256,117 @@ async def get_daily_history(db: Annotated[AsyncSession, Depends(get_db)]) -> lis
     return history
 
 
+class CandidateRankOut(BaseModel):
+    rank: int
+    is_occupied: bool
+    holder_name: str | None = None
+    holder_handle: str | None = None
+    holder_paid_b: int = 0
+    price_b: int
+
+
+@router.get("/{board_id}/candidates", response_model=list[CandidateRankOut])
+async def get_candidates(
+    board_id: str,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    limit: int = Query(10, ge=1, le=50),
+) -> list[CandidateRankOut]:
+    """Get live pricing and occupant info for candidate ranks 1..limit."""
+    board = None
+    try:
+        b_uuid = uuid.UUID(board_id)
+        result = await db.execute(select(Board).where(Board.id == b_uuid))
+        board = result.scalar_one_or_none()
+    except ValueError:
+        ref = now_tashkent()
+        _, _, period_key = get_period_bounds(board_id, ref)
+        result = await db.execute(
+            select(Board).where(
+                Board.period_type == board_id,
+                Board.period_key == period_key,
+                Board.status == "active",
+            )
+        )
+        board = result.scalar_one_or_none()
+
+    active_entries: list[BoardEntry] = []
+    if board:
+        entries_result = await db.execute(
+            select(BoardEntry)
+            .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
+            .options(selectinload(BoardEntry.listing))
+            .order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
+        )
+        active_entries = list(entries_result.scalars())
+
+    candidates: list[CandidateRankOut] = []
+    total_ranks = max(limit, len(active_entries) + 1)
+    for r in range(1, total_ranks + 1):
+        if r <= len(active_entries):
+            e = active_entries[r - 1]
+            paid_b = e.paid_units // 1000
+            price_b = paid_b + 1  # occupant's price + 1 B
+            candidates.append(
+                CandidateRankOut(
+                    rank=r,
+                    is_occupied=True,
+                    holder_name=e.listing.name if e.listing else None,
+                    holder_handle=e.listing.handle if e.listing else None,
+                    holder_paid_b=paid_b,
+                    price_b=price_b,
+                )
+            )
+        else:
+            candidates.append(
+                CandidateRankOut(
+                    rank=r,
+                    is_occupied=False,
+                    holder_name=None,
+                    holder_handle=None,
+                    holder_paid_b=0,
+                    price_b=1,
+                )
+            )
+        if len(candidates) >= limit:
+            break
+
+    return candidates
+
+
 @router.get("/{board_id}/quote", response_model=QuoteOut)
 async def get_quote(
     board_id: str,
     db: Annotated[AsyncSession, Depends(get_db)],
     target_rank: int = Query(..., ge=1),
 ) -> QuoteOut:
-    """Read-only quote: cost to claim target_rank on a board."""
-    result = await db.execute(select(Board).where(Board.id == board_id))
-    board = result.scalar_one_or_none()
-    if board is None or board.status != "active":
-        raise HTTPException(status_code=404, detail="Board not found or not active")
+    """Read-only quote: cost to claim target_rank on a board (by board UUID or period_type)."""
+    board = None
+    try:
+        b_uuid = uuid.UUID(board_id)
+        result = await db.execute(select(Board).where(Board.id == b_uuid))
+        board = result.scalar_one_or_none()
+    except ValueError:
+        ref = now_tashkent()
+        _, _, period_key = get_period_bounds(board_id, ref)
+        result = await db.execute(
+            select(Board).where(
+                Board.period_type == board_id,
+                Board.period_key == period_key,
+                Board.status == "active",
+            )
+        )
+        board = result.scalar_one_or_none()
+
+    if board is None:
+        return QuoteOut(
+            board_id=board_id,
+            target_rank=target_rank,
+            holder_paid_b="0",
+            holder_paid_units=0,
+            min_cost_b="1",
+            min_cost_units=1000,
+            resulting_rank=1,
+        )
 
     # Get all active entries ranked
     entries_result = await db.execute(
@@ -281,7 +382,7 @@ async def get_quote(
         holder_paid = holder_entry.paid_units
         min_cost = holder_paid + 1000  # +1 B
     else:
-        # Claiming a new last place or beyond
+        # Claiming a new last place or empty slot
         holder_paid = 0
         min_cost = 1000  # floor 1 B
 
@@ -289,7 +390,7 @@ async def get_quote(
     resulting_rank = 1 + sum(1 for e in entries if e.paid_units >= min_cost)
 
     return QuoteOut(
-        board_id=board_id,
+        board_id=str(board.id),
         target_rank=target_rank,
         holder_paid_b=units_to_b_display(holder_paid),
         holder_paid_units=holder_paid,
@@ -325,11 +426,7 @@ async def claim_rank(
     if not listing:
         raise HTTPException(status_code=404, detail="Kanal topilmadi yoki sizga tegishli emas")
 
-    # 2. Check balance
-    if current_user.balance < req.paid_b:
-        raise HTTPException(status_code=400, detail="Mablag' yetarli emas. Balansingizda kamida 1 B bo'lishi kerak")
-
-    # 3. Get or create active board
+    # 2. Get or create active board
     ref = now_tashkent()
     starts_at, ends_at, period_key = get_period_bounds(req.period_type, ref)
     board_result = await db.execute(
@@ -351,7 +448,7 @@ async def claim_rank(
         db.add(board)
         await db.flush()
 
-    # 4. Check active entries on this board
+    # 3. Check active entries on this board to compute exact price
     entries_result = await db.execute(
         select(BoardEntry)
         .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
@@ -359,40 +456,64 @@ async def claim_rank(
     )
     active_entries = list(entries_result.scalars())
 
-    paid_units = req.paid_b * 1000
     if req.target_rank <= len(active_entries):
         holder = active_entries[req.target_rank - 1]
         min_cost = holder.paid_units + 1000
     else:
         min_cost = 1000
 
-    if paid_units < min_cost:
-        raise HTTPException(status_code=400, detail=f"Ushbu o'rin uchun kamida {min_cost // 1000} B to'lash kerak")
+    min_cost_b = min_cost // 1000
+    if req.paid_b < min_cost_b:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Ushbu #{req.target_rank}-o'rin uchun kamida {min_cost_b} B to'lash kerak"
+        )
 
-    # 5. Soft-replace old active entry for this listing on this board
+    charge_b = req.paid_b
+    if current_user.balance < charge_b:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Mablag' yetarli emas. Balansingizda kamida {charge_b} B bo'lishi kerak"
+        )
+
+    # 4. Soft-replace old active entry for this listing on this board
     for e in active_entries:
         if e.listing_id == listing.id:
             e.status = "replaced"
 
-    # 6. Deduct user balance
-    current_user.balance -= req.paid_b
+    # 5. Deduct user balance
+    current_user.balance -= charge_b
 
-    # 7. Create new BoardEntry
+    # 6. Create new BoardEntry
     new_entry = BoardEntry(
         board_id=board.id,
         listing_id=listing.id,
-        paid_units=paid_units,
+        paid_units=charge_b * 1000,
         entered_at=now_tashkent(),
         status="active",
     )
     db.add(new_entry)
+    await db.flush()
+
+    # 7. Record in append-only ledger_entries
+    ledger_entry = LedgerEntry(
+        user_id=current_user.id,
+        delta_units=-charge_b,
+        kind="claim_rank",
+        ref_type="board_entry",
+        ref_id=str(new_entry.id),
+        balance_after=current_user.balance,
+    )
+    db.add(ledger_entry)
+
     await db.commit()
     await db.refresh(new_entry)
 
     return {
         "success": True,
         "entry_id": str(new_entry.id),
-        "paid_b": req.paid_b,
+        "paid_b": charge_b,
+        "charge_b": charge_b,
         "new_balance": current_user.balance,
         "message": f"Kanal muvaffaqiyatli #{req.target_rank}-o'ringa joylashtirildi!"
     }

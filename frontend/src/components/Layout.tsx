@@ -10,14 +10,16 @@ export function Layout() {
 
   return (
     <div className="app">
-      <button 
-        type="button" 
-        className="exit-phone-bar" 
-        onClick={exitPhoneMode}
-        title="Mobil ko'rinishdan chiqish"
-      >
-        📱 Mobil ko'rinish faol · Chiqish ✕
-      </button>
+      {import.meta.env.DEV && (
+        <button 
+          type="button" 
+          className="exit-phone-bar" 
+          onClick={exitPhoneMode}
+          title="Mobil ko'rinishdan chiqish"
+        >
+          📱 Mobil ko'rinish faol · Chiqish ✕
+        </button>
+      )}
       <Rail />
       <div className="viewport">
         <Topbar />

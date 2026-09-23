@@ -49,14 +49,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info('Rung backend shutting down')
 
 
+is_prod = settings.ENV.lower() in ("prod", "production")
+docs_url = None if is_prod else "/api/v1/docs"
+redoc_url = None if is_prod else "/api/v1/redoc"
+openapi_url = None if is_prod else "/api/v1/openapi.json"
+
 app = FastAPI(
     title='Rung API',
     version='0.1.0',
-    docs_url='/api/v1/docs',
-    redoc_url='/api/v1/redoc',
-    openapi_url='/api/v1/openapi.json',
+    docs_url=docs_url,
+    redoc_url=redoc_url,
+    openapi_url=openapi_url,
     lifespan=lifespan,
 )
+
+from app.core.rate_limit import check_rate_limit
 
 app.add_middleware(
     CORSMiddleware,
@@ -65,6 +72,20 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+@app.middleware("http")
+async def api_rate_limit_middleware(request: Request, call_next):
+    if request.url.path.startswith("/api/") and request.method != "OPTIONS":
+        try:
+            await check_rate_limit(request, namespace="global_api", limit=120, window_seconds=60)
+        except HTTPException as exc:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+                headers=exc.headers or {},
+            )
+    return await call_next(request)
 
 
 @app.middleware("http")

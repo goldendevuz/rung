@@ -16,18 +16,20 @@ export function Rail() {
         <NavLink to="/qoidalar" className="rung">qoi</NavLink>
       </nav>
       <div className="rail-foot">
-        <button 
-          className="icon-btn" 
-          id="phoneBtn" 
-          title="Mobil ko'rinish" 
-          aria-label="Mobil ko'rinish"
-          onClick={() => document.body.classList.toggle('phone-mode')}
-        >
-          <svg viewBox="0 0 24 24">
-            <rect x="7" y="2.5" width="10" height="19" rx="2.5" />
-            <path d="M11 18.5h2" />
-          </svg>
-        </button>
+        {import.meta.env.DEV && (
+          <button 
+            className="icon-btn" 
+            id="phoneBtn" 
+            title="Mobil ko'rinish" 
+            aria-label="Mobil ko'rinish"
+            onClick={() => document.body.classList.toggle('phone-mode')}
+          >
+            <svg viewBox="0 0 24 24">
+              <rect x="7" y="2.5" width="10" height="19" rx="2.5" />
+              <path d="M11 18.5h2" />
+            </svg>
+          </button>
+        )}
         <div className="rail-b">1 B = 1 000 so'm</div>
       </div>
     </aside>

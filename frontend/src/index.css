@@ -404,34 +404,48 @@ footer .slogan{font-family:var(--mono);font-size:12px;letter-spacing:.06em;margi
 }
 
 .mobile-drawer-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:150;
-  backdrop-filter:blur(6px);animation:fadeIn .18s ease-out;
+  position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .18s ease-out;
 }
 .mobile-drawer{
-  position:fixed;top:0;right:0;bottom:0;width:290px;max-width:85vw;
-  background:var(--bg-2);border-left:1px solid var(--line);
-  padding:20px 18px;display:flex;flex-direction:column;gap:16px;
+  position:fixed;top:0;right:0;bottom:0;width:300px;max-width:85vw;
+  background:#14171A;border-left:1px solid rgba(255,255,255,0.12);
+  padding:24px 20px;display:flex;flex-direction:column;gap:18px;
   animation:slideDrawer .2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: -10px 0 30px rgba(0,0,0,0.7);
-  z-index:151;
+  box-shadow: -12px 0 40px rgba(0,0,0,0.85);
+  z-index:10000;
+}
+[data-theme="light"] .mobile-drawer{
+  background:#FFFFFF;border-left:1px solid rgba(0,0,0,0.12);
+  box-shadow: -10px 0 30px rgba(0,0,0,0.15);
 }
 @keyframes slideDrawer{from{transform:translateX(100%)}to{transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 .mobile-drawer-head{
   display:flex;align-items:center;justify-content:space-between;
-  padding-bottom:14px;border-bottom:1px solid var(--line-soft);
+  padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1);
+}
+[data-theme="light"] .mobile-drawer-head{
+  border-bottom:1px solid rgba(0,0,0,0.08);
 }
 .mobile-drawer-nav{
-  display:flex;flex-direction:column;gap:6px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:8px;overflow-y:auto;
 }
 .mobile-nav-link{
-  display:flex;align-items:center;gap:12px;padding:11px 14px;
-  border-radius:var(--r);color:var(--fg);text-decoration:none;
-  font-size:14.5px;font-weight:600;transition:background .15s ease;
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  border-radius:12px;color:#F1F3EE;text-decoration:none;
+  font-size:15px;font-weight:600;transition:all .15s ease;
+  min-height:44px;
+}
+[data-theme="light"] .mobile-nav-link{
+  color:#111827;
 }
 .mobile-nav-link:hover, .mobile-nav-link:active{
-  background:rgba(255,255,255,0.06);color:var(--lime-text);
+  background:rgba(184,240,60,0.12);color:#B8F03C;
+}
+[data-theme="light"] .mobile-nav-link:hover, [data-theme="light"] .mobile-nav-link:active{
+  background:rgba(5,150,105,0.1);color:#059669;
 }
 @media (max-width:700px){
   .claimbar{flex-direction:column}

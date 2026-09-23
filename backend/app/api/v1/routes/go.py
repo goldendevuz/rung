@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.periods import now_tashkent
 from app.core.redis import get_redis
+from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.listing import Listing
 from app.models.stats import ListingStatsDaily
@@ -19,7 +20,11 @@ from app.models.stats import ListingStatsDaily
 router = APIRouter(tags=["clicks"])
 
 
-@router.api_route("/go/{listing_id}", methods=["GET", "HEAD"])
+@router.api_route(
+    "/go/{listing_id}",
+    methods=["GET", "HEAD"],
+    dependencies=[Depends(rate_limit("go_redirect", limit=30, window_seconds=60))]
+)
 async def redirect_to_listing(
     listing_id: str,
     request: Request,

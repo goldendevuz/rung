@@ -10,9 +10,18 @@ export function Wallet() {
   const { user, isLoading: authLoading, mutate: refreshUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const orderIdFromUrl = searchParams.get('order_id');
+  const amountFromUrl = searchParams.get('amount');
 
-  const [bAmount, setBAmount] = useState<number>(5);
-  const [customInput, setCustomInput] = useState<string>('5');
+  const initialAmount = React.useMemo(() => {
+    if (amountFromUrl) {
+      const parsed = parseInt(amountFromUrl, 10);
+      if (!isNaN(parsed) && parsed >= 1) return parsed;
+    }
+    return 5;
+  }, [amountFromUrl]);
+
+  const [bAmount, setBAmount] = useState<number>(initialAmount);
+  const [customInput, setCustomInput] = useState<string>(String(initialAmount));
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

@@ -130,6 +130,8 @@ class CreateListingRequest(BaseModel):
     description: str | None = None
     category_slug: str
     claim_now: bool = True
+    target_rank: int = 1
+    period_type: str = "all_time"
     logo_url: str | None = None
 
 class UpdateListingRequest(BaseModel):
@@ -146,6 +148,7 @@ async def create_listing(
     from app.models.category import Category
     from app.models.listing import Listing
     from app.models.board import Board, BoardEntry
+    from app.models.ledger import LedgerEntry
     from app.core.periods import get_period_bounds, now_tashkent
     import random
     
@@ -158,11 +161,52 @@ async def create_listing(
     if not cat:
         raise HTTPException(status_code=400, detail="Category not found")
         
-    # If claim_now is True, check user balance
+    # If claim_now is True, check board and exact price for target_rank
+    charge_b = 1
+    target_rank = max(1, req.target_rank)
+    board = None
     if req.claim_now:
-        if user.balance < 1:
-            raise HTTPException(status_code=400, detail="Mablag' yetarli emas. Balansingizda kamida 1 B bo'lishi kerak")
-        user.balance -= 1
+        ref = now_tashkent()
+        period_type = req.period_type or "all_time"
+        starts_at, ends_at, period_key = get_period_bounds(period_type, ref)
+        board_result = await db.execute(
+            select(Board).where(
+                Board.period_type == period_type,
+                Board.period_key == period_key,
+                Board.status == "active",
+            )
+        )
+        board = board_result.scalar_one_or_none()
+        if not board:
+            board = Board(
+                period_type=period_type,
+                period_key=period_key,
+                starts_at=starts_at,
+                ends_at=ends_at,
+                status="active",
+            )
+            db.add(board)
+            await db.flush()
+
+        entries_result = await db.execute(
+            select(BoardEntry)
+            .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
+            .order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
+        )
+        active_entries = list(entries_result.scalars())
+
+        if target_rank <= len(active_entries):
+            holder = active_entries[target_rank - 1]
+            charge_b = (holder.paid_units // 1000) + 1
+        else:
+            charge_b = 1
+
+        if user.balance < charge_b:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Mablag' yetarli emas. #{target_rank}-o'rin uchun balansingizda kamida {charge_b} B bo'lishi kerak"
+            )
+        user.balance -= charge_b
 
     # Generate random gradient for missing avatars
     colors = ["#2563EB", "#1E3A8A", "#7C3AED", "#4C1D95", "#059669", "#064E3B", "#D97706", "#92400E"]
@@ -226,36 +270,26 @@ async def create_listing(
     db.add(listing)
     await db.flush()
 
-    if req.claim_now:
-        ref = now_tashkent()
-        starts_at, ends_at, period_key = get_period_bounds("all_time", ref)
-        board_result = await db.execute(
-            select(Board).where(
-                Board.period_type == "all_time",
-                Board.period_key == period_key,
-                Board.status == "active",
-            )
-        )
-        board = board_result.scalar_one_or_none()
-        if not board:
-            board = Board(
-                period_type="all_time",
-                period_key=period_key,
-                starts_at=starts_at,
-                ends_at=ends_at,
-                status="active",
-            )
-            db.add(board)
-            await db.flush()
-
+    if req.claim_now and board:
         board_entry = BoardEntry(
             board_id=board.id,
             listing_id=listing.id,
-            paid_units=1000,
+            paid_units=charge_b * 1000,
             entered_at=now_tashkent(),
             status="active"
         )
         db.add(board_entry)
+        await db.flush()
+
+        ledger_entry = LedgerEntry(
+            user_id=user.id,
+            delta_units=-charge_b,
+            kind="claim_rank",
+            ref_type="board_entry",
+            ref_id=str(board_entry.id),
+            balance_after=user.balance,
+        )
+        db.add(ledger_entry)
 
     await db.commit()
     await db.refresh(listing)
@@ -263,6 +297,8 @@ async def create_listing(
     return {
         "id": listing.id,
         "claimed": req.claim_now,
+        "charge_b": charge_b,
+        "target_rank": target_rank if req.claim_now else None,
         "new_balance": user.balance,
         "logo_url": listing.logo_url,
     }
