@@ -47,8 +47,12 @@ async def get_public_stats(
 
     total_paid_units = (
         await db.execute(
-            select(func.sum(BoardEntry.paid_units)).where(
-                BoardEntry.status == "active", BoardEntry.deleted_at.is_(None)
+            select(func.sum(BoardEntry.paid_units))
+            .join(BoardEntry.listing)
+            .where(
+                BoardEntry.status == "active",
+                BoardEntry.deleted_at.is_(None),
+                func.lower(Listing.handle).notin_(["@rung_uz", "rung_uz", "@sipagentbot", "sipagentbot"]),
             )
         )
     ).scalar_one() or 0
