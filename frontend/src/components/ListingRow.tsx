@@ -92,16 +92,14 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
           <span className="num">{subs(ch.s)}</span> obunachi
           <span className="sep">·</span>
           <span className="num">{nf(ch.k)}</span> o'tish
-          <span className="sep">·</span>
           {ch.free ? (
-            <span className={`adlabel free ${ch.free.includes("tasdiq") ? "unclaimed" : ""}`}>
-              {ch.free}
-            </span>
-          ) : (
-            <span className="adlabel">
-              <span className="num">{item.price} B</span>
-            </span>
-          )}
+            <>
+              <span className="sep">·</span>
+              <span className={`adlabel free ${ch.free.includes("tasdiq") ? "unclaimed" : ""}`}>
+                {ch.free}
+              </span>
+            </>
+          ) : null}
         </p>
       </div>
 
