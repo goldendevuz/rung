@@ -138,10 +138,13 @@ export function Home() {
     return (
       h !== 'rung_uz' &&
       h !== 'uz_fast_signals' &&
+      h !== 'sipagentbot' &&
       !h.includes('rung') &&
       !h.includes('fast_signals') &&
+      !h.includes('sipagentbot') &&
       !n.includes('fast signals') &&
-      !n.includes('rung |')
+      !n.includes('rung |') &&
+      !n.includes('sipagentbot')
     );
   });
 
