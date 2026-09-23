@@ -1,5 +1,5 @@
 import React from 'react';
-import { initials, nf, subs, formatB } from '../utils/formatters';
+import { initials, nf, subs, formatB, cleanTelegramHandle } from '../utils/formatters';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ICON_V = (
@@ -42,6 +42,9 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
   const rank = typeof item?.rank === 'number' ? item.rank : undefined;
   const tinted = rank != null && rank <= 9;
   
+  const handleClean = cleanTelegramHandle(ch.h || ch.handle || '').toLowerCase();
+  const isRung = handleClean === '@rung_uz' || ch.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
+
   const cat = ch.category || { 
     n: ch.category_slug || ch.c || 'Kategoriya', 
     c: ch.category_color || 'var(--ink-2)',
@@ -103,7 +106,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
         </p>
       </div>
 
-      {!ch.free ? (
+      {!ch.free && !isRung ? (
         <div className="rprice-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div className="rprice"><span className="num">{item.price}</span> B</div>
           {onClaim && (
@@ -128,21 +131,26 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
             Bu o'rinni <span className="num">{formatB(item.priceUnits + 1000)} B</span> ga oling
           </button>
         </div>
-      ) : (
+      ) : ch.free ? (
         <div className="rprice"><span style={{ color: 'var(--ink-3)', fontSize: '14px' }}>pulsiz</span></div>
-      )}
+      ) : null}
     </div>
   );
 }
 
 export function MiniListing({ item }: { item: any }) {
   const ch = item.ch;
+  const handleClean = cleanTelegramHandle(ch?.h || ch?.handle || '').toLowerCase();
+  const isRung = handleClean === '@rung_uz' || ch?.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
+
   return (
     <div className="mini">
       <div className="rank num">#{item.rank}</div>
       <Avatar ch={ch} />
       <div className="mini-n">{ch.n}</div>
-      <div className="mini-p"><span className="num">{item.price}</span> B</div>
+      {!isRung && (
+        <div className="mini-p"><span className="num">{item.price}</span> B</div>
+      )}
     </div>
   );
 }
