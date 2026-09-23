@@ -262,13 +262,16 @@ async def get_recent_activity(
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: int = Query(8, ge=1, le=20),
 ) -> list[ActivityItemOut]:
-    """Return recent rank claims across boards (latest activity feed)."""
+    """Return recent rank claims across boards (latest activity feed), excluding Rung and Fast Signals."""
     stmt = (
         select(BoardEntry)
         .options(selectinload(BoardEntry.listing))
-        .where(BoardEntry.status.in_(["active", "replaced"]))
+        .where(
+            BoardEntry.status.in_(["active", "replaced"]),
+            BoardEntry.deleted_at.is_(None),
+        )
         .order_by(BoardEntry.entered_at.desc())
-        .limit(limit)
+        .limit(limit * 3)
     )
     result = await db.execute(stmt)
     entries = list(result.scalars())
@@ -277,6 +280,17 @@ async def get_recent_activity(
     for e in entries:
         if not e.listing:
             continue
+        handle_clean = (e.listing.handle or "").lower().lstrip("@").strip()
+        name_clean = (e.listing.name or "").lower().strip()
+        # Exclude Rung and Fast Signals per user requirement
+        if (
+            handle_clean in {"rung_uz", "uz_fast_signals"}
+            or "rung" in handle_clean
+            or "fast_signals" in handle_clean
+            or "fast signals" in name_clean
+        ):
+            continue
+
         activity_items.append(
             ActivityItemOut(
                 id=e.id,
@@ -291,6 +305,8 @@ async def get_recent_activity(
                 entered_at=e.entered_at,
             )
         )
+        if len(activity_items) >= limit:
+            break
     return activity_items
 
 

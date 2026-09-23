@@ -1,7 +1,7 @@
+import os
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +17,100 @@ from app.core.config import get_settings
 settings = get_settings()
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.get("/admin/overview")
+async def get_admin_users_overview(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    x_internal_token: Annotated[str | None, Header(alias="x-internal-token")] = None,
+    caller_tg_id: int | None = Query(None),
+    secret_key: str | None = Query(None),
+):
+    """Internal admin endpoint to fetch all users, their balances, and their listings.
+
+    Protected by:
+    1. Valid X-Internal-Token or secret_key matching INTERNAL_API_TOKEN / SECRET_KEY
+    AND
+    2. Either caller_tg_id is an admin (is_admin=True in DB, or in ADMIN_TG_IDS),
+       or valid secret_key argument provided.
+    """
+    # Check token
+    token = x_internal_token if isinstance(x_internal_token, str) else None
+    if not token and isinstance(secret_key, str):
+        token = secret_key
+
+    if not token or (token != settings.INTERNAL_API_TOKEN and token != settings.SECRET_KEY):
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid internal token")
+
+    # If caller_tg_id provided, verify caller is authorized admin
+    if isinstance(caller_tg_id, int):
+        admin_ids_raw = os.getenv("ADMIN_TG_IDS", "")
+        admin_ids = [int(x.strip()) for x in admin_ids_raw.split(",") if x.strip().isdigit()]
+        has_secret = isinstance(secret_key, str) and secret_key in {settings.INTERNAL_API_TOKEN, settings.SECRET_KEY}
+        is_allowed = caller_tg_id in admin_ids or has_secret
+
+        if not is_allowed:
+            # Check DB for is_admin flag
+            user_stmt = select(User).where(User.telegram_id == caller_tg_id)
+            user_res = await db.execute(user_stmt)
+            caller_user = user_res.scalar_one_or_none()
+            if caller_user and caller_user.is_admin:
+                is_allowed = True
+
+        if not is_allowed:
+            raise HTTPException(status_code=403, detail="Forbidden: User is not an authorized administrator")
+
+    # Fetch all users
+    users_stmt = select(User).order_by(User.balance.desc(), User.created_at.desc())
+    users_res = await db.execute(users_stmt)
+    users = list(users_res.scalars())
+
+    # Fetch all non-deleted listings
+    listings_stmt = (
+        select(Listing)
+        .where(Listing.deleted_at.is_(None))
+        .order_by(Listing.created_at.desc())
+    )
+    listings_res = await db.execute(listings_stmt)
+    all_listings = list(listings_res.scalars())
+
+    user_listings_map: dict[str, list[dict]] = {}
+    for listing_item in all_listings:
+        if not listing_item.owner_id:
+            continue
+        key = str(listing_item.owner_id)
+        if key not in user_listings_map:
+            user_listings_map[key] = []
+        user_listings_map[key].append({
+            "id": str(listing_item.id),
+            "name": listing_item.name,
+            "handle": listing_item.handle,
+            "status": listing_item.status,
+            "subscribers": listing_item.subscribers,
+        })
+
+    items = []
+    for u in users:
+        u_listings = user_listings_map.get(str(u.id), [])
+        bal_b = u.balance // 1000
+        items.append({
+            "id": str(u.id),
+            "telegram_id": u.telegram_id,
+            "username": u.username,
+            "first_name": u.first_name,
+            "balance_units": u.balance,
+            "balance_b": bal_b,
+            "balance_som": f"{bal_b * 1000:,}".replace(",", " "),
+            "is_admin": u.is_admin,
+            "listings_count": len(u_listings),
+            "listings": u_listings,
+        })
+
+    return {
+        "total_users": len(items),
+        "total_listings": len(all_listings),
+        "users": items,
+    }
 
 @router.get("/me/listings", response_model=list[ListingDetail])
 async def get_my_listings(

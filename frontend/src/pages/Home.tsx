@@ -126,10 +126,23 @@ export function Home() {
     retry: false,
   });
 
-  const { data: recentActivity = [] } = useQuery({
+  const { data: rawRecentActivity = [] } = useQuery({
     queryKey: ['recent-activity'],
-    queryFn: () => fetchRecentActivity(6),
+    queryFn: () => fetchRecentActivity(8),
     refetchInterval: 15000,
+  });
+
+  const recentActivity = rawRecentActivity.filter((act) => {
+    const h = (act.listing_handle || '').toLowerCase().replace('@', '');
+    const n = (act.listing_name || '').toLowerCase();
+    return (
+      h !== 'rung_uz' &&
+      h !== 'uz_fast_signals' &&
+      !h.includes('rung') &&
+      !h.includes('fast_signals') &&
+      !n.includes('fast signals') &&
+      !n.includes('rung |')
+    );
   });
 
   const entries = boardPage?.entries || [];

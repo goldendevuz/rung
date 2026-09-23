@@ -37,6 +37,7 @@ async def main() -> None:
     from aiogram.client.default import DefaultBotProperties
     from aiogram.enums import ParseMode
     from handlers.start import router as start_router
+    from handlers.admin import router as admin_router
 
     bot = Bot(
         token=bot_token,
@@ -44,6 +45,7 @@ async def main() -> None:
     )
     dp = Dispatcher()
     dp.include_router(start_router)
+    dp.include_router(admin_router)
 
     try:
         me = await bot.get_me()
