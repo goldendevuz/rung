@@ -44,6 +44,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
   
   const handleClean = cleanTelegramHandle(ch.h || ch.handle || '').toLowerCase();
   const isRung = handleClean === '@rung_uz' || ch.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
+  const isSipagentBot = handleClean === '@sipagentbot' || ch.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || (ch.n && ch.n.toLowerCase().includes('sipagentbot'));
 
   const cat = ch.category || { 
     n: ch.category_slug || ch.c || 'Kategoriya', 
@@ -106,7 +107,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
         </p>
       </div>
 
-      {!ch.free && !isRung ? (
+      {!ch.free && !isRung && !isSipagentBot ? (
         <div className="rprice-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div className="rprice"><span className="num">{item.price}</span> B</div>
           {onClaim && (
@@ -131,6 +132,32 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
             Bu o'rinni <span className="num">{formatB(item.priceUnits + 1000)} B</span> ga oling
           </button>
         </div>
+      ) : isSipagentBot ? (
+        <div className="rprice-wrap" style={{ display: 'flex', alignItems: 'center' }}>
+          <span 
+            className="sponsor-badge"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '4px 10px',
+              borderRadius: '999px',
+              fontSize: '12px',
+              fontWeight: 600,
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15))',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              color: '#FBBF24',
+              letterSpacing: '0.03em',
+              boxShadow: '0 0 10px rgba(245, 158, 11, 0.12)',
+              userSelect: 'none'
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.9 }}>
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            Sponsor
+          </span>
+        </div>
       ) : ch.free ? (
         <div className="rprice"><span style={{ color: 'var(--ink-3)', fontSize: '14px' }}>pulsiz</span></div>
       ) : null}
@@ -142,15 +169,18 @@ export function MiniListing({ item }: { item: any }) {
   const ch = item.ch;
   const handleClean = cleanTelegramHandle(ch?.h || ch?.handle || '').toLowerCase();
   const isRung = handleClean === '@rung_uz' || ch?.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
+  const isSipagentBot = handleClean === '@sipagentbot' || ch?.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || (ch?.n && ch.n.toLowerCase().includes('sipagentbot'));
 
   return (
     <div className="mini">
       <div className="rank num">#{item.rank}</div>
       <Avatar ch={ch} />
       <div className="mini-n">{ch.n}</div>
-      {!isRung && (
+      {!isRung && !isSipagentBot ? (
         <div className="mini-p"><span className="num">{item.price}</span> B</div>
-      )}
+      ) : isSipagentBot ? (
+        <div className="mini-p" style={{ color: '#FBBF24', fontSize: '11px', fontWeight: 600 }}>Sponsor</div>
+      ) : null}
     </div>
   );
 }
