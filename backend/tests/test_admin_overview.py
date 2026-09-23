@@ -25,7 +25,7 @@ async def test_admin_overview_authorized_internal_token():
     u1.telegram_id = 557407324
     u1.username = "goldendevuz"
     u1.first_name = "Admin"
-    u1.balance = 495000
+    u1.balance = 495
     u1.is_admin = True
 
     l1 = Listing()

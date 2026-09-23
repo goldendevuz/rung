@@ -92,13 +92,12 @@ async def get_admin_users_overview(
     items = []
     for u in users:
         u_listings = user_listings_map.get(str(u.id), [])
-        bal_b = u.balance // 1000
+        bal_b = u.balance
         items.append({
             "id": str(u.id),
             "telegram_id": u.telegram_id,
             "username": u.username,
             "first_name": u.first_name,
-            "balance_units": u.balance,
             "balance_b": bal_b,
             "balance_som": f"{bal_b * 1000:,}".replace(",", " "),
             "is_admin": u.is_admin,
