@@ -39,8 +39,21 @@ export async function fetchPublicStats() {
   return res.json();
 }
 
-export async function fetchQuote(boardId: string | number, targetRank: number) {
-  const res = await fetch(`${API_BASE}/boards/${boardId}/quote?target_rank=${targetRank}`, { headers: getHeaders() });
+export async function fetchVisitorsStats() {
+  const res = await fetch(`${API_BASE}/stats/visitors`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch visitors stats');
+  return res.json() as Promise<{
+    configured: boolean;
+    visitors_today: number | null;
+    visitors_30d: number | null;
+    start_at: string | null;
+    end_at: string | null;
+  }>;
+}
+
+export async function fetchQuote(boardId: string | number, targetRank: number, category?: string) {
+  const catParam = category && category !== 'all' ? `&category=${encodeURIComponent(category)}` : '';
+  const res = await fetch(`${API_BASE}/boards/${boardId}/quote?target_rank=${targetRank}${catParam}`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch quote');
   return res.json() as Promise<{
     board_id: string;
@@ -53,8 +66,9 @@ export async function fetchQuote(boardId: string | number, targetRank: number) {
   }>;
 }
 
-export async function fetchCandidates(boardId: string | number, limit: number = 10) {
-  const res = await fetch(`${API_BASE}/boards/${boardId}/candidates?limit=${limit}`, { headers: getHeaders() });
+export async function fetchCandidates(boardId: string | number, limit: number = 10, category?: string) {
+  const catParam = category && category !== 'all' ? `&category=${encodeURIComponent(category)}` : '';
+  const res = await fetch(`${API_BASE}/boards/${boardId}/candidates?limit=${limit}${catParam}`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch candidate ranks');
   return res.json() as Promise<Array<{
     rank: number;
@@ -63,6 +77,24 @@ export async function fetchCandidates(boardId: string | number, limit: number = 
     holder_handle: string | null;
     holder_paid_b: number;
     price_b: number;
+  }>>;
+}
+
+export async function fetchRecentActivity(limit: number = 8) {
+  const res = await fetch(`${API_BASE}/boards/activity?limit=${limit}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch recent activity');
+  return res.json() as Promise<Array<{
+    id: string;
+    listing_id: string;
+    listing_name: string;
+    listing_handle: string;
+    listing_logo_url: string | null;
+    listing_gradient_start: string | null;
+    listing_gradient_end: string | null;
+    paid_b: string;
+    paid_units: number;
+    entered_at: string;
+    period_type: string | null;
   }>>;
 }
 
@@ -138,7 +170,7 @@ export async function createListing(data: any) {
   return res.json();
 }
 
-export async function claimRank(data: { listing_id: string; period_type?: string; target_rank?: number; paid_b?: number }) {
+export async function claimRank(data: { listing_id: string; period_type?: string; target_rank?: number; paid_b?: number; category?: string }) {
   const res = await fetch(`${API_BASE}/boards/claim`, {
     method: 'POST',
     headers: { ...getHeaders(), 'Content-Type': 'application/json' },

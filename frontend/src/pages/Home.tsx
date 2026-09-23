@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
-import { fetchTabs, fetchBoard, fetchCategories, fetchQuote, fetchPublicStats, fetchPublicConfig, fetchMyListings, claimRank } from '../api/client';
-import { formatB, formatDateSafe } from '../utils/formatters';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { 
+  fetchTabs, 
+  fetchBoard, 
+  fetchCategories, 
+  fetchQuote, 
+  fetchPublicStats, 
+  fetchVisitorsStats,
+  fetchRecentActivity,
+  fetchPublicConfig, 
+  fetchMyListings, 
+  claimRank 
+} from '../api/client';
+import { formatB, formatDateSafe, formatRelativeTimeUz, initials } from '../utils/formatters';
 import { ListingRow, MiniListing, EmptyRankSlot } from '../components/ListingRow';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -25,18 +36,42 @@ const PERIOD_NOTES: Record<string, string> = {
   season: "Fasl boshida yangilanadi"
 };
 
-const LAUNCH_DATE = new Date('2026-09-21T00:00:00+05:00');
-
 export function Home() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlCategory = searchParams.get('category') || 'all';
+
   const { user, mutate: refreshUser } = useAuth();
   const toast = useToast();
   const queryClient = useQueryClient();
 
   const [period, setPeriod] = useState<string>('all_time');
-  const [cat, setCat] = useState<string>('all');
+  const [cat, setCat] = useState<string>(urlCategory);
   const [search] = useState<string>('');
   const [page, setPage] = useState<number>(1);
+
+  React.useEffect(() => {
+    const qCat = searchParams.get('category');
+    if (qCat && qCat !== cat) {
+      setCat(qCat);
+      setPage(1);
+    } else if (!qCat && cat !== 'all') {
+      setCat('all');
+      setPage(1);
+    }
+  }, [searchParams]);
+
+  const handleSelectCat = (newCat: string) => {
+    setCat(newCat);
+    setPage(1);
+    const newParams = new URLSearchParams(searchParams);
+    if (newCat === 'all') {
+      newParams.delete('category');
+    } else {
+      newParams.set('category', newCat);
+    }
+    setSearchParams(newParams, { replace: true });
+  };
 
   // Claim modal state
   const [claimModalOpen, setClaimModalOpen] = useState(false);
@@ -80,8 +115,8 @@ export function Home() {
   });
 
   const { data: heroQuote } = useQuery({
-    queryKey: ['quote', boardPage?.board_id, 1],
-    queryFn: () => fetchQuote(boardPage!.board_id, 1),
+    queryKey: ['quote', boardPage?.board_id, 1, cat],
+    queryFn: () => fetchQuote(boardPage!.board_id, 1, cat),
     enabled: !!boardPage?.board_id && boardPage?.board_id !== '00000000-0000-0000-0000-000000000000',
   });
 
@@ -89,6 +124,12 @@ export function Home() {
     queryKey: ['board', 'daily', 1, undefined, undefined],
     queryFn: () => fetchBoard('daily', 1),
     retry: false,
+  });
+
+  const { data: recentActivity = [] } = useQuery({
+    queryKey: ['recent-activity'],
+    queryFn: () => fetchRecentActivity(6),
+    refetchInterval: 15000,
   });
 
   const entries = boardPage?.entries || [];
@@ -114,6 +155,13 @@ export function Home() {
   const { data: stats } = useQuery({
     queryKey: ['stats'],
     queryFn: fetchPublicStats,
+  });
+
+  const { data: visitorsStats } = useQuery({
+    queryKey: ['visitors-stats'],
+    queryFn: fetchVisitorsStats,
+    refetchInterval: 60000,
+    retry: false,
   });
 
   // Claim mutation
@@ -172,7 +220,7 @@ export function Home() {
             <button 
               className="cpill" 
               aria-pressed={cat === 'all' ? "true" : "false"}
-              onClick={() => { setCat('all'); setPage(1); }}
+              onClick={() => handleSelectCat('all')}
             >
               <span className="sq" style={{ '--c': 'var(--ink-3)' } as any} />Hammasi
             </button>
@@ -181,7 +229,7 @@ export function Home() {
                 key={c.slug} 
                 className="cpill" 
                 aria-pressed={cat === c.slug ? "true" : "false"}
-                onClick={() => { setCat(cat === c.slug ? 'all' : c.slug); setPage(1); }}
+                onClick={() => handleSelectCat(cat === c.slug ? 'all' : c.slug)}
               >
                 <span className="sq" style={{ '--c': c.color } as any} />{c.name_uz} <span className="num">{c.listing_count}</span>
               </button>
@@ -358,15 +406,86 @@ export function Home() {
                 Har bir o'rinning narxi bor. <b style={{ color: 'var(--ink)' }}>k</b>-o'rinni olish uchun shu o'rindagi kanaldan <b style={{ color: 'var(--ink)' }}>1 B</b> ko'p to'laysiz. Ular bir pog'ona pastga tushadi. <Link to="/qoidalar" style={{ color: 'var(--lime-text)' }}>Qoidalar →</Link>
               </p>
             </div>
+
+            {recentActivity.length > 0 && (
+              <div className="card" style={{ marginTop: '16px' }}>
+                <div className="card-h" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>⚡</span> Oxirgi amallar
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
+                  {recentActivity.map((act) => (
+                    <div 
+                      key={act.id} 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '10px', 
+                        padding: '8px 10px',
+                        borderRadius: '10px',
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)'
+                      }}
+                    >
+                      <div 
+                        style={{ 
+                          width: '32px', 
+                          height: '32px', 
+                          borderRadius: '8px', 
+                          background: act.listing_logo_url ? 'transparent' : 'var(--surface-2)',
+                          display: 'grid',
+                          placeItems: 'center',
+                          fontWeight: 700,
+                          fontSize: '12px',
+                          color: '#fff',
+                          overflow: 'hidden',
+                          flexShrink: 0
+                        }}
+                      >
+                        {act.listing_logo_url ? (
+                          <img src={act.listing_logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          initials(act.listing_name)
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {act.listing_name}
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: 'var(--ink-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ color: 'var(--lime-text)', fontWeight: 700 }}>{act.paid_b} B</span> to'landi · <span>{formatRelativeTimeUz(act.entered_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </aside>
         </div>
 
         <section className="stats">
-          <h2>Rung <b>{Math.max(1, Math.floor((Date.now() - LAUNCH_DATE.getTime()) / (1000 * 60 * 60 * 24)))} kun</b> oldin ishga tushdi. O'shandan beri:</h2>
+          <h2>Platforma statistikasi</h2>
           <div className="stat-grid">
-            <div className="stat"><div className="v num">{stats?.visits_today ?? 0}</div><div className="k">tashrif (tekshirilgan, botlarsiz)</div></div>
-            <div className="stat accent"><div className="v num">{stats ? formatB(stats.total_paid_units) : '0'} B</div><div className="k">o'rinlar uchun to'langan</div></div>
-            <div className="stat"><div className="v num">{stats?.total_listings ?? 0}</div><div className="k">ro'yxatdagi kanal</div></div>
+            <div className="stat">
+              <div className="v num">
+                {visitorsStats?.configured && visitorsStats.visitors_30d != null
+                  ? visitorsStats.visitors_30d
+                  : (stats?.visits_today ?? 0)}
+              </div>
+              <div className="k">
+                {visitorsStats?.configured && visitorsStats.visitors_30d != null
+                  ? 'tashriflar (30 kun)'
+                  : 'bugungi tashriflar'}
+              </div>
+            </div>
+            <div className="stat accent">
+              <div className="v num">{stats ? formatB(stats.total_paid_units) : '0'} B</div>
+              <div className="k">o'rinlar uchun to'langan</div>
+            </div>
+            <div className="stat">
+              <div className="v num">{stats?.total_listings ?? 0}</div>
+              <div className="k">ro'yxatdagi kanal</div>
+            </div>
           </div>
         </section>
       </div>
@@ -375,6 +494,7 @@ export function Home() {
       {claimModalOpen && (
         <ClaimModalInner 
           period={period}
+          category={cat}
           claimTargetRank={claimTargetRank}
           myListings={myListings}
           selectedListingId={selectedListingId}
@@ -390,6 +510,7 @@ export function Home() {
 
 function ClaimModalInner({
   period,
+  category,
   claimTargetRank,
   myListings,
   selectedListingId,
@@ -399,6 +520,7 @@ function ClaimModalInner({
   onClose,
 }: {
   period: string;
+  category?: string;
   claimTargetRank: number;
   myListings: any[];
   selectedListingId: string;
@@ -408,8 +530,8 @@ function ClaimModalInner({
   onClose: () => void;
 }) {
   const { data: quote, isLoading: isQuoteLoading } = useQuery({
-    queryKey: ['quote', period, claimTargetRank],
-    queryFn: () => fetchQuote(period, claimTargetRank),
+    queryKey: ['quote', period, claimTargetRank, category],
+    queryFn: () => fetchQuote(period, claimTargetRank, category),
   });
 
   const quoteCost = quote ? Math.round(quote.min_cost_units / 1000) : 1;
@@ -522,7 +644,8 @@ function ClaimModalInner({
                     listing_id: listingId,
                     period_type: period,
                     target_rank: claimTargetRank,
-                    paid_b: quoteCost
+                    paid_b: quoteCost,
+                    category: category === 'all' ? undefined : category,
                   });
                 }}
                 className="flex-1 py-3 px-4 rounded-xl bg-[#B8F03C] hover:bg-[#c6fa4d] text-[#0D0F11] font-bold text-sm transition-all disabled:opacity-50"

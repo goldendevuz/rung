@@ -61,3 +61,24 @@ export function formatDateSafe(dateStr?: string | null): string {
   return d.toLocaleDateString('ru-RU');
 }
 
+export function formatRelativeTimeUz(dateStr?: string | null): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const now = Date.now();
+  const diffSec = Math.floor((now - d.getTime()) / 1000);
+
+  if (diffSec < 60) return 'hozirgina';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} daqiqa oldin`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours} soat oldin`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return 'kecha';
+  if (diffDays < 30) return `${diffDays} kun oldin`;
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths < 12) return `${diffMonths} oy oldin`;
+  return `${Math.floor(diffMonths / 12)} yil oldin`;
+}
+
+

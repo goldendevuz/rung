@@ -23,6 +23,7 @@ from pydantic import BaseModel
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.schemas.public import (
+    ActivityItemOut,
     BoardEntryOut,
     BoardPage,
     BoardTabOut,
@@ -256,6 +257,43 @@ async def get_daily_history(db: Annotated[AsyncSession, Depends(get_db)]) -> lis
     return history
 
 
+@router.get("/activity", response_model=list[ActivityItemOut])
+async def get_recent_activity(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    limit: int = Query(8, ge=1, le=20),
+) -> list[ActivityItemOut]:
+    """Return recent rank claims across boards (latest activity feed)."""
+    stmt = (
+        select(BoardEntry)
+        .options(selectinload(BoardEntry.listing))
+        .where(BoardEntry.status.in_(["active", "replaced"]))
+        .order_by(BoardEntry.entered_at.desc())
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    entries = list(result.scalars())
+
+    activity_items: list[ActivityItemOut] = []
+    for e in entries:
+        if not e.listing:
+            continue
+        activity_items.append(
+            ActivityItemOut(
+                id=e.id,
+                listing_id=e.listing.id,
+                listing_name=e.listing.name,
+                listing_handle=e.listing.handle,
+                listing_logo_url=e.listing.logo_url,
+                listing_gradient_start=e.listing.gradient_start,
+                listing_gradient_end=e.listing.gradient_end,
+                paid_b=units_to_b_display(e.paid_units),
+                paid_units=e.paid_units,
+                entered_at=e.entered_at,
+            )
+        )
+    return activity_items
+
+
 class CandidateRankOut(BaseModel):
     rank: int
     is_occupied: bool
@@ -270,8 +308,9 @@ async def get_candidates(
     board_id: str,
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: int = Query(10, ge=1, le=50),
+    category: str | None = Query(None),
 ) -> list[CandidateRankOut]:
-    """Get live pricing and occupant info for candidate ranks 1..limit."""
+    """Get live pricing and occupant info for candidate ranks 1..limit, optionally filtered by category."""
     board = None
     try:
         b_uuid = uuid.UUID(board_id)
@@ -291,11 +330,17 @@ async def get_candidates(
 
     active_entries: list[BoardEntry] = []
     if board:
-        entries_result = await db.execute(
+        base_q = (
             select(BoardEntry)
             .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
+            .join(BoardEntry.listing)
             .options(selectinload(BoardEntry.listing))
-            .order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
+        )
+        if category and category != "all":
+            base_q = base_q.join(Listing.category).where(Category.slug == category)
+
+        entries_result = await db.execute(
+            base_q.order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
         )
         active_entries = list(entries_result.scalars())
 
@@ -338,8 +383,9 @@ async def get_quote(
     board_id: str,
     db: Annotated[AsyncSession, Depends(get_db)],
     target_rank: int = Query(..., ge=1),
+    category: str | None = Query(None),
 ) -> QuoteOut:
-    """Read-only quote: cost to claim target_rank on a board (by board UUID or period_type)."""
+    """Read-only quote: cost to claim target_rank on a board (by board UUID or period_type), optionally filtered by category."""
     board = None
     try:
         b_uuid = uuid.UUID(board_id)
@@ -368,11 +414,17 @@ async def get_quote(
             resulting_rank=1,
         )
 
-    # Get all active entries ranked
-    entries_result = await db.execute(
+    # Base query for active entries
+    base_q = (
         select(BoardEntry)
         .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
-        .order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
+        .join(BoardEntry.listing)
+    )
+    if category and category != "all":
+        base_q = base_q.join(Listing.category).where(Category.slug == category)
+
+    entries_result = await db.execute(
+        base_q.order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
     )
     entries = list(entries_result.scalars())
 
@@ -390,7 +442,7 @@ async def get_quote(
     resulting_rank = 1 + sum(1 for e in entries if e.paid_units >= min_cost)
 
     return QuoteOut(
-        board_id=str(board.id),
+        board_id=board.id,
         target_rank=target_rank,
         holder_paid_b=units_to_b_display(holder_paid),
         holder_paid_units=holder_paid,
@@ -405,6 +457,7 @@ class ClaimRequest(BaseModel):
     period_type: str = "all_time"
     target_rank: int = 1
     paid_b: int = 1
+    category: str | None = None
 
 
 @router.post("/claim")
@@ -449,10 +502,16 @@ async def claim_rank(
         await db.flush()
 
     # 3. Check active entries on this board to compute exact price
-    entries_result = await db.execute(
+    base_q = (
         select(BoardEntry)
         .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
-        .order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
+        .join(BoardEntry.listing)
+    )
+    if req.category and req.category != "all":
+        base_q = base_q.join(Listing.category).where(Category.slug == req.category)
+
+    entries_result = await db.execute(
+        base_q.order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
     )
     active_entries = list(entries_result.scalars())
 

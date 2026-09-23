@@ -2,7 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchPublicStats } from '../api/client';
+import { fetchPublicStats, fetchVisitorsStats } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 
 function UserAvatar({ photoUrl, name }: { photoUrl?: string | null; name?: string | null }) {
@@ -63,7 +63,20 @@ export function Topbar() {
     refetchInterval: 30000,
   });
 
+  const { data: visitorsStats } = useQuery({
+    queryKey: ['visitors-stats'],
+    queryFn: fetchVisitorsStats,
+    refetchInterval: 60000,
+    retry: false,
+  });
+
   const showLiveStats = stats?.online_now != null;
+  const visitorsCount = (visitorsStats?.configured && visitorsStats.visitors_30d != null)
+    ? visitorsStats.visitors_30d
+    : (stats?.visits_today || 1);
+  const visitorsLabel = (visitorsStats?.configured && visitorsStats.visitors_30d != null)
+    ? '30 kunda'
+    : 'bugun';
 
   return (
     <header className="topbar">
@@ -85,7 +98,7 @@ export function Topbar() {
               <span className="dot" />
               <b className="num">{stats.online_now || 1}</b> onlayn{' '}
               <span className="hide-xs">
-                · bugun <b className="num">{new Intl.NumberFormat('uz-UZ').format(stats.visits_today || 1).replace(',', ' ')}</b> tashrif · <span className="stat-arrow" style={{ textDecoration: 'underline' }}>statistika →</span>
+                · {visitorsLabel} <b className="num">{new Intl.NumberFormat('uz-UZ').format(visitorsCount).replace(',', ' ')}</b> tashrif · <span className="stat-arrow" style={{ textDecoration: 'underline' }}>statistika →</span>
               </span>
             </a>
           )}

@@ -122,6 +122,30 @@ class PublicStatsOut(BaseModel):
     total_paid_units: int = 0
 
 
+# ── Activity & Analytics ───────────────────────────────────────────────────────
+
+class ActivityItemOut(BaseModel):
+    id: UUID
+    listing_id: UUID
+    listing_name: str
+    listing_handle: str
+    listing_logo_url: str | None = None
+    listing_gradient_start: str | None = None
+    listing_gradient_end: str | None = None
+    paid_b: str
+    paid_units: int
+    entered_at: datetime
+    period_type: str | None = None
+
+
+class VisitorsStatsOut(BaseModel):
+    configured: bool
+    visitors_today: int | None = None
+    visitors_30d: int | None = None
+    start_at: str | None = None
+    end_at: str | None = None
+
+
 # ── Pagination helper ─────────────────────────────────────────────────────────
 
 class PaginatedResponse(BaseModel):
@@ -129,3 +153,4 @@ class PaginatedResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
