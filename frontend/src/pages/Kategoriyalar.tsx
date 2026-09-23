@@ -35,7 +35,9 @@ export function Kategoriyalar() {
                   className="btn-ghost" 
                   style={{ width: '100%', fontSize: '13px', minHeight: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  1 B ga birinchi bo'ling
+                  {c.listing_count === 0
+                    ? "1 B ga birinchi bo'ling"
+                    : `${c.next_rank_price_b ?? 1} B ga 1-o'rinni oling`}
                 </a>
               </div>
             ))}

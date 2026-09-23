@@ -597,3 +597,51 @@ async def claim_rank(
         "message": f"Kanal muvaffaqiyatli #{req.target_rank}-o'ringa joylashtirildi!"
     }
 
+@router.post("/admin/reset-daily")
+async def admin_reset_daily_board(
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    """
+    Manually trigger the daily board reset (for testing S5 logic).
+    Marks all active entries on today's daily board as 'expired' and closes the board.
+    """
+    from sqlalchemy import update as sa_update
+
+    ref = now_tashkent()
+    _, _, period_key = get_period_bounds("daily", ref)
+
+    result = await db.execute(
+        select(Board).where(
+            Board.period_type == "daily",
+            Board.period_key == period_key,
+            Board.status == "active",
+        )
+    )
+    board = result.scalar_one_or_none()
+
+    if board is None:
+        return {"reset": False, "period_key": period_key, "message": "No active daily board found"}
+
+    # Count entries before reset for proof
+    count_result = await db.execute(
+        select(BoardEntry)
+        .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
+    )
+    entries_before = list(count_result.scalars())
+    entry_count = len(entries_before)
+
+    await db.execute(
+        sa_update(BoardEntry)
+        .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
+        .values(status="expired")
+    )
+    board.status = "closed"
+    await db.commit()
+
+    return {
+        "reset": True,
+        "board_id": str(board.id),
+        "period_key": period_key,
+        "entries_expired": entry_count,
+        "message": f"Daily board closed. {entry_count} entries marked as expired.",
+    }

@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { fetchMyListings, uploadLogo, updateListing } from '../api/client';
+import { fetchMyListings, uploadLogo, updateListing, fetchCategories } from '../api/client';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import AddListingModal from '../components/AddListingModal';
@@ -9,6 +10,7 @@ import { cleanTelegramHandle } from '../utils/formatters';
 
 function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?: () => void }) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -188,10 +190,164 @@ function ChannelCard({ listing, onLogoUpdated }: { listing: any; onLogoUpdated?:
         >
           <span>🚀</span> Reytingda ko'tarish (1 B)
         </Link>
+        <button
+          type="button"
+          onClick={() => setIsEditing(true)}
+          style={{
+            padding: '10px 14px',
+            fontSize: '13px',
+            fontWeight: '600',
+            background: 'rgba(255,255,255,0.06)',
+            color: 'var(--fg)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <span>✏️</span> Tahrirlash
+        </button>
+      </div>
+
+      {isEditing && (
+        <EditChannelModal
+          listing={listing}
+          onClose={() => setIsEditing(false)}
+          onSaved={() => { setIsEditing(false); if (onLogoUpdated) onLogoUpdated(); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditChannelModal({ listing, onClose, onSaved }: { listing: any; onClose: () => void; onSaved: () => void }) {
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const [name, setName] = useState(listing.name || '');
+  const [description, setDescription] = useState(listing.description || '');
+  const [categorySlug, setCategorySlug] = useState(listing.category_slug || '');
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+  });
+
+  const mutation = useMutation({
+    mutationFn: () => updateListing(listing.id, {
+      name: name.trim() || undefined,
+      description: description.trim() || undefined,
+      category_slug: categorySlug || undefined,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-listings'] });
+      toast.success("Kanal ma'lumotlari yangilandi!");
+      onSaved();
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Saqlashda xatolik yuz berdi");
+    },
+  });
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{
+        background: '#12151A', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '20px', padding: '28px', width: '100%', maxWidth: '440px',
+        position: 'relative', boxShadow: '0 24px 48px rgba(0,0,0,0.6)'
+      }}>
+        <button onClick={onClose} type="button" aria-label="Yopish"
+          style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '20px', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          ✕
+        </button>
+        <h2 style={{ margin: '0 0 20px', fontSize: '20px', fontWeight: '700' }}>Kanalni tahrirlash</h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.6)', marginBottom: '6px' }}>
+              Kanal nomi
+            </label>
+            <input
+              id="edit-listing-name"
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              maxLength={120}
+              style={{
+                width: '100%', padding: '12px 14px', borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)',
+                color: '#fff', fontSize: '15px', boxSizing: 'border-box', outline: 'none'
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.6)', marginBottom: '6px' }}>
+              Kategoriya
+            </label>
+            <select
+              id="edit-listing-category"
+              value={categorySlug}
+              onChange={e => setCategorySlug(e.target.value)}
+              style={{
+                width: '100%', padding: '12px 14px', borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.1)', background: '#181B20',
+                color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none'
+              }}
+            >
+              <option value="">-- Kategoriyani tanlang --</option>
+              {(categories as any[]).map((c: any) => (
+                <option key={c.slug} value={c.slug}>{c.name_uz}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.6)', marginBottom: '6px' }}>
+              Tavsif <span style={{ textTransform: 'lowercase', color: 'rgba(255,255,255,0.4)' }}>(ixtiyoriy)</span>
+            </label>
+            <textarea
+              id="edit-listing-description"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              rows={3}
+              maxLength={500}
+              placeholder="Kanal haqida qisqacha..."
+              style={{
+                width: '100%', padding: '12px 14px', borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)',
+                color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none',
+                resize: 'vertical', lineHeight: '1.5'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', paddingTop: '4px' }}>
+            <button type="button" onClick={onClose}
+              style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', color: 'rgba(255,255,255,0.8)', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              Bekor qilish
+            </button>
+            <button type="button" disabled={mutation.isPending || !name.trim()}
+              onClick={() => mutation.mutate()}
+              style={{ flex: 2, padding: '12px', borderRadius: '12px', background: '#B8F03C', color: '#0D0F11', fontSize: '14px', fontWeight: '700', cursor: mutation.isPending || !name.trim() ? 'not-allowed' : 'pointer', opacity: mutation.isPending || !name.trim() ? 0.7 : 1, border: 'none' }}>
+              {mutation.isPending ? 'Saqlanmoqda...' : 'Saqlash'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
 
 export function Profile() {
   const { user, logout } = useAuth();

@@ -10,6 +10,7 @@ from arq import cron
 from sqlalchemy import select
 
 from app.db.session import async_session_factory
+from app.models.board import Board, BoardEntry
 from app.models.topup import TopupOrder
 from app.models.user import User
 from app.models.ledger import LedgerEntry
@@ -102,6 +103,46 @@ async def reconcile_inpay_topups(ctx: dict) -> int:  # type: ignore[type-arg]
     return reconciled_count
 
 
+
+async def reset_daily_board(ctx: dict) -> dict:  # type: ignore[type-arg]
+    """
+    Daily board reset (arq cron, runs at UTC 19:00 = Tashkent 00:00).
+    Closes the current daily board by marking all active entries as expired.
+    The next claim on the daily period auto-creates a fresh board via get_period_bounds.
+    """
+    from sqlalchemy import update as sa_update
+    from app.core.periods import now_tashkent, get_period_bounds
+
+    HEARTBEAT.touch()
+    ref = now_tashkent()
+    _, _, period_key = get_period_bounds("daily", ref)
+
+    async with async_session_factory() as db:
+        result = await db.execute(
+            select(Board).where(
+                Board.period_type == "daily",
+                Board.period_key == period_key,
+                Board.status == "active",
+            )
+        )
+        board = result.scalar_one_or_none()
+
+        if board is None:
+            logger.info("reset_daily_board: no active daily board for %s", period_key)
+            return {"reset": False, "period_key": period_key}
+
+        await db.execute(
+            sa_update(BoardEntry)
+            .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
+            .values(status="expired")
+        )
+        board.status = "closed"
+        await db.commit()
+
+        logger.info("reset_daily_board: closed board %s (period_key=%s)", board.id, period_key)
+        return {"reset": True, "board_id": str(board.id), "period_key": period_key}
+
+
 async def startup(ctx: dict) -> None:  # type: ignore[type-arg]
     logger.info('Worker starting')
     HEARTBEAT.touch()
@@ -112,8 +153,11 @@ async def shutdown(ctx: dict) -> None:  # type: ignore[type-arg]
 
 
 class WorkerSettings:
-    functions = [noop, reconcile_inpay_topups]
-    cron_jobs = [cron(reconcile_inpay_topups, minute=None, second=0)]
+    functions = [noop, reconcile_inpay_topups, reset_daily_board]
+    cron_jobs = [
+        cron(reconcile_inpay_topups, minute=None, second=0),
+        cron(reset_daily_board, hour=19, minute=0, second=0),  # UTC 19:00 = Tashkent 00:00
+    ]
     on_startup = startup
     on_shutdown = shutdown
     after_job_end = None

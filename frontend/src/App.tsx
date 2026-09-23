@@ -12,23 +12,12 @@ import { AddChannel } from './pages/AddChannel';
 import { Listing } from './pages/Listing';
 import { Wallet } from './pages/Wallet';
 import { Statistika } from './pages/Statistika';
+import { Kunlik } from './pages/Kunlik';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 
 // Dummy components for other pages until we implement them
-const Kunlik = () => (
-  <section id="page-kunlik">
-    <div className="wrap">
-      <div className="page-head">
-        <h1>Kunlik taxtalar</h1>
-        <p>Har kun yarim tunda (Toshkent vaqti) taxta yopiladi va yangisi 1 B dan boshlanadi. Yopilgan kun natijalari shu yerda qoladi.</p>
-      </div>
-      <div className="daycards" id="dayCards">
-        <p className="empty-state">Hali yopilgan kunlik reyting yo'q</p>
-      </div>
-    </div>
-  </section>
-);
+
 
 const NotFound = () => (
   <section id="page-404">

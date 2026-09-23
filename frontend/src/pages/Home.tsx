@@ -236,7 +236,8 @@ export function Home() {
             )}
           </div>
           
-          <div className="catbar" id="catbar" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '16px' }}>
+          <div className="catbar-wrap">
+          <div className="catbar" id="catbar">
             <button 
               className="cpill" 
               aria-pressed={cat === 'all' ? "true" : "false"}
@@ -255,6 +256,7 @@ export function Home() {
               </button>
             ))}
           </div>
+          </div>  {/* catbar-wrap */}
 
           <p className="period-note">{note}</p>
           <h1 className="claim">

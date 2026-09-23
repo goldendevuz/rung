@@ -18,6 +18,7 @@ class CategoryOut(BaseModel):
     color: str
     icon: str | None
     listing_count: int = 0
+    next_rank_price_b: int = 1      # B-coins needed to claim rank 1 in this category
 
     @computed_field
     @property
@@ -120,6 +121,7 @@ class PublicStatsOut(BaseModel):
     online_now: int | None = None   # None when SHOW_LIVE_STATS=false
     visits_today: int | None = None  # None when SHOW_LIVE_STATS=false
     total_paid_units: int = 0
+    highest_price: int = 0          # MAX paid_units across all active entries (in units)
 
 
 # ── Activity & Analytics ───────────────────────────────────────────────────────

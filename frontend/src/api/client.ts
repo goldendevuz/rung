@@ -198,7 +198,7 @@ export async function uploadLogo(file: File): Promise<{ url: string }> {
   return res.json();
 }
 
-export async function updateListing(id: string, data: { name?: string; description?: string; logo_url?: string }) {
+export async function updateListing(id: string, data: { name?: string; description?: string; logo_url?: string; category_slug?: string }) {
   const res = await fetch(`${API_BASE}/users/me/listings/${id}`, {
     method: 'PATCH',
     headers: { ...getHeaders(), 'Content-Type': 'application/json' },
@@ -211,4 +211,26 @@ export async function updateListing(id: string, data: { name?: string; descripti
   return res.json();
 }
 
+export interface TransactionItem {
+  id: string;
+  created_at: string;
+  kind: string;
+  delta_b: number;
+  balance_after_b: number;
+  description: string;
+}
 
+export interface HistoryResponse {
+  items: TransactionItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export async function fetchWalletHistory(page: number = 1): Promise<HistoryResponse> {
+  const res = await fetch(`${API_BASE}/wallet/history?page=${page}&page_size=20`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Tarix yuklanmadi');
+  return res.json() as Promise<HistoryResponse>;
+}

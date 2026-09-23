@@ -268,6 +268,7 @@ class UpdateListingRequest(BaseModel):
     name: str | None = None
     description: str | None = None
     logo_url: str | None = None
+    category_slug: str | None = None
 
 @router.post("/me/listings")
 async def create_listing(
@@ -463,6 +464,13 @@ async def update_my_listing(
         listing.description = req.description.strip()
     if req.logo_url is not None:
         listing.logo_url = req.logo_url.strip() or None
+    if req.category_slug is not None:
+        from app.models.category import Category as Cat2
+        cat_result = await db.execute(select(Cat2).where(Cat2.slug == req.category_slug))
+        cat = cat_result.scalar_one_or_none()
+        if not cat:
+            raise HTTPException(status_code=400, detail="Kategoriya topilmadi")
+        listing.category_id = cat.id
 
     await db.commit()
     await db.refresh(listing)

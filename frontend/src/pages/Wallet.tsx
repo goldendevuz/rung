@@ -1,7 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { createTopup, fetchTopupStatus } from '../api/client';
+import { createTopup, fetchTopupStatus, fetchWalletHistory, TransactionItem } from '../api/client';
 
 const QUICK_AMOUNTS = [1, 5, 10, 25, 50, 100];
 const B_UNIT_UZS = 1000;
@@ -444,6 +445,113 @@ export function Wallet() {
           </button>
         </form>
       </div>
+      <WalletHistory />
+    </div>
+  );
+}
+
+
+function WalletHistory() {
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['wallet-history', page],
+    queryFn: () => fetchWalletHistory(page),
+  });
+
+  if (isLoading) return (
+    <div style={{ textAlign: 'center', color: 'var(--fg-dim)', padding: '24px', fontSize: '14px' }}>
+      Tarix yuklanmoqda...
+    </div>
+  );
+  if (isError || !data) return null;
+  if (data.total === 0) return (
+    <div style={{ textAlign: 'center', color: 'var(--fg-dim)', padding: '24px', fontSize: '14px' }}>
+      Hali tranzaksiyalar yo'q
+    </div>
+  );
+
+  return (
+    <div style={{ marginTop: '24px' }}>
+      <h2 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px', letterSpacing: '-0.01em' }}>
+        Tranzaksiyalar tarixi
+      </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {data.items.map((item: TransactionItem) => {
+          const isCredit = item.delta_b > 0;
+          const date = new Date(item.created_at);
+          const dateStr = date.toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          const timeStr = date.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+          return (
+            <div
+              key={item.id}
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
+                borderRadius: '14px',
+                padding: '14px 18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                <div style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '50%',
+                  background: isCredit ? 'rgba(184, 240, 60, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px',
+                  flexShrink: 0,
+                }}>
+                  {isCredit ? '💳' : '🏆'}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--fg)', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.description}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--fg-dim)' }}>
+                    {dateStr} {timeStr}
+                  </div>
+                </div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: '800',
+                  color: isCredit ? 'var(--brand)' : '#EF4444',
+                  fontFamily: 'var(--mono)',
+                }}>
+                  {isCredit ? '+' : ''}{item.delta_b} B
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--fg-dim)' }}>
+                  Balans: {item.balance_after_b} B
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {data.total > data.page_size && (
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px' }}>
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'none', color: 'var(--fg)', cursor: page === 1 ? 'not-allowed' : 'pointer', opacity: page === 1 ? 0.5 : 1 }}
+          >← Oldingi</button>
+          <span style={{ padding: '8px 12px', fontSize: '13px', color: 'var(--fg-dim)' }}>
+            {page} / {Math.ceil(data.total / data.page_size)}
+          </span>
+          <button
+            onClick={() => setPage(p => p + 1)}
+            disabled={page >= Math.ceil(data.total / data.page_size)}
+            style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'none', color: 'var(--fg)', cursor: 'pointer' }}
+          >Keyingi →</button>
+        </div>
+      )}
     </div>
   );
 }

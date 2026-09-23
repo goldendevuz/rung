@@ -86,12 +86,23 @@ async def get_public_stats(
         except Exception:
             pass
 
+    highest_price = (
+        await db.execute(
+            select(func.max(BoardEntry.paid_units))
+            .where(
+                BoardEntry.status == "active",
+                BoardEntry.deleted_at.is_(None),
+            )
+        )
+    ).scalar_one() or 0
+
     return PublicStatsOut(
         total_listings=total_listings,
         total_entries=total_entries,
         online_now=online_now,
         visits_today=visits_today,
         total_paid_units=int(total_paid_units),
+        highest_price=int(highest_price),
     )
 
 
