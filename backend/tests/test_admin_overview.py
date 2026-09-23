@@ -40,8 +40,12 @@ async def test_admin_overview_authorized_internal_token():
     res1.scalars.return_value = [u1]
     res2 = MagicMock()
     res2.scalars.return_value = [l1]
+    res3 = MagicMock()
+    res3.scalars.return_value = []
+    res4 = MagicMock()
+    res4.scalars.return_value = []
 
-    calls = [res1, res2]
+    calls = [res1, res2, res3, res4]
     async def mock_execute(*args, **kwargs):
         return calls.pop(0)
 
@@ -59,6 +63,8 @@ async def test_admin_overview_authorized_internal_token():
         assert result["total_listings"] == 1
         assert result["users"][0]["telegram_id"] == 557407324
         assert result["users"][0]["balance_b"] == 495
+        assert "total_deposited_b" in result["users"][0]
+        assert "total_spent_b" in result["users"][0]
         assert len(result["users"][0]["listings"]) == 1
         assert result["users"][0]["listings"][0]["handle"] == "@my_channel"
 

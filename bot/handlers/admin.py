@@ -1,6 +1,4 @@
-"""Bot admin handlers for secret and secure management commands."""
-from __future__ import annotations
-
+from datetime import datetime, timezone, timedelta
 import html
 import logging
 import os
@@ -17,6 +15,20 @@ router = Router()
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://backend_prod:8000").rstrip("/")
 INTERNAL_API_TOKEN = os.getenv("INTERNAL_API_TOKEN", "")
+
+
+def format_tashkent_time(iso_str: str | None) -> str:
+    """Format ISO UTC timestamp to readable Tashkent (UTC+5) string."""
+    if not iso_str:
+        return "yo'q"
+    try:
+        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        tashkent_tz = timezone(timedelta(hours=5))
+        dt_local = dt.astimezone(tashkent_tz)
+        return dt_local.strftime("%d.%m.%Y, %H:%M")
+    except Exception:
+        return str(iso_str)[:16].replace("T", " ")
+
 
 
 @router.message(Command("users", "admin_users", "secret_users"))
@@ -74,21 +86,34 @@ async def cmd_users_overview(message: Message, command: CommandObject) -> None:
 
             bal_b = u.get("balance_b", 0)
             bal_som = u.get("balance_som", "0")
+            dep_b = u.get("total_deposited_b", 0)
+            spent_b = u.get("total_spent_b", 0)
             is_adm = " ⭐️ [ADMIN]" if u.get("is_admin") else ""
             listings = u.get("listings", [])
+
+            created_str = format_tashkent_time(u.get("created_at"))
+            last_action_str = format_tashkent_time(u.get("last_action_at"))
 
             block = (
                 f"<b>{i}. {fname}</b> ({uname}){is_adm}\n"
                 f"   🆔 TG ID: <code>{tg_id}</code>\n"
+                f"   📅 Qo'shilgan: <b>{created_str}</b>\n"
                 f"   💰 Balans: <b>{bal_b} B</b> ({bal_som} so'm)\n"
+                f"   💳 To'ldirgan: <b>{dep_b} B</b> | 📉 Sarflagan: <b>{spent_b} B</b>\n"
             )
+            if last_action_str != "yo'q":
+                block += f"   ⚡️ Oxirgi amal: <b>{last_action_str}</b>\n"
 
             if listings:
                 block += f"   📢 Kanallari ({len(listings)} ta):\n"
                 for l in listings:
                     lhandle = html.escape(l.get('handle') or '')
                     lname = html.escape(l.get('name') or '')
-                    block += f"      • {lhandle} — <i>{lname}</i>\n"
+                    rank = l.get('rank')
+                    subs = l.get('subscribers', 0)
+                    rank_str = f"#{rank}-o'rinda" if rank else "doskada emas"
+                    subs_str = f", {subs:,} obunachi".replace(",", " ") if subs else ""
+                    block += f"      • {lhandle} — <i>{lname}</i> ({rank_str}{subs_str})\n"
             else:
                 block += "   📢 Kanallari: <i>yo'q</i>\n"
 

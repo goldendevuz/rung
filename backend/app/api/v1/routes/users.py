@@ -9,6 +9,8 @@ from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
+from app.models.board import BoardEntry
+from app.models.ledger import LedgerEntry
 from app.models.listing import Listing
 from app.models.user import User
 from app.schemas.public import ListingDetail
@@ -74,6 +76,27 @@ async def get_admin_users_overview(
     listings_res = await db.execute(listings_stmt)
     all_listings = list(listings_res.scalars())
 
+    # Fetch active board entries to map listing -> rank
+    be_stmt = (
+        select(BoardEntry.listing_id)
+        .where(BoardEntry.status == "active")
+        .order_by(BoardEntry.paid_units.desc(), BoardEntry.entered_at.asc())
+    )
+    be_res = await db.execute(be_stmt)
+    active_ranks = {str(lid): idx for idx, lid in enumerate(be_res.scalars(), 1)}
+
+    # Fetch all ledger entries
+    ledger_stmt = select(LedgerEntry).order_by(LedgerEntry.created_at.desc())
+    ledger_res = await db.execute(ledger_stmt)
+    all_ledger = list(ledger_res.scalars())
+
+    user_ledger_map: dict[str, list[LedgerEntry]] = {}
+    for entry in all_ledger:
+        lkey = str(entry.user_id)
+        if lkey not in user_ledger_map:
+            user_ledger_map[lkey] = []
+        user_ledger_map[lkey].append(entry)
+
     user_listings_map: dict[str, list[dict]] = {}
     for listing_item in all_listings:
         if not listing_item.owner_id:
@@ -81,25 +104,39 @@ async def get_admin_users_overview(
         key = str(listing_item.owner_id)
         if key not in user_listings_map:
             user_listings_map[key] = []
+        rank = active_ranks.get(str(listing_item.id))
         user_listings_map[key].append({
             "id": str(listing_item.id),
             "name": listing_item.name,
             "handle": listing_item.handle,
             "status": listing_item.status,
             "subscribers": listing_item.subscribers,
+            "rank": rank,
+            "created_at": listing_item.created_at.isoformat() if getattr(listing_item, "created_at", None) else None,
         })
 
     items = []
     for u in users:
         u_listings = user_listings_map.get(str(u.id), [])
-        bal_b = u.balance
+        bal_b = u.balance or 0
+        u_ledger = user_ledger_map.get(str(u.id), [])
+        total_deposited_b = sum(e.delta_units for e in u_ledger if e.delta_units > 0)
+        total_spent_b = sum(abs(e.delta_units) for e in u_ledger if e.delta_units < 0)
+        last_action = u_ledger[0].created_at if u_ledger else None
+
         items.append({
             "id": str(u.id),
             "telegram_id": u.telegram_id,
             "username": u.username,
             "first_name": u.first_name,
+            "created_at": u.created_at.isoformat() if getattr(u, "created_at", None) else None,
+            "last_action_at": last_action.isoformat() if last_action else None,
             "balance_b": bal_b,
             "balance_som": f"{bal_b * 1000:,}".replace(",", " "),
+            "total_deposited_b": total_deposited_b,
+            "total_deposited_som": f"{total_deposited_b * 1000:,}".replace(",", " "),
+            "total_spent_b": total_spent_b,
+            "total_spent_som": f"{total_spent_b * 1000:,}".replace(",", " "),
             "is_admin": u.is_admin,
             "listings_count": len(u_listings),
             "listings": u_listings,
