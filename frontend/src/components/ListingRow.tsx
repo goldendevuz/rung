@@ -43,8 +43,9 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
   const tinted = rank != null && rank <= 9;
   
   const handleClean = cleanTelegramHandle(ch.h || ch.handle || '').toLowerCase();
+  const nameClean = (ch.n || ch.name || '').toLowerCase();
   const isRung = handleClean === '@rung_uz' || ch.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
-  const isSipagentBot = handleClean === '@sipagentbot' || ch.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || (ch.n && ch.n.toLowerCase().includes('sipagentbot'));
+  const isSponsor = handleClean === '@sipagentbot' || handleClean === '@uz_cinema_rasmiy' || handleClean.includes('uz_cinema') || ch.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || nameClean.includes('sipagentbot') || nameClean.includes('uzcinema') || nameClean.includes('uz cinema');
 
   const cat = ch.category || { 
     n: ch.category_slug || ch.c || 'Kategoriya', 
@@ -107,7 +108,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
         </p>
       </div>
 
-      {!ch.free && !isRung && !isSipagentBot ? (
+      {!ch.free && !isRung && !isSponsor ? (
         <div className="rprice-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div className="rprice"><span className="num">{item.price}</span> B</div>
           {onClaim && (
@@ -132,7 +133,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
             Bu o'rinni <span className="num">{formatB(item.priceUnits + 1000)} B</span> ga oling
           </button>
         </div>
-      ) : isSipagentBot ? (
+      ) : isSponsor ? (
         <div className="rprice-wrap" style={{ display: 'flex', alignItems: 'center' }}>
           <span 
             className="sponsor-badge"
@@ -168,17 +169,18 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
 export function MiniListing({ item }: { item: any }) {
   const ch = item.ch;
   const handleClean = cleanTelegramHandle(ch?.h || ch?.handle || '').toLowerCase();
+  const nameClean = (ch?.n || ch?.name || '').toLowerCase();
   const isRung = handleClean === '@rung_uz' || ch?.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
-  const isSipagentBot = handleClean === '@sipagentbot' || ch?.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || (ch?.n && ch.n.toLowerCase().includes('sipagentbot'));
+  const isSponsor = handleClean === '@sipagentbot' || handleClean === '@uz_cinema_rasmiy' || handleClean.includes('uz_cinema') || ch?.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || nameClean.includes('sipagentbot') || nameClean.includes('uzcinema') || nameClean.includes('uz cinema');
 
   return (
     <div className="mini">
       <div className="rank num">#{item.rank}</div>
       <Avatar ch={ch} />
       <div className="mini-n">{ch.n}</div>
-      {!isRung && !isSipagentBot ? (
+      {!isRung && !isSponsor ? (
         <div className="mini-p"><span className="num">{item.price}</span> B</div>
-      ) : isSipagentBot ? (
+      ) : isSponsor ? (
         <div className="mini-p" style={{ color: '#FBBF24', fontSize: '11px', fontWeight: 600 }}>Sponsor</div>
       ) : null}
     </div>

@@ -282,14 +282,16 @@ async def get_recent_activity(
             continue
         handle_clean = (e.listing.handle or "").lower().lstrip("@").strip()
         name_clean = (e.listing.name or "").lower().strip()
-        # Exclude Rung, Fast Signals, and Sponsor projects (SIPAGENTBOT, etc.) per user requirement
+        # Exclude Rung, Fast Signals, and Sponsor projects (SIPAGENTBOT, UzCinema, etc.) per user requirement
         if (
-            handle_clean in {"rung_uz", "uz_fast_signals", "sipagentbot"}
+            handle_clean in {"rung_uz", "uz_fast_signals", "sipagentbot", "uz_cinema_rasmiy"}
             or "rung" in handle_clean
             or "fast_signals" in handle_clean
             or "fast signals" in name_clean
             or "sipagentbot" in handle_clean
             or "sipagentbot" in name_clean
+            or "uz_cinema" in handle_clean
+            or "uzcinema" in name_clean
         ):
             continue
 

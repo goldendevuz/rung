@@ -139,12 +139,16 @@ export function Home() {
       h !== 'rung_uz' &&
       h !== 'uz_fast_signals' &&
       h !== 'sipagentbot' &&
+      h !== 'uz_cinema_rasmiy' &&
       !h.includes('rung') &&
       !h.includes('fast_signals') &&
       !h.includes('sipagentbot') &&
+      !h.includes('uz_cinema') &&
       !n.includes('fast signals') &&
       !n.includes('rung |') &&
-      !n.includes('sipagentbot')
+      !n.includes('sipagentbot') &&
+      !n.includes('uzcinema') &&
+      !n.includes('uz cinema')
     );
   });
 
