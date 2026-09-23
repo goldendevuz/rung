@@ -1,6 +1,7 @@
 """Bot admin handlers for secret and secure management commands."""
 from __future__ import annotations
 
+import html
 import logging
 import os
 from typing import Any
@@ -62,9 +63,15 @@ async def cmd_users_overview(message: Message, command: CommandObject) -> None:
 
         blocks: list[str] = []
         for i, u in enumerate(users, 1):
-            fname = u.get("first_name") or "Noma'lum"
-            uname = f"@{u['username']}" if u.get("username") else "yo'q"
+            fname = html.escape(u.get("first_name") or "Noma'lum")
             tg_id = u.get("telegram_id")
+            if u.get("username"):
+                uname = f"@{html.escape(u['username'])}"
+            elif tg_id:
+                uname = f'<a href="tg://user?id={tg_id}">havola orqali kirish ↗</a>'
+            else:
+                uname = "yo'q"
+
             bal_b = u.get("balance_b", 0)
             bal_som = u.get("balance_som", "0")
             is_adm = " ⭐️ [ADMIN]" if u.get("is_admin") else ""
@@ -79,7 +86,9 @@ async def cmd_users_overview(message: Message, command: CommandObject) -> None:
             if listings:
                 block += f"   📢 Kanallari ({len(listings)} ta):\n"
                 for l in listings:
-                    block += f"      • {l.get('handle')} — <i>{l.get('name')}</i>\n"
+                    lhandle = html.escape(l.get('handle') or '')
+                    lname = html.escape(l.get('name') or '')
+                    block += f"      • {lhandle} — <i>{lname}</i>\n"
             else:
                 block += "   📢 Kanallari: <i>yo'q</i>\n"
 
