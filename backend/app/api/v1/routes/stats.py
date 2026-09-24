@@ -247,28 +247,34 @@ async def get_timeseries_stats() -> TimeseriesOut:
 
 @router.get("/top-clicked", response_model=list[TopClickedListingOut])
 async def get_top_clicked(db: Annotated[AsyncSession, Depends(get_db)]) -> list[TopClickedListingOut]:
-    # Exclude sponsors from the top clicked list
     from app.api.v1.routes.boards import SPONSOR_HANDLES, SPONSOR_IDS
-    from sqlalchemy import String
-
+    from sqlalchemy import String, func
+    from app.models.listing import ListingStatsDaily
+    
+    # 1. Get top 10 clicked listings
     result = await db.execute(
-        select(Listing)
+        select(
+            Listing,
+            func.sum(ListingStatsDaily.clickthroughs).label("total_clicks")
+        )
+        .join(ListingStatsDaily, ListingStatsDaily.listing_id == Listing.id)
         .where(
             Listing.status == "active",
             Listing.deleted_at.is_(None),
             ~Listing.handle.in_(SPONSOR_HANDLES),
-            ~Listing.id.cast(String).in_(SPONSOR_IDS),
-            Listing.clickthroughs > 0
+            ~Listing.id.cast(String).in_(SPONSOR_IDS)
         )
-        .order_by(Listing.clickthroughs.desc())
+        .group_by(Listing.id)
+        .order_by(func.sum(ListingStatsDaily.clickthroughs).desc())
         .limit(10)
     )
-    listings = list(result.scalars())
-
-    if not listings:
+    rows = result.all()
+    if not rows:
         return []
-
-    listing_ids = [l.id for l in listings]
+    
+    listing_ids = [row.Listing.id for row in rows]
+    
+    # 2. Get current price
     entries_result = await db.execute(
         select(BoardEntry.listing_id, BoardEntry.paid_units)
         .where(
@@ -282,20 +288,23 @@ async def get_top_clicked(db: Annotated[AsyncSession, Depends(get_db)]) -> list[
     price_map = {}
     for l_id, paid_units in entries_result.all():
         if l_id not in price_map:
-            # First one is the highest because of desc()
             price_map[l_id] = paid_units
 
     out = []
-    for l in listings:
+    for row in rows:
+        l = row.Listing
+        clicks = int(row.total_clicks or 0)
+        
         price_b = None
         if l.id in price_map:
             price_b = f"{price_map[l.id] / 1000:g}"
+            
         out.append(TopClickedListingOut(
             id=l.id,
             name=l.name,
             handle=l.handle,
             logo_url=l.logo_url,
-            clickthroughs=l.clickthroughs,
+            clickthroughs=clicks,
             current_price_b=price_b
         ))
     return out
