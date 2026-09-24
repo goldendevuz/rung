@@ -56,7 +56,7 @@ async def notify_owner(bot: Bot, response: dict | None, action: str, user_info: 
     if response and response.get("status") == "ok":
         listing_name = response.get("listing_name", chat_title)
         
-    action_text = "yangi obunachi qo'shildi" if action == "join" else "obunachi chiqib ketdi"
+    action_text = "obunachi qo'shildi" if action == "join" else "obunachi chiqib ketdi"
     icon = "📥" if action == "join" else "📤"
     msg = f"{icon} {listing_name}: {action_text}\n(Kim: {user_info})"
     
