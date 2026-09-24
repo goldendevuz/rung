@@ -343,7 +343,9 @@ const [sponsorIndex, setSponsorIndex] = useState(0);
                 
                 // Show a sponsor every 6 items (after index 5, 11, 17, etc.)
                 let sponsorSlot = null;
-                if (index > 0 && index % 6 === 5 && sponsors.length > 0) {
+                const isInterval = index > 0 && index % 6 === 5;
+                const isShortListEnd = entries.length <= 5 && index === entries.length - 1;
+                if ((isInterval || isShortListEnd) && sponsors.length > 0) {
                    const offsetIndex = (sponsorIndex + Math.floor(index / 6)) % sponsors.length;
                    const sp = sponsors[offsetIndex];
                    if (sp) {
