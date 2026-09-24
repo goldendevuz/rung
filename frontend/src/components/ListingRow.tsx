@@ -40,6 +40,13 @@ function Avatar({ ch, className = '' }: { ch: any, className?: string }) {
 export function SponsorRow({ item, isOwner }: { item: any, isOwner: boolean }) {
   const navigate = useNavigate();
   const ch = item?.ch || item || {};
+
+  const handleClean = cleanTelegramHandle(ch?.h || ch?.handle || '').toLowerCase();
+  let badgeText = 'Hamkor';
+  if (handleClean === '@uz_cinema_rasmiy' || handleClean.includes('uz_cinema')) badgeText = 'Sotiladi';
+  if (handleClean === '@rung_uz') badgeText = 'Rasmiy';
+  if (isOwner) badgeText += ' (Sizniki)';
+
   
   const cat = ch.category || { 
     n: ch.category_slug || ch.c || 'Kategoriya', 
@@ -73,7 +80,7 @@ export function SponsorRow({ item, isOwner }: { item: any, isOwner: boolean }) {
         </div>
         <div className="rprice-wrap" style={{ display: 'flex', alignItems: 'center' }}>
           <span className="sponsor-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 600, background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15))', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#FBBF24' }}>
-            Homiylik
+            {badgeText}
           </span>
         </div>
       </div>
@@ -109,7 +116,7 @@ export function SponsorRow({ item, isOwner }: { item: any, isOwner: boolean }) {
       </div>
       <div className="rprice-wrap" style={{ display: 'flex', flexFlow: 'column', alignItems: 'flex-end', gap: '4px' }}>
         <span className="sponsor-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 600, background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15))', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#FBBF24' }}>
-          Sponsor (Sizniki)
+          {badgeText}
         </span>
       </div>
     </div>
@@ -252,6 +259,10 @@ export function MiniListing({ item }: { item: any }) {
   const isRung = handleClean === '@rung_uz' || ch?.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
   const isSponsor = handleClean === '@sipagentbot' || handleClean === '@uz_cinema_rasmiy' || handleClean.includes('uz_cinema') || ch?.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || nameClean.includes('sipagentbot') || nameClean.includes('uzcinema') || nameClean.includes('uz cinema');
 
+  let miniBadgeText = 'Hamkor';
+  if (handleClean === '@uz_cinema_rasmiy' || handleClean.includes('uz_cinema')) miniBadgeText = 'Sotiladi';
+  if (handleClean === '@rung_uz') miniBadgeText = 'Rasmiy';
+
   return (
     <div className="mini">
       <div className="rank num">#{item.rank}</div>
@@ -260,7 +271,7 @@ export function MiniListing({ item }: { item: any }) {
       {!isRung && !isSponsor ? (
         <div className="mini-p"><span className="num">{item.price}</span> B</div>
       ) : isSponsor ? (
-        <div className="mini-p" style={{ color: '#FBBF24', fontSize: '11px', fontWeight: 600 }}>Sponsor</div>
+        <div className="mini-p" style={{ color: '#FBBF24', fontSize: '11px', fontWeight: 600 }}>{miniBadgeText}</div>
       ) : null}
     </div>
   );

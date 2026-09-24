@@ -35,7 +35,7 @@ from app.schemas.public import (
 router = APIRouter(prefix="/boards", tags=["boards"])
 
 PAGE_SIZE = 12
-SPONSOR_HANDLES = ['@sipagentbot', '@uz_cinema_rasmiy']
+SPONSOR_HANDLES = ['@sipagentbot', '@Uz_Cinema_Rasmiy']
 SPONSOR_IDS = ['2b2efff6-894d-4cdc-98e2-87ddc40a9ec8', 'ba3b5499-4988-41c1-9f66-b721db1f66d8'] # Also exclude rung_uz
 
 
