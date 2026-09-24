@@ -249,7 +249,7 @@ async def get_timeseries_stats() -> TimeseriesOut:
 async def get_top_clicked(db: Annotated[AsyncSession, Depends(get_db)]) -> list[TopClickedListingOut]:
     from app.api.v1.routes.boards import SPONSOR_HANDLES, SPONSOR_IDS
     from sqlalchemy import String, func
-    from app.models.listing import ListingStatsDaily
+    from app.models.stats import ListingStatsDaily
     
     # 1. Get top 10 clicked listings
     result = await db.execute(
