@@ -190,3 +190,112 @@ async def get_visitors_stats() -> VisitorsStatsOut:
             end_at=today_str,
         )
 
+
+
+from app.schemas.public import TimeseriesOut, TimeseriesDataPoint, TopClickedListingOut
+from sqlalchemy.orm import selectinload
+
+@router.get("/timeseries", response_model=TimeseriesOut)
+async def get_timeseries_stats() -> TimeseriesOut:
+    settings = get_settings()
+    api_key = settings.DATAFAST_API_KEY
+    if not api_key:
+        return TimeseriesOut(configured=False, data=[])
+
+    now = now_tashkent()
+    start_time = (now - timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%S")
+    end_time = now.strftime("%Y-%m-%dT%H:%M:%S")
+
+    cache_key = f"datafast:timeseries_24h"
+    redis = await get_redis()
+    if redis:
+        try:
+            cached = await redis.get(cache_key)
+            if cached:
+                return TimeseriesOut(**json.loads(cached))
+        except Exception:
+            pass
+
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            headers = {"Authorization": f"Bearer {api_key}"}
+            url = f"https://datafa.st/api/v1/analytics/timeseries?fields=pageviews&interval=hour&startAt={start_time}&endAt={end_time}"
+            resp = await client.get(url, headers=headers)
+            
+            data_points = []
+            if resp.status_code == 200:
+                payload = resp.json()
+                if "data" in payload and isinstance(payload["data"], list):
+                    for item in payload["data"]:
+                        if "date" in item and "pageviews" in item:
+                            data_points.append(TimeseriesDataPoint(
+                                date=item["date"],
+                                pageviews=item["pageviews"]
+                            ))
+            
+            result = TimeseriesOut(configured=True, data=data_points)
+            if redis:
+                try:
+                    await redis.setex(cache_key, 60, json.dumps(result.model_dump()))
+                except Exception:
+                    pass
+            return result
+    except Exception as exc:
+        logger.warning("DataFast timeseries call failed: %s", exc)
+        return TimeseriesOut(configured=True, data=[])
+
+
+@router.get("/top-clicked", response_model=list[TopClickedListingOut])
+async def get_top_clicked(db: Annotated[AsyncSession, Depends(get_db)]) -> list[TopClickedListingOut]:
+    # Exclude sponsors from the top clicked list
+    from app.api.v1.routes.boards import SPONSOR_HANDLES, SPONSOR_IDS
+    from sqlalchemy import String
+
+    result = await db.execute(
+        select(Listing)
+        .where(
+            Listing.status == "active",
+            Listing.deleted_at.is_(None),
+            ~Listing.handle.in_(SPONSOR_HANDLES),
+            ~Listing.id.cast(String).in_(SPONSOR_IDS),
+            Listing.clickthroughs > 0
+        )
+        .order_by(Listing.clickthroughs.desc())
+        .limit(10)
+    )
+    listings = list(result.scalars())
+
+    if not listings:
+        return []
+
+    listing_ids = [l.id for l in listings]
+    entries_result = await db.execute(
+        select(BoardEntry.listing_id, BoardEntry.paid_units)
+        .where(
+            BoardEntry.listing_id.in_(listing_ids),
+            BoardEntry.status == "active",
+            BoardEntry.deleted_at.is_(None)
+        )
+        .order_by(BoardEntry.paid_units.desc())
+    )
+    
+    price_map = {}
+    for l_id, paid_units in entries_result.all():
+        if l_id not in price_map:
+            # First one is the highest because of desc()
+            price_map[l_id] = paid_units
+
+    out = []
+    for l in listings:
+        price_b = None
+        if l.id in price_map:
+            price_b = f"{price_map[l.id] / 1000:g}"
+        out.append(TopClickedListingOut(
+            id=l.id,
+            name=l.name,
+            handle=l.handle,
+            logo_url=l.logo_url,
+            clickthroughs=l.clickthroughs,
+            current_price_b=price_b
+        ))
+    return out

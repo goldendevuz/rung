@@ -240,3 +240,16 @@ export async function fetchWalletHistory(page: number = 1): Promise<HistoryRespo
   if (!res.ok) throw new Error('Tarix yuklanmadi');
   return res.json() as Promise<HistoryResponse>;
 }
+
+
+export async function fetchTimeseries() {
+  const res = await fetch(`${API_BASE}/stats/timeseries`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch timeseries stats');
+  return res.json();
+}
+
+export async function fetchTopClicked() {
+  const res = await fetch(`${API_BASE}/stats/top-clicked`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch top clicked listings');
+  return res.json();
+}

@@ -157,3 +157,20 @@ class PaginatedResponse(BaseModel):
     page: int
     page_size: int
 
+
+
+class TimeseriesDataPoint(BaseModel):
+    date: str
+    pageviews: int | float
+
+class TimeseriesOut(BaseModel):
+    configured: bool
+    data: list[TimeseriesDataPoint] = []
+
+class TopClickedListingOut(BaseModel):
+    id: UUID
+    name: str
+    handle: str
+    logo_url: str | None
+    clickthroughs: int
+    current_price_b: str | None
