@@ -148,6 +148,7 @@ async def get_wallet_history(
     from sqlalchemy import desc
     from app.models.board import BoardEntry
     from app.models.listing import Listing
+    from app.models.ledger import LedgerEntry
 
     offset = (page - 1) * page_size
 

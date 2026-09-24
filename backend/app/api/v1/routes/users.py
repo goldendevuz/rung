@@ -183,6 +183,7 @@ async def get_my_listings(
             clickthroughs=0,
             created_at=listing.created_at,
             status=listing.status,
+            bot_is_admin=listing.bot_is_admin,
         )
         for listing in listings
     ]

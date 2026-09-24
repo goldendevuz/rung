@@ -138,6 +138,7 @@ async def get_listing(
         clickthroughs=clickthroughs,
         created_at=listing.created_at,
         status=listing.status,
+        bot_is_admin=listing.bot_is_admin,
     )
 
 
@@ -162,3 +163,59 @@ async def sync_listing(
 
     await _sync_telegram_subscribers(listing, db)
     return await get_listing(str(listing.id), db)
+
+
+@router.get("/{identifier}/subscriber-stats")
+async def get_subscriber_stats(
+    identifier: str,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Get time-series data of subscriber joins and leaves."""
+    try:
+        listing_id = UUID(identifier)
+        stmt = select(Listing).where(Listing.id == listing_id, Listing.deleted_at.is_(None))
+    except ValueError:
+        clean = _extract_clean_handle(identifier)
+        handles_to_try = [identifier, f"@{clean}", clean]
+        stmt = select(Listing).where(Listing.handle.in_(handles_to_try), Listing.deleted_at.is_(None))
+
+    result = await db.execute(stmt)
+    listing = result.scalars().first()
+    if listing is None or listing.status != "active":
+        raise HTTPException(status_code=404, detail="Listing not found")
+
+    from app.models.subscriber_events import SubscriberEvent
+    
+    # Fetch events for the last 30 days
+    # To keep it simple, we just return the raw events for now, or aggregate by day.
+    # Grouping by day and action:
+    # SELECT date_trunc('day', created_at) as day, action, count(*) 
+    # FROM subscriber_events WHERE listing_id = ? GROUP BY 1, 2 ORDER BY 1
+    
+    stats_stmt = (
+        select(
+            func.date_trunc('day', SubscriberEvent.created_at).label('day'),
+            SubscriberEvent.action,
+            func.count(SubscriberEvent.id).label('count')
+        )
+        .where(SubscriberEvent.listing_id == listing.id)
+        .group_by('day', SubscriberEvent.action)
+        .order_by('day')
+    )
+    
+    stats_result = await db.execute(stats_stmt)
+    
+    # Format into a list of { date: '2023-10-01', joins: 5, leaves: 2 }
+    daily_stats = {}
+    for row in stats_result:
+        day_str = row.day.strftime('%Y-%m-%d') if row.day else "unknown"
+        if day_str not in daily_stats:
+            daily_stats[day_str] = {"date": day_str, "joins": 0, "leaves": 0}
+            
+        if row.action == "join":
+            daily_stats[day_str]["joins"] = row.count
+        elif row.action == "leave":
+            daily_stats[day_str]["leaves"] = row.count
+            
+    return sorted(list(daily_stats.values()), key=lambda x: x["date"])
+

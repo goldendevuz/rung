@@ -41,6 +41,10 @@ class Listing(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     # Status: active | hidden
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="active", index=True)
 
+    # Telegram Bot Tracking
+    telegram_chat_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True, index=True)
+    bot_is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
     # Free catalog label (e.g. "Rung jamoasi", "Egasi tasdiqlanmagan")
     free_label: Mapped[str | None] = mapped_column(String(128), nullable=True)
 

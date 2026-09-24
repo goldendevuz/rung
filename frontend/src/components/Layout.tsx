@@ -40,10 +40,6 @@ export function Layout() {
             </div>
             <div className="flinks">
               <Link to="/">Top reyting</Link><span>·</span>
-              <Link to="/kunlik">Kunlik</Link><span>·</span>
-              <Link to="/kategoriyalar">Kategoriyalar</Link><span>·</span>
-              <Link to="/qoshish">+Kanal qo'shish</Link><span>·</span>
-              <Link to="/hamyon">Hamyon</Link><span>·</span>
               <Link to="/haqida">Haqida</Link><span>·</span>
               <Link to="/qoidalar">Qoidalar</Link><span>·</span>
               <Link to="/statistika" style={{ color: 'var(--lime-text)', fontWeight: 600 }}>Jonli statistika ↗</Link>

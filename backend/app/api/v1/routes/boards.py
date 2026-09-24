@@ -636,6 +636,8 @@ async def admin_reset_daily_board(
         .values(status="expired")
     )
     board.status = "closed"
+    from app.models.user import User
+    await db.execute(sa_update(User).values(daily_board_views=0))
     await db.commit()
 
     return {

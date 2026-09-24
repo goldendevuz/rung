@@ -53,6 +53,7 @@ class ListingResponse(ListingMini):
     stats_daily: list[dict] = []
     clickthroughs: int = 0
     created_at: datetime | None = None
+    bot_is_admin: bool = False
 
 
 ListingCompact = ListingResponse

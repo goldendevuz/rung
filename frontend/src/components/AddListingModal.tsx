@@ -191,6 +191,14 @@ export default function AddListingModal({ onClose }: AddListingModalProps) {
               ? "Kanal ma'lumotlarini kiriting va keyingi bosqichda reytingdagi o'rinni tanlang."
               : "Reytingdan o'zingiz xohlagan o'rinni tanlang. Band o'rinlar 1 pog'ona pastga suriladi."}
           </p>
+          {step === 1 && (
+            <div className="mt-3 p-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white/70 flex gap-2">
+              <span className="text-[#B8F03C]">💡</span>
+              <p>
+                <b>Eslatma:</b> Real vaqtli o'sish statistikasini ko'rish uchun, kanalni qo'shgandan so'ng <b>@rung_uz_bot</b>'ni kanalingizga admin qiling.
+              </p>
+            </div>
+          )}
         </div>
 
         {step === 1 ? (

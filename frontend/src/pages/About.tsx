@@ -48,7 +48,7 @@ export function About() {
         </div>
         <div className="stat-grid" style={{ marginBottom: '34px' }}>
           <div className="stat"><div className="v num">{nf(tashrifCount)}</div><div className="k">tashrif (30 kun)</div></div>
-          <div className="stat accent"><div className="v num">{stats ? nf(stats.total_paid_units) : 0} B</div><div className="k">to'langan</div></div>
+          <div className="stat accent"><div className="v num">{stats ? nf(stats.total_paid_units / 1000) : 0} B</div><div className="k">to'langan</div></div>
           <div className="stat"><div className="v num">{stats && stats.highest_price ? nf(Math.round(stats.highest_price / 1000)) : 0} B</div><div className="k">eng yuqori o'rin narxi</div></div>
           <div className="stat"><div className="v num">{stats ? nf(stats.total_listings) : 0}</div><div className="k">kanal ro'yxatda</div></div>
         </div>

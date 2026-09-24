@@ -125,9 +125,9 @@ a.live:hover .stat-arrow{color:var(--lime-text)}
 .btn-login:hover{background:var(--lime-soft)}
 
 /* kategoriya filtri */
-.catbar-wrap{position:relative}
+.catbar-wrap{position:relative;max-width:100%;overflow:hidden}
 .catbar-wrap::after{content:"";position:absolute;right:0;top:0;bottom:10px;width:48px;background:linear-gradient(to left,var(--bg) 0%,transparent 100%);pointer-events:none;z-index:1}
-.catbar{display:flex;gap:6px;overflow-x:auto;padding:8px 0 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.catbar{display:flex;gap:6px;overflow-x:auto;padding:8px 0 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%}
 .catbar::-webkit-scrollbar{display:none}
 .cpill{
   display:inline-flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer;
