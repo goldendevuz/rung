@@ -124,7 +124,7 @@ export function Statistika() {
                 tsData.map((d: any, idx: number) => {
                   const heightPct = Math.max((d.pageviews / maxPageViews) * 100, 2);
                   return (
-                    <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end', position: 'relative', group: 'true' }} className="chart-bar-group">
+                    <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end', position: 'relative' }} className="chart-bar-group">
                       <div 
                         title={`${d.pageviews} views`}
                         style={{
