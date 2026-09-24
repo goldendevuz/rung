@@ -35,6 +35,8 @@ from app.schemas.public import (
 router = APIRouter(prefix="/boards", tags=["boards"])
 
 PAGE_SIZE = 12
+SPONSOR_HANDLES = ['@sipagentbot', '@uz_cinema_rasmiy']
+SPONSOR_IDS = ['2b2efff6-894d-4cdc-98e2-87ddc40a9ec8', 'ba3b5499-4988-41c1-9f66-b721db1f66d8'] # Also exclude rung_uz
 
 
 def _listing_to_compact(listing: Listing, clickthroughs: int = 0) -> ListingCompact:
@@ -72,6 +74,28 @@ async def _get_clickthroughs_map(session: AsyncSession, listing_ids: list[int]) 
     )
     return {row.listing_id: int(row.total or 0) for row in result}
 
+
+from sqlalchemy import String
+
+@router.get("/sponsors", response_model=list[ListingCompact])
+async def get_sponsors(db: Annotated[AsyncSession, Depends(get_db)]) -> list[ListingCompact]:
+    result = await db.execute(
+        select(Listing)
+        .where(
+            (Listing.handle.in_(SPONSOR_HANDLES)) | 
+            (Listing.id.cast(String).in_(SPONSOR_IDS))
+        )
+        .options(selectinload(Listing.category))
+    )
+    listings = list(result.scalars())
+    
+    listing_ids = [l.id for l in listings]
+    click_map = await _get_clickthroughs_map(db, listing_ids)
+    
+    return [
+        _listing_to_compact(l, click_map.get(l.id, 0))
+        for l in listings
+    ]
 
 @router.get("/tabs", response_model=list[BoardTabOut])
 async def get_tabs(db: Annotated[AsyncSession, Depends(get_db)]) -> list[BoardTabOut]:
@@ -161,6 +185,8 @@ async def get_board_current(
         select(BoardEntry)
         .where(BoardEntry.board_id == board.id, BoardEntry.status == "active")
         .join(BoardEntry.listing)
+        .where(~Listing.handle.in_(SPONSOR_HANDLES))
+        .where(~Listing.id.cast(String).in_(SPONSOR_IDS))
         .options(selectinload(BoardEntry.listing).selectinload(Listing.category))
     )
 

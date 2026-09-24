@@ -27,6 +27,12 @@ export async function fetchBoard(periodType: string, page: number = 1, category?
   return res.json();
 }
 
+export async function fetchSponsors() {
+  const res = await fetch(`${API_BASE}/boards/sponsors`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch sponsors');
+  return res.json();
+}
+
 export async function fetchCategories() {
   const res = await fetch(`${API_BASE}/categories`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch categories');

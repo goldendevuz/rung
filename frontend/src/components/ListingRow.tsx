@@ -36,6 +36,86 @@ function Avatar({ ch, className = '' }: { ch: any, className?: string }) {
   );
 }
 
+
+export function SponsorRow({ item, isOwner }: { item: any, isOwner: boolean }) {
+  const navigate = useNavigate();
+  const ch = item?.ch || item || {};
+  
+  const cat = ch.category || { 
+    n: ch.category_slug || ch.c || 'Kategoriya', 
+    c: ch.category_color || 'var(--ink-2)',
+    i: ch.category_icon
+  };
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button, a')) return;
+    if (ch.id) navigate(`/p/${ch.id}`);
+  };
+
+  // REDUCED VIEW
+  if (!isOwner) {
+    return (
+      <div className="row plain" style={{ cursor: 'pointer', background: 'var(--surface-2)', border: '1px solid rgba(245, 158, 11, 0.2)' }} onClick={handleRowClick}>
+        <div className="rank num" style={{ width: '40px', display: 'flex', justifyContent: 'center' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(245, 158, 11, 0.5)">
+             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        </div>
+        <Avatar ch={ch} />
+        <div className="mid">
+          <p className="rtitle">
+            <Link to={`/p/${ch.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+              {ch.n}
+            </Link>
+            {ch.v && ICON_V}
+          </p>
+          <p className="rdesc">{ch.d}</p>
+        </div>
+        <div className="rprice-wrap" style={{ display: 'flex', alignItems: 'center' }}>
+          <span className="sponsor-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 600, background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15))', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#FBBF24' }}>
+            Homiylik
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // FULL VIEW (Owner)
+  return (
+    <div className="row plain" style={{ cursor: 'pointer', background: 'var(--surface-2)', border: '1px dashed rgba(245, 158, 11, 0.4)' }} onClick={handleRowClick}>
+      <div className="rank num" style={{ width: '40px', display: 'flex', justifyContent: 'center' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(245, 158, 11, 0.5)">
+           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      </div>
+      <Avatar ch={ch} />
+      <div className="mid">
+        <p className="rtitle">
+          <Link to={`/p/${ch.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+            {ch.n}
+          </Link>
+          {ch.v && ICON_V}
+        </p>
+        <p className="rdesc">{ch.d}</p>
+        <p className="rmeta">
+          {cat.i ? <span style={{ marginRight: '4px' }}>{cat.i}</span> : <span className="sq" style={{ '--c': cat.c } as any} />}
+          <b>{cat.n}</b>
+          {ch.t ? <><span className="sep">·</span>{ch.t}</> : null}
+          <span className="sep">·</span>
+          <span className="num">{subs(ch.s)}</span> obunachi
+          <span className="sep">·</span>
+          <span className="num">{nf(ch.k)}</span> o'tish
+        </p>
+      </div>
+      <div className="rprice-wrap" style={{ display: 'flex', flexFlow: 'column', alignItems: 'flex-end', gap: '4px' }}>
+        <span className="sponsor-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 600, background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15))', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#FBBF24' }}>
+          Sponsor (Sizniki)
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void }) {
   const navigate = useNavigate();
   const ch = item?.ch || item || {};
@@ -45,7 +125,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
   const handleClean = cleanTelegramHandle(ch.h || ch.handle || '').toLowerCase();
   const nameClean = (ch.n || ch.name || '').toLowerCase();
   const isRung = handleClean === '@rung_uz' || ch.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
-  const isSponsor = handleClean === '@sipagentbot' || handleClean === '@uz_cinema_rasmiy' || handleClean.includes('uz_cinema') || ch.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || nameClean.includes('sipagentbot') || nameClean.includes('uzcinema') || nameClean.includes('uz cinema');
+  const isSponsor = false; // Moved to SponsorRow
 
   const cat = ch.category || { 
     n: ch.category_slug || ch.c || 'Kategoriya', 

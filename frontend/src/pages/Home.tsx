@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   fetchTabs, 
   fetchBoard, 
-  fetchCategories, 
+  fetchCategories, fetchSponsors, 
   fetchQuote, 
   fetchPublicStats, 
   fetchVisitorsStats,
@@ -14,7 +14,7 @@ import {
   claimRank 
 } from '../api/client';
 import { formatB, formatDateSafe, formatRelativeTimeUz, initials } from '../utils/formatters';
-import { ListingRow, MiniListing, EmptyRankSlot } from '../components/ListingRow';
+import { ListingRow, MiniListing, EmptyRankSlot, SponsorRow } from '../components/ListingRow';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
@@ -77,6 +77,22 @@ export function Home() {
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [claimTargetRank, setClaimTargetRank] = useState(1);
   const [selectedListingId, setSelectedListingId] = useState<string>('');
+
+const [sponsorIndex, setSponsorIndex] = useState(0);
+
+  const { data: sponsors = [] } = useQuery({
+    queryKey: ['sponsors'],
+    queryFn: fetchSponsors,
+    refetchInterval: 60000,
+  });
+
+  React.useEffect(() => {
+    if (sponsors.length <= 1) return;
+    const interval = setInterval(() => {
+      setSponsorIndex(prev => (prev + 1) % sponsors.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [sponsors.length]);
 
   const { data: tabs = [] } = useQuery({
     queryKey: ['tabs'],
