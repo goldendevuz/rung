@@ -64,9 +64,7 @@ async def notify_owner(bot: Bot, response: dict | None, action: str, user_info: 
         action_text = "obunachi chiqib ketdi"
         
     icon = "📥" if action == "join" else "📤"
-    msg = f"{icon} {listing_name}: {action_text}
-(Kim: {user_info})"
-    
+    msg = f"{icon} {listing_name}: {action_text}\n(Kim: {user_info})"
     for admin_id in SUBSCRIBER_NOTIFY_USER_IDS:
         try:
             await bot.send_message(chat_id=admin_id, text=msg, disable_notification=True)
