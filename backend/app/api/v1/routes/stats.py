@@ -227,11 +227,13 @@ async def get_timeseries_stats() -> TimeseriesOut:
                 payload = resp.json()
                 if "data" in payload and isinstance(payload["data"], list):
                     for item in payload["data"]:
-                        if "date" in item and "pageviews" in item:
-                            data_points.append(TimeseriesDataPoint(
-                                date=item["date"],
-                                pageviews=item["pageviews"]
-                            ))
+                        if "pageviews" in item:
+                            dt = item.get("timestamp") or item.get("date")
+                            if dt:
+                                data_points.append(TimeseriesDataPoint(
+                                    date=dt,
+                                    pageviews=item["pageviews"]
+                                ))
             
             result = TimeseriesOut(configured=True, data=data_points)
             if redis:
