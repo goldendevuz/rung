@@ -319,7 +319,7 @@ const [sponsorIndex, setSponsorIndex] = useState(0);
                   <button className="btn-primary" onClick={() => handleOpenClaim(1)}>1-o'rinni 1 B ga olish</button>
                 </div>
               )}
-              {!isLoading && entries.length > 0 && entries.map((entry: any) => {
+              {!isLoading && entries.length > 0 && entries.map((entry: any, index: number) => {
                 const mappedItem = {
                   rank: entry.rank,
                   price: entry.paid_b,
@@ -340,6 +340,34 @@ const [sponsorIndex, setSponsorIndex] = useState(0);
                     category: categoryMap[entry.listing.category_slug] || { name: entry.listing.category_slug, color: entry.listing.category_color }
                   }
                 };
+                
+                // Show a sponsor every 6 items (after index 5, 11, 17, etc.)
+                let sponsorSlot = null;
+                if (index > 0 && index % 6 === 5 && sponsors.length > 0) {
+                   const offsetIndex = (sponsorIndex + Math.floor(index / 6)) % sponsors.length;
+                   const sp = sponsors[offsetIndex];
+                   if (sp) {
+                     const spItem = {
+                        ch: {
+                          id: sp.id,
+                          n: sp.name,
+                          h: sp.handle,
+                          d: sp.description,
+                          c: sp.category_slug,
+                          g: [sp.gradient_start, sp.gradient_end],
+                          v: sp.verified,
+                          s: sp.subscribers,
+                          k: sp.clickthroughs,
+                          t: formatDateSafe(sp.created_at),
+                          free: sp.free_label,
+                          logo_url: sp.logo_url,
+                          category: categoryMap[sp.category_slug] || { name: sp.category_slug, color: sp.category_color }
+                        }
+                     };
+                     const isSpOwner = !!user && myListings.some((ml: any) => ml.id === sp.id);
+                     sponsorSlot = <SponsorRow key={`sponsor-${index}`} item={spItem} isOwner={isSpOwner} />;
+                   }
+                }
 
                 return (
                   <React.Fragment key={entry.listing.id}>
@@ -347,6 +375,7 @@ const [sponsorIndex, setSponsorIndex] = useState(0);
                     {entry.rank === 10 && (
                       <div className="divider"><span>TOP 10</span></div>
                     )}
+                    {sponsorSlot}
                   </React.Fragment>
                 );
               })}

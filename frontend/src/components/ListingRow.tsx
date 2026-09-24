@@ -249,8 +249,7 @@ export function ListingRow({ item, onClaim }: { item: any, onClaim?: () => void 
 export function MiniListing({ item }: { item: any }) {
   const ch = item.ch;
   const handleClean = cleanTelegramHandle(ch?.h || ch?.handle || '').toLowerCase();
-  const nameClean = (ch?.n || ch?.name || '').toLowerCase();
-  const isRung = handleClean === '@rung_uz' || ch?.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
+    const isRung = handleClean === '@rung_uz' || ch?.id === 'ba3b5499-4988-41c1-9f66-b721db1f66d8';
   const isSponsor = handleClean === '@sipagentbot' || handleClean === '@uz_cinema_rasmiy' || handleClean.includes('uz_cinema') || ch?.id === '2b2efff6-894d-4cdc-98e2-87ddc40a9ec8' || nameClean.includes('sipagentbot') || nameClean.includes('uzcinema') || nameClean.includes('uz cinema');
 
   return (
