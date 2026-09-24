@@ -13,6 +13,7 @@ from app.api.v1.routes.wallet import router as wallet_router
 from app.api.v1.routes.payments import router as payments_router
 from app.api.v1.routes.uploads import router as uploads_router
 from app.api.v1.routes.go import router as go_router
+from app.api.v1.routes.internal_bot import router as internal_bot_router
 
 router = APIRouter()
 router.include_router(ping_router)
@@ -27,3 +28,4 @@ router.include_router(wallet_router)
 router.include_router(payments_router)
 router.include_router(uploads_router)
 router.include_router(go_router)
+router.include_router(internal_bot_router)

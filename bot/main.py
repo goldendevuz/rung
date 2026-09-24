@@ -38,6 +38,7 @@ async def main() -> None:
     from aiogram.enums import ParseMode
     from handlers.start import router as start_router
     from handlers.admin import router as admin_router
+    from handlers.tracking import router as tracking_router
 
     bot = Bot(
         token=bot_token,
@@ -46,6 +47,7 @@ async def main() -> None:
     dp = Dispatcher()
     dp.include_router(start_router)
     dp.include_router(admin_router)
+    dp.include_router(tracking_router)
 
     try:
         me = await bot.get_me()
@@ -55,7 +57,7 @@ async def main() -> None:
         raise
 
     asyncio.create_task(heartbeat_loop())
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, allowed_updates=["message", "chat_member", "my_chat_member"])
 
 
 if __name__ == '__main__':

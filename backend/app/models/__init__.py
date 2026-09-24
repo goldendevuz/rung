@@ -7,6 +7,7 @@ from app.models.stats import ListingStatsDaily
 from app.models.setting import Setting
 from app.models.topup import TopupOrder
 from app.models.ledger import LedgerEntry
+from app.models.subscriber_events import SubscriberEvent
 
 __all__ = [
     "User",
@@ -18,4 +19,5 @@ __all__ = [
     "Setting",
     "TopupOrder",
     "LedgerEntry",
+    "SubscriberEvent",
 ]
