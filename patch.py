@@ -1,26 +1,23 @@
-import yaml
+import re
 
-filepath = '/home/kai/projects/rung/docker-compose.yml'
-with open(filepath, 'r', encoding='utf-8') as f:
-    compose = yaml.safe_load(f)
+with open('bot/handlers/tracking.py', 'r', encoding='utf-8') as f:
+    content = f.read()
 
-if 'worker_prod' not in compose['services']:
-    worker_prod = compose['services']['worker'].copy()
-    worker_prod['profiles'] = ['prod']
-    worker_prod['environment']['ENV'] = '${ENV:-prod}'
-    worker_prod['environment']['REDIS_URL'] = '${REDIS_URL:-redis://redis_prod:6379/0}'
-    worker_prod['depends_on'] = {
-        'migrate_prod': {'condition': 'service_completed_successfully'},
-        'redis_prod': {'condition': 'service_healthy'}
-    }
-    compose['services']['worker_prod'] = worker_prod
+replacement = '''listing_name = chat_title
+    is_returning = False
+    if response and response.get("status") == "ok":
+        listing_name = response.get("listing_name", chat_title)
+        is_returning = response.get("is_returning", False)
+        
+    if action == "join":
+        action_text = "qaytib qo'shildi" if is_returning else "yangi obunachi qo'shildi"
+    else:
+        action_text = "obunachi chiqib ketdi"
+        
+    icon = "📥" if action == "join" else "📤"
+    msg = f"{icon} {listing_name}: {action_text}\\n(Kim: {user_info})"'''
 
-if 'bot_prod' not in compose['services']:
-    bot_prod = compose['services']['bot'].copy()
-    bot_prod['profiles'] = ['prod']
-    bot_prod['environment']['ENV'] = '${ENV:-prod}'
-    bot_prod['environment']['BACKEND_URL'] = 'http://backend_prod:8000'
-    compose['services']['bot_prod'] = bot_prod
+content = re.sub(r'listing_name = chat_title.*?(?=\n\s*for admin_id in)', replacement, content, flags=re.DOTALL)
 
-with open(filepath, 'w', encoding='utf-8') as f:
-    yaml.dump(compose, f, sort_keys=False, default_flow_style=False)
+with open('bot/handlers/tracking.py', 'w', encoding='utf-8') as f:
+    f.write(content)

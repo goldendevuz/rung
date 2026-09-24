@@ -53,12 +53,19 @@ async def notify_owner(bot: Bot, response: dict | None, action: str, user_info: 
     # if owner_id and owner_id in SUBSCRIBER_NOTIFY_USER_IDS: ...
 
     listing_name = chat_title
+    is_returning = False
     if response and response.get("status") == "ok":
         listing_name = response.get("listing_name", chat_title)
+        is_returning = response.get("is_returning", False)
         
-    action_text = "obunachi qo'shildi" if action == "join" else "obunachi chiqib ketdi"
+    if action == "join":
+        action_text = "qaytib qo'shildi" if is_returning else "yangi obunachi qo'shildi"
+    else:
+        action_text = "obunachi chiqib ketdi"
+        
     icon = "📥" if action == "join" else "📤"
-    msg = f"{icon} {listing_name}: {action_text}\n(Kim: {user_info})"
+    msg = f"{icon} {listing_name}: {action_text}
+(Kim: {user_info})"
     
     for admin_id in SUBSCRIBER_NOTIFY_USER_IDS:
         try:

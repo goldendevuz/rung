@@ -77,6 +77,18 @@ async def handle_subscriber_event(
     if listing and payload.is_bot_admin is not None:
         listing.bot_is_admin = payload.is_bot_admin
 
+    # Check if returning user
+    is_returning = False
+    if payload.action == "join" and payload.telegram_user_id is not None:
+        prev_result = await db.execute(
+            select(SubscriberEvent.id).where(
+                SubscriberEvent.telegram_chat_id == payload.telegram_chat_id,
+                SubscriberEvent.telegram_user_id == payload.telegram_user_id
+            ).limit(1)
+        )
+        if prev_result.scalar_one_or_none():
+            is_returning = True
+
     event = SubscriberEvent(
         listing_id=listing_id,
         telegram_chat_id=payload.telegram_chat_id,
@@ -90,5 +102,6 @@ async def handle_subscriber_event(
     return {
         "status": "ok",
         "owner_telegram_id": owner_telegram_id,
-        "listing_name": listing_name
+        "listing_name": listing_name,
+        "is_returning": is_returning
     }
