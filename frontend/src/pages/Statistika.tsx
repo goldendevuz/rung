@@ -116,9 +116,13 @@ export function Statistika() {
           }}>
             <h2 style={{ fontSize: '18px', marginBottom: '24px', color: 'var(--ink)' }}>Sahifa ko'rishlar (So'nggi 24 soat)</h2>
             <div style={{ height: '240px', display: 'flex', alignItems: 'flex-end', gap: '8px', paddingBottom: '24px', position: 'relative' }}>
-              {tsData.length === 0 ? (
+              {!timeseries ? (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-3)' }}>
                   Yuklanmoqda...
+                </div>
+              ) : tsData.length === 0 ? (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-3)' }}>
+                  Hali ma'lumot yo'q
                 </div>
               ) : (
                 tsData.map((d: any, idx: number) => {
