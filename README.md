@@ -3,7 +3,7 @@
 **Bir pog'ona yuqoriga.** — O'zbek Telegram kanallarining ochiq reytingi.
 
 Rung — reklama beruvchilar uchun Telegram kanallar katalogi. Reytingdagi o'rin
-ichki valyuta **B coin** bilan sotib olinadi. Ovoz yo'q — faqat bozor.
+ichki valyuta **B coin** bilan sotib olinadi ([inPAY](https://inpay.uz) to'lov tizimi integratsiyasi bilan). Ovoz yo'q — faqat bozor.
 
 ## Tezkor ishga tushirish
 
