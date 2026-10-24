@@ -39,3 +39,19 @@ docs/       Spec, state, decisions, screenshots
 ## Rivojlantirish qo'llanmasi
 
 Batafsil: `docs/spec/`, `docs/STATE.md`, `docs/DECISIONS.md`.
+
+---
+
+## Havolalar (Links)
+
+- **Web App**: [https://rung.shats.uz](https://rung.shats.uz)
+- **Telegram Bot / Mini App**: [@rung_uz_bot](https://t.me/rung_uz_bot)
+
+---
+
+## License & Attribution
+
+This project is licensed under the **MIT License with Attribution** (see [`LICENSE`](LICENSE)).
+
+You are free to use, modify, distribute, fork, and integrate this software for **any purpose** (commercial, personal, or educational), under the condition that the original author attribution and copyright notice (**Abdulmajid Yunus / [@goldendevuz](https://github.com/goldendevuz)**) are preserved and displayed in the `README.md` file of any copies, forks, or derivative works.
+
